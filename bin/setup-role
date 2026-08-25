@@ -17,7 +17,11 @@ while (($#)); do
 done
 [[ -n "$role" ]] || usage
 
-root="$(git rev-parse --show-toplevel)"
+root="$(cd "$(dirname "$0")/.." && pwd -P)"
+[[ "$(git -C "$root" rev-parse --show-toplevel)" == "$root" ]] || {
+  printf 'error: %s is not the bb-workspace Git root\n' "$root" >&2
+  exit 1
+}
 components=(fork plugins community-plugins)
 
 is_repo_root() {
