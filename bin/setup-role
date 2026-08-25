@@ -46,6 +46,13 @@ for component in "${components[@]}"; do
     printf 'refusing setup: %s has authored changes\n' "$component" >&2
     exit 1
   fi
+  if [[ "$role" == "staging" ]]; then
+    branch="$(git -C "$root/$component" symbolic-ref --quiet --short HEAD || true)"
+    if [[ "$branch" != "main" ]]; then
+      printf 'refusing staging setup: initialized %s is on %s, expected main\n' "$component" "${branch:-detached}" >&2
+      exit 1
+    fi
+  fi
   if [[ "$role" == "normal" ]]; then
     head="$(git -C "$root/$component" rev-parse HEAD)"
     recorded="$(git -C "$root" ls-tree HEAD -- "$component" | awk '{print $3}')"

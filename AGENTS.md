@@ -25,8 +25,10 @@ the `ubuntu` user). The default BB service and CLI run from
 - Treat dirty child repositories as authored work. Never automatically stash,
   reset, clean, discard, relocate, or overwrite it.
 - Never run `git submodule update`, switch branches, or move a child HEAD until
-  its status and current commit have been inspected. `bin/setup-role` is safe
-  only because it refuses dirty or divergent initialized children.
+  its status and current commit have been inspected. `bin/setup-role` refuses
+  dirty children, refuses to move an initialized normal child, and advances an
+  initialized staging child only when it is already on `main` and can
+  fast-forward.
 - A workspace commit is a promotion receipt: its three gitlinks identify one
   tested BB composition. Commit and push child changes first, then advance the
   corresponding gitlink here.

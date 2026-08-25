@@ -17,8 +17,9 @@ cd ~/bb
 ```
 
 `setup-role` refuses dirty children. Normal setup also refuses to move an
-already initialized child away from its current commit; it is intended to make
-a fresh clone match the recorded composition safely.
+already initialized child away from its current commit. Staging setup refuses
+an initialized child that is not already on `main`, and only fast-forwards
+`main`. The command is intended to make a fresh clone match its role safely.
 
 Run `./bin/status` before editing. Run `./bin/check --role staging` on
 `bb-machine`, or `./bin/check --role normal` on the normal host. Add `--runtime`
