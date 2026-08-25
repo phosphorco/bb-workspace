@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf 'usage: %s --role staging|normal [--runtime]\n' "${0##*/}" >&2
+  exit 2
+}
+
+role=""
+runtime=0
+while (($#)); do
+  case "$1" in
+    --role)
+      shift
+      (($#)) || usage
+      role="$1"
+      ;;
+    --runtime) runtime=1 ;;
+    *) usage ;;
+  esac
+  shift
+done
+
+[[ "$role" == "staging" || "$role" == "normal" ]] || usage
+
+root="$(git rev-parse --show-toplevel)"
+failures=0
+
+fail() {
+  printf 'FAIL: %s\n' "$*" >&2
+  failures=$((failures + 1))
+}
+
+normalize_remote() {
+  printf '%s\n' "$1" |
+    sed -E 's#^git@github\.com:#https://github.com/#; s#\.git/?$##; s#/$##'
+}
+
+check_remote() {
+  local path="$1"
+  local expected="$2"
+  local actual
+  actual="$(git -C "$root/$path" remote get-url origin 2>/dev/null || true)"
+  if [[ "$(normalize_remote "$actual")" != "$(normalize_remote "$expected")" ]]; then
+    fail "$path origin is '$actual', expected '$expected'"
+  fi
+}
+
+is_repo_root() {
+  local path="$1"
+  local target
+  local discovered
+  target="$(cd "$root/$path" 2>/dev/null && pwd -P || true)"
+  discovered="$(git -C "$root/$path" rev-parse --show-toplevel 2>/dev/null || true)"
+  [[ -n "$target" && "$discovered" == "$target" ]]
+}
+
+check_remote . https://github.com/phosphorco/bb-workspace.git
+
+components=(fork plugins community-plugins)
+expected_remotes=(
+  https://github.com/phosphorco/bb-fork.git
+  https://github.com/phosphorco/bb-plugins.git
+  https://github.com/phosphorco/bb-community-plugins.git
+)
+
+for index in "${!components[@]}"; do
+  component="${components[$index]}"
+  mode="$(git -C "$root" ls-files --stage -- "$component" | awk '{print $1}')"
+  [[ "$mode" == "160000" ]] || fail "$component is not a tracked submodule gitlink"
+
+  if ! is_repo_root "$component"; then
+    fail "$component is not initialized; run ./bin/setup-role --$role"
+    continue
+  fi
+
+  check_remote "$component" "${expected_remotes[$index]}"
+  head="$(git -C "$root/$component" rev-parse HEAD)"
+  recorded="$(git -C "$root" ls-tree HEAD -- "$component" | awk '{print $3}')"
+
+  if [[ "$role" == "normal" && "$head" != "$recorded" ]]; then
+    fail "$component HEAD $head does not match recorded $recorded"
+  fi
+
+  if [[ -n "$(git -C "$root/$component" status --porcelain --untracked-files=all)" ]]; then
+    printf 'WARN: %s contains visible authored changes\n' "$component" >&2
+  fi
+done
+
+if is_repo_root fork; then
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    case "${line:0:1}" in
+      ' '|U) ;;
+      -) fail "fork nested submodule is uninitialized: $line" ;;
+      +) fail "fork nested submodule differs from its recorded commit: $line" ;;
+    esac
+  done < <(git -C "$root/fork" submodule status --recursive 2>/dev/null || true)
+fi
+
+if ((runtime)); then
+  [[ -d "$root/fork/build/bb" ]] || fail "fork/build/bb is not materialized"
+  [[ -f "$root/fork/build/bb/package.json" ]] || fail "fork/build/bb/package.json is missing"
+fi
+
+if ((failures)); then
+  printf '%d workspace check(s) failed\n' "$failures" >&2
+  exit 1
+fi
+
+printf 'bb-workspace %s contract passed\n' "$role"

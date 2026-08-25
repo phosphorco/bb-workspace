@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+
+describe_repo() {
+  local label="$1"
+  local path="$2"
+  local recorded="-"
+  local head="-"
+  local branch="-"
+  local dirty="uninitialized"
+  local target
+  local discovered
+  local parent
+  local child
+
+  target="$(cd "$root/$path" 2>/dev/null && pwd -P || true)"
+  discovered="$(git -C "$root/$path" rev-parse --show-toplevel 2>/dev/null || true)"
+
+  if [[ "$path" != "." ]]; then
+    if [[ "$path" == */* ]]; then
+      parent="${path%%/*}"
+      child="${path#*/}"
+      recorded="$(git -C "$root/$parent" ls-tree HEAD -- "$child" | awk '{print $3}')"
+    else
+      recorded="$(git -C "$root" ls-tree HEAD -- "$path" | awk '{print $3}')"
+    fi
+  fi
+
+  if [[ -n "$target" && "$discovered" == "$target" ]]; then
+    head="$(git -C "$root/$path" rev-parse HEAD)"
+    branch="$(git -C "$root/$path" symbolic-ref --quiet --short HEAD || printf 'detached')"
+    if [[ -n "$(git -C "$root/$path" status --porcelain --untracked-files=all)" ]]; then
+      dirty="dirty"
+    else
+      dirty="clean"
+    fi
+  fi
+
+  printf '%-20s branch=%-12s head=%s tree=%s' "$label" "$branch" "$head" "$dirty"
+  if [[ "$recorded" != "-" ]]; then
+    if [[ "$head" == "$recorded" ]]; then
+      printf ' recorded=match'
+    else
+      printf ' recorded=%s' "$recorded"
+    fi
+  fi
+  printf '\n'
+}
+
+describe_repo workspace .
+describe_repo fork fork
+describe_repo plugins plugins
+describe_repo community-plugins community-plugins
+
+upstream_root="$(cd "$root/fork/upstream" 2>/dev/null && pwd -P || true)"
+upstream_discovered="$(git -C "$root/fork/upstream" rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -n "$upstream_root" && "$upstream_discovered" == "$upstream_root" ]]; then
+  describe_repo fork/upstream fork/upstream
+fi
+
+if [[ -d "$root/fork/build/bb" ]]; then
+  printf 'runtime              path=%s state=present\n' "$root/fork/build/bb"
+else
+  printf 'runtime              path=%s state=not-materialized\n' "$root/fork/build/bb"
+fi

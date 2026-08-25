@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf 'usage: %s --staging|--normal\n' "${0##*/}" >&2
+  exit 2
+}
+
+role=""
+while (($#)); do
+  case "$1" in
+    --staging) [[ -z "$role" ]] || usage; role=staging ;;
+    --normal) [[ -z "$role" ]] || usage; role=normal ;;
+    *) usage ;;
+  esac
+  shift
+done
+[[ -n "$role" ]] || usage
+
+root="$(git rev-parse --show-toplevel)"
+components=(fork plugins community-plugins)
+
+is_repo_root() {
+  local path="$1"
+  local target
+  local discovered
+  target="$(cd "$root/$path" 2>/dev/null && pwd -P || true)"
+  discovered="$(git -C "$root/$path" rev-parse --show-toplevel 2>/dev/null || true)"
+  [[ -n "$target" && "$discovered" == "$target" ]]
+}
+
+if [[ -n "$(git -C "$root" status --porcelain --untracked-files=all --ignore-submodules=all)" ]]; then
+  printf 'refusing setup: workspace root has authored changes\n' >&2
+  exit 1
+fi
+
+for component in "${components[@]}"; do
+  if ! is_repo_root "$component"; then
+    continue
+  fi
+  if [[ -n "$(git -C "$root/$component" status --porcelain --untracked-files=all)" ]]; then
+    printf 'refusing setup: %s has authored changes\n' "$component" >&2
+    exit 1
+  fi
+  if [[ "$role" == "normal" ]]; then
+    head="$(git -C "$root/$component" rev-parse HEAD)"
+    recorded="$(git -C "$root" ls-tree HEAD -- "$component" | awk '{print $3}')"
+    if [[ "$head" != "$recorded" ]]; then
+      printf 'refusing normal setup: %s is at %s, recorded %s\n' "$component" "$head" "$recorded" >&2
+      exit 1
+    fi
+  fi
+done
+
+git -C "$root" submodule update --init --recursive
+
+if [[ "$role" == "staging" ]]; then
+  for component in "${components[@]}"; do
+    git -C "$root/$component" fetch origin main
+    git -C "$root/$component" switch main
+    git -C "$root/$component" merge --ff-only origin/main
+  done
+  git -C "$root/fork" submodule update --init --recursive
+fi
+
+"$root/bin/check" --role "$role"

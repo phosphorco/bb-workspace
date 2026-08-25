@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+
+expected=(
+  'fork https://github.com/phosphorco/bb-fork.git'
+  'plugins https://github.com/phosphorco/bb-plugins.git'
+  'community-plugins https://github.com/phosphorco/bb-community-plugins.git'
+)
+
+for entry in "${expected[@]}"; do
+  path="${entry%% *}"
+  url="${entry#* }"
+  [[ "$(git config -f .gitmodules --get "submodule.$path.url")" == "$url" ]]
+  [[ "$(git ls-files --stage -- "$path" | awk '{print $1}')" == 160000 ]]
+done
+
+grep -Fq 'MACHINE_BB_WORKSPACE_REV' README.md
+grep -Fq 'Never automatically stash' AGENTS.md
+
+for script in bin/check bin/setup-role bin/status bin/test-contract; do
+  bash -n "$script"
+done
+
+printf 'workspace static contract passed\n'

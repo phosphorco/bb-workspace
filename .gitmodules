@@ -1,0 +1,9 @@
+[submodule "fork"]
+	path = fork
+	url = https://github.com/phosphorco/bb-fork.git
+[submodule "plugins"]
+	path = plugins
+	url = https://github.com/phosphorco/bb-plugins.git
+[submodule "community-plugins"]
+	path = community-plugins
+	url = https://github.com/phosphorco/bb-community-plugins.git
