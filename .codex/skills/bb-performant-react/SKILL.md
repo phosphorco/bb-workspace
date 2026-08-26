@@ -1,0 +1,102 @@
+---
+name: bb-performant-react
+description: Build, review, or diagnose React code in BB when render scalability, idle work, large lists, timers, overlays, plugin surfaces, or navigation performance matter. Use for BB fork and plugin React work; do not invoke for generic React projects or non-React BB changes.
+---
+
+# BB Performant React
+
+Produce BB React changes that are quiet when idle, proportional to the state
+that changed, and verified without confusing profiler overhead with user
+latency. Preserve behavior, accessibility, plugin contracts, and BB's fork
+materialization rules.
+
+## Start with the surface and witness
+
+Before changing code:
+
+1. Read the workspace and affected child-repository `AGENTS.md` files and run
+   `/home/ubuntu/bb/bin/status`. Preserve existing dirty work.
+2. Identify whether the tested code comes from an organization plugin, the
+   materialized fork, or upstream ancestry. Record the exact materialized
+   result-tree SHA and active plugin source. Do not assume `fork/upstream` is
+   identical to `fork/build/bb`.
+3. Establish a reproducible witness. Separate continuous idle work from
+   navigation/mount work and interaction updates. Keep fixture, viewport,
+   pointer mode, cache state, plugin set, row/event counts, and build mode
+   fixed.
+4. State what is measured, source-supported, and inferred. Aggregate provider
+   names suggest a hotspot but do not prove commit attribution.
+
+For deeper diagnosis, implementation patterns, and performance gates, read
+[references/performance-playbook.md](references/performance-playbook.md).
+
+## Design rules
+
+- Make invalidation match presentation. Components subscribe to the smallest
+  stable primitive or interned presentation object they render.
+- Never propagate raw wall-clock time, a global tick, or an epoch counter
+  through a list. Compute the next meaningful presentation deadline and notify
+  only affected leaves. Treat section membership deadlines separately from row
+  visuals.
+- Use the approved reactivity library for fine-grained state. Let it own
+  snapshots, equality, batching, and React notification. A deadline/lifetime
+  manager may schedule resources but must not become a second value graph or
+  listener fan-out. Do not invent an ad hoc external store.
+- Resolve TanStack Store versus effect-atom from the repository's current
+  dependency graph, peer compatibility, production bundle closure, lifecycle
+  needs, and an equivalent prototype. Team familiarity is relevant; a
+  transitive lock entry is not a declared dependency.
+- Keep collection work proportional. Share global lookups per source snapshot,
+  expose keyed selections, and avoid rebuilding whole maps in every row hook.
+  Replace per-row suffix slices or `indexOf` plus slice with linear metadata or
+  a reverse pass.
+- Do not multiply closed overlay infrastructure per row/message. Prefer one
+  provider at the narrow shared surface, eager accessible triggers, and lazy
+  content that preserves first-open behavior, close animation, and focus
+  restoration.
+- Reuse and validate BB's existing timeline windowing before creating another
+  virtualizer. Offscreen controls need an explicit keyboard and screen-reader
+  model.
+- Add `memo` only after props, callbacks, environment objects, and derived
+  values are stable. Plugin code cannot assume the fork's React Compiler will
+  supply bailouts.
+- Preserve accessible names, titles, timer semantics, focus order, and live
+  regions. Bucketing or suppressing exact-second accessibility text is a
+  product decision, not a transparent optimization.
+- Dispose timers, heap entries, observers, listeners, keyed state, and
+  subscribers across unmount, plugin reload, Strict Mode remount, visibility
+  changes, sleep/resume, and clock jumps.
+
+## Verification discipline
+
+Use two measurement lanes and never mix their timings:
+
+- A production lane without React Scan or profiling React measures input or
+  navigation to paint, long tasks/LoAF, heap, and bundle closure.
+- A render-attribution lane loads profiling instrumentation before React and
+  measures commits, fibers, render records, and reasons. Reject the run when
+  required hooks or manifests are absent.
+
+React Scan callback time includes instrumentation overhead. Use it to explain
+relative render behavior, not as native React duration. Require a quiet
+baseline, alternating control/candidate runs, retained raw artifacts, and
+focused correctness tests. A render-count improvement does not excuse a
+production-latency regression.
+
+Before track handoff, run affected-package typecheck, focused tests, and a
+production build. Final integration repeats the complete fork/plugin checks,
+accessibility and interaction matrices, canonical plugin reload, and combined
+performance scenarios.
+
+## BB ownership constraints
+
+Organization-plugin dependencies are declared through
+`plugins/tools/workspaces-sync/definition.ts` and generated by the documented
+sync workflow; never rely on transitive dependencies or edit generated output
+as the source of truth.
+
+`fork/build/bb` is disposable materialized output and `fork/upstream` is pinned
+input. Durable fork changes must follow `fork/README.md`, enter the ordered
+patch series, refresh hashes/result-tree state, rematerialize, and pass the
+fork verification gates. Coordinate one owner for shared patch-series or
+generated SDK files when parallel tracks converge.

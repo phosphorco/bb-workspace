@@ -1,0 +1,4 @@
+interface:
+  display_name: "BB Performant React"
+  short_description: "Build and review fast React surfaces in BB"
+  default_prompt: "Use $bb-performant-react to review this BB React change for render scalability and correctness."

@@ -31,6 +31,8 @@ once `fork/build/bb` has been materialized to verify the visible runtime path.
 ~/bb/
 ├── AGENTS.md
 ├── bin/
+├── docs/                 cross-repository programs and operating records
+├── .codex/skills/        workspace-specific reusable agent guidance
 ├── fork/                 phosphorco/bb-fork
 │   ├── upstream/         fork's pinned upstream submodule
 │   └── build/bb/         visible runnable materialization
