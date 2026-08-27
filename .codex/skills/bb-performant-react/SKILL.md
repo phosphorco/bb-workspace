@@ -30,6 +30,16 @@ Before changing code:
 For deeper diagnosis, implementation patterns, and performance gates, read
 [references/performance-playbook.md](references/performance-playbook.md).
 
+## Pair with BB UI
+
+When performance work also changes surface ownership, native component choice,
+interaction or focus behavior, responsive layout, or theme semantics, read the
+[BB UI skill](../../../plugins/.agents/skills/bb-ui/SKILL.md) when it is present
+in the canonical workspace. BB UI owns the product and interaction contract;
+this skill owns invalidation, proportional work, and measurement. Satisfy both:
+do not gain speed by replacing a host experience or weakening accessibility,
+navigation, focus, responsive behavior, or failure containment.
+
 ## Design rules
 
 - Make invalidation match presentation. Components subscribe to the smallest
@@ -60,6 +70,12 @@ For deeper diagnosis, implementation patterns, and performance gates, read
 - Add `memo` only after props, callbacks, environment objects, and derived
   values are stable. Plugin code cannot assume the fork's React Compiler will
   supply bailouts.
+- Keep renderer definitions stable when a headless library treats functions as
+  React component types. In TanStack Table, a memoized columns array that
+  depends on controlled input values can still create new inline header/cell
+  functions and remount focused DOM. Prefer stable named renderers and column
+  definitions, with changing values/actions supplied through typed table meta,
+  table state, or a narrowly selected context.
 - Preserve accessible names, titles, timer semantics, focus order, and live
   regions. Bucketing or suppressing exact-second accessibility text is a
   product decision, not a transparent optimization.

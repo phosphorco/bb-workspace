@@ -21,6 +21,31 @@ row. Scaling evidence is stronger than a component name alone. Add temporary
 counters or render-reason attribution when aggregate profiling cannot identify
 the owning call site.
 
+## Renderer identity and focused controls
+
+A controlled input that loses focus, caret position, selection, or composition
+while typing is evidence of a remount, not merely a rerender. Check element and
+renderer identity before adding memoization:
+
+- Record the focused DOM node and confirm whether it is the same node after an
+  interaction and after any debounced query response.
+- Inspect headless-library render adapters. TanStack Table's React renderer
+  treats function-valued headers and cells as component types; recreating an
+  inline function changes the component type even when the column ID and React
+  key remain stable.
+- Do not put controlled input values in a `useMemo` dependency list that
+  recreates columns containing inline renderer functions. `useMemo` does not
+  make the value stable when one of those dependencies changes.
+- Prefer module-scoped or otherwise stable column definitions and named
+  renderers. Supply live values and actions through typed table meta, controlled
+  table state, or a narrowly selected context. For genuinely configurable
+  tables, create the definition set once per stable configuration rather than
+  globally sharing incompatible behavior.
+- Verify ordinary typing, caret edits, text selection, IME composition, and the
+  debounced/server-refresh boundary. Attribute visible-row commits separately:
+  preserving the input node should also avoid rebuilding every cell renderer
+  before data or filter membership actually changes.
+
 ## Temporal reactivity
 
 Model time as scheduled presentation changes rather than reactive wall time.
