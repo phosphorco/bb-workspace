@@ -1,0 +1,4 @@
+interface:
+  display_name: "Synchronize identity state"
+  short_description: "Design robust identity-scoped optimistic state synchronization"
+  default_prompt: "Use $sync-identity-state to design or review identity-scoped client/server state synchronization."
