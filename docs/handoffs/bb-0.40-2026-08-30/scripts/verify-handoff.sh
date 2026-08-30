@@ -11,6 +11,7 @@ required=(
   04-PLUGIN-PORT-MAP.md
   05-VERIFICATION-EVIDENCE.md
   06-CUTOVER-ROLLBACK.md
+  07-PRIMARY-HOST-DEPLOYMENT.md
   AGENT_PROMPT.md
   scripts/preflight.sh
   scripts/capture-evidence.sh
@@ -32,5 +33,7 @@ target="f3cab2dd8c5c4be6d450be318550f3a04c8c3a1f"
 rg -q --fixed-strings "$target" "$handoff_dir/README.md" "$handoff_dir/02-EXECUTION-RUNBOOK.md"
 rg -q --fixed-strings 'BEGIN IMMEDIATE' "$handoff_dir/03-MIGRATION-AND-DATA.md"
 rg -q --fixed-strings 'Do not mutate Rosetta' "$handoff_dir/AGENT_PROMPT.md"
+rg -q --fixed-strings 'CUTOVER GO' "$handoff_dir/07-PRIMARY-HOST-DEPLOYMENT.md"
+rg -q --fixed-strings 'first 0.40 write' "$handoff_dir/07-PRIMARY-HOST-DEPLOYMENT.md"
 
 printf 'handoff bundle verified\n'

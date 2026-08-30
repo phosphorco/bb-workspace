@@ -1,27 +1,29 @@
-# Prompt for the `bb-machine` staging agent
+# Prompt for the `bb-machine` upgrade agent
 
-You are preparing Phosphor's canonical BB workspace on `bb-machine` for an
-identity-first upgrade from BB 0.39 to exact upstream 0.40.
+You own Phosphor's identity-first BB 0.40 upgrade on `bb-machine` through tested
+promotion preparation and, after explicit approval, primary-host cutover.
 
 Start in `/home/ubuntu/bb`. Read `/home/ubuntu/bb/AGENTS.md` and every affected
 child `AGENTS.md`. Then read this handoff directory in the order listed by its
 README and run `scripts/preflight.sh` before changing anything.
 
-Your authorized objective is to:
+Treat [`07-PRIMARY-HOST-DEPLOYMENT.md`](07-PRIMARY-HOST-DEPLOYMENT.md) as the
+controlling execution runbook. `bb-machine` is temporarily isolated for porting
+and validation, then becomes the normal primary host at approved cutover.
+Rosetta stays live until then and becomes rollback-only afterward.
 
-1. establish a safe canonical staging workspace;
-2. reconcile explicitly selected source history without losing authored work;
-3. freeze a reproducible 0.39 recovery receipt;
-4. build the exact 0.40 baseline;
-5. implement the reduced identity/authorship/migration/protocol port;
-6. adapt and verify plugins against the exact generated SDK;
-7. exercise the combined staging runtime; and
-8. rehearse the upgrade and rollback on a consistent Rosetta database copy.
+Preserve WIP first. Complete the migration bridge, accepted-origin and
+idempotency model, authorship inventory, provider lease enforcement, minimal
+plugin capabilities, SDK regeneration, canonical runtime validation, and
+production-copy rollback rehearsal. Push tested child commits before creating
+the exact workspace promotion receipt.
 
-Do not mutate Rosetta, change `rosetta-machine`, claim normal ingress, force
-push, reset, clean, stash, overwrite dirty work, or advance workspace gitlinks
-before tested child commits are pushed. Stop at the Phase 10 promotion proposal
-unless the operator gives separate production authorization.
+Do not mutate Rosetta, apply role-policy changes, claim normal ingress, or
+accept a live 0.40 write before the runbook's explicit gates. `CUTOVER GO`
+authorizes the live cutover sequence; the first 0.40 write requires the
+runbook's separate irreversible-write decision. Never force-push, reset, clean,
+stash, overwrite authored work, deploy a temporary worktree, or advance
+workspace gitlinks before tested child commits are pushed.
 
 Maintain an evidence directory outside the Git workspace. Report progress at
 phase exits, including exact SHAs, commands, results, risks, and STOP/GO status.

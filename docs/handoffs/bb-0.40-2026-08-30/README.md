@@ -1,10 +1,14 @@
-# BB 0.40 staging handoff — 2026-08-30
+# BB 0.40 primary-host handoff — 2026-08-30
 
 This directory is the self-contained handoff for preparing BB 0.40 on
-`bb-machine` while Rosetta remains the normal 0.39 host.
+`bb-machine`, validating it in isolation, and—only after explicit approval—
+making `bb-machine` the normal primary host. Rosetta remains live until that
+cutover and becomes rollback-only afterward.
 
 Start an agent from `/home/ubuntu/bb`, give it [`AGENT_PROMPT.md`](AGENT_PROMPT.md),
-and have it execute [`02-EXECUTION-RUNBOOK.md`](02-EXECUTION-RUNBOOK.md).
+and have it execute
+[`07-PRIMARY-HOST-DEPLOYMENT.md`](07-PRIMARY-HOST-DEPLOYMENT.md), using the
+earlier numbered documents as its supporting design and evidence record.
 
 ## Authorization boundary
 
@@ -38,6 +42,7 @@ Those actions require a later explicit production GO.
 5. [`04-PLUGIN-PORT-MAP.md`](04-PLUGIN-PORT-MAP.md)
 6. [`05-VERIFICATION-EVIDENCE.md`](05-VERIFICATION-EVIDENCE.md)
 7. [`06-CUTOVER-ROLLBACK.md`](06-CUTOVER-ROLLBACK.md)
+8. [`07-PRIMARY-HOST-DEPLOYMENT.md`](07-PRIMARY-HOST-DEPLOYMENT.md)
 
 Run `scripts/preflight.sh` before changing anything. Use
 `scripts/capture-evidence.sh /an/explicit/output/directory` at each durable
@@ -47,9 +52,9 @@ The child-repository source snapshot is published at the same branch name in
 both repositories:
 
 - `phosphorco/bb-fork`: `handoff/bb-0.40-2026-08-30` at
-  `d890479d90baa63a415d400ddb89e7c43668bd37`
+  `b3f486c8f9c15c4353ece5b609041426a0734941`
 - `phosphorco/bb-plugins`: `handoff/bb-0.40-2026-08-30` at
-  `44d934d32f2562df6ea2e430c5dcfaef25cecba8`
+  `e8cc4c7a50effbd6b721dfb585a8d6f89cc37821`
 
 These are WIP preservation snapshots, not promotion branches. Fetch and inspect
 them; select/rework commits deliberately rather than switching staging runtime
@@ -63,9 +68,11 @@ to an unverified snapshot wholesale.
 - Current runtime: BB `0.39.0`
 - Planned downstream protocol: `171`, based on upstream protocol `170`
 
-## Success for tomorrow
+## Success
 
-Tomorrow's work is successful when `bb-machine` has a reproducible 0.40
-staging runtime, the reduced fork and adapted plugins pass their checks, and a
-production-copy migration plus rollback rehearsal has an evidence record.
-Rosetta should still be unchanged at that point.
+Preparation is successful when `bb-machine` has a reproducible 0.40 candidate,
+the reduced fork and adapted plugins pass their checks, and a production-copy
+migration plus rollback rehearsal has an evidence record. Deployment is
+successful only after an approved cutover leaves `bb-machine` running the exact
+normal workspace receipt, primary ingress resolves only to it, and Rosetta is
+recorded as rollback-only.
