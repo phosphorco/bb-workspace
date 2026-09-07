@@ -3,7 +3,7 @@
   "coreTree": "c30b12255a7f9f098e7bf9b6d1999410e7956785",
   "repos": {
     "fork": "1a0b5baa9d53996e2e2ba6154d629e8f5ce0cb4f",
-    "plugins": "697d3e66123233370a4453cdc2aa7ff1e1d8bff0",
+    "plugins": "c5c37ce622fabf8ebe942b238f334497db43c6e3",
     "community-plugins": "ff4f24d25ff94b63d2140f1066c84592ab1110da"
   },
   "dataDir": "/home/ubuntu/.local/share/bb-service-preview",
@@ -96,6 +96,15 @@
         "plugins": "697d3e66123233370a4453cdc2aa7ff1e1d8bff0",
         "community-plugins": "ff4f24d25ff94b63d2140f1066c84592ab1110da"
       }
+    },
+    "pluginPruning": {
+      "removed": [
+        "learning",
+        "chronoscope"
+      ],
+      "pluginCommit": "c5c37ce622fabf8ebe942b238f334497db43c6e3",
+      "receipt": "preview/plugin-pruning.json",
+      "communityReferenceRetained": true
     }
   },
   "initialRepos": {
