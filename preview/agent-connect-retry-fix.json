@@ -1,0 +1,28 @@
+{
+  "plugin": "agent-connect",
+  "pluginCommit": "bf3848abb9e6b70095d148217f290edd84f830d1",
+  "scope": "Isolated preview only",
+  "change": "Expose optional durable operationId on GraphQL cast/call/sendMessage and forward it through the served call helper.",
+  "checks": {
+    "focusedTests": 56,
+    "aggregate": [
+      "sync:check",
+      "references:check",
+      "sdk-types:check",
+      "typecheck",
+      "test",
+      "build",
+      "post-build sdk-types:check",
+      "git diff --check"
+    ],
+    "aggregateLogSha256": "0551326a127fc283e0dfdda023ae42cc3ad19c545a7250a0fa111578373ba2ca"
+  },
+  "runtime": {
+    "enabled": true,
+    "scopedReload": "passed; running",
+    "activeOperationsBeforeReload": 0
+  },
+  "remaining": "Disposable real-host cast/call, retry, and revocation workflow checks are in progress; source tests and successful reload do not establish their completion.",
+  "normalRuntimeChanged": false,
+  "publication": false
+}
