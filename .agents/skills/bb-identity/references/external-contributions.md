@@ -69,3 +69,25 @@ first page. Apply cancellation/deadlines during a pending history read as well
 as between polls. One correlated turn does not establish exclusive authorship:
 grouped original/generated inputs can share that turn. Preserve unknown scope
 unless the evidence positively establishes stronger ownership.
+
+For core queue integration, exercise the real active-thread dispatcher and normal
+queue drain. A low-level send function may reject a mode that the dispatch
+checkpoint supports by retaining a queued row. Keep queue reservation and final
+receipt promotion in their native transactions. Fast drain paths must preserve
+those callbacks for every reserved row, including an external row after an
+ordinary lead. Retain each row's actual input-group position and frozen author
+when promoting a mixed batch; commit participant projection with promotion.
+
+An accepted request can precede its exact native turn link. After validating the
+history query/cursor, expose pending while retained, otherwise-intact operation
+evidence is awaiting that link. Do not classify missing contributions, empty
+attempts, generated context without causal mapping, or ambiguous accepted-input
+events as pending. Verify the transition using the matching native request ID,
+then observe its exact turn; do not substitute the latest turn or message text.
+
+A finite-call lease also belongs to the request/response lifecycle. Release it
+when execution omits the event field, fails before observation, or completes or
+cancels its response. A lazy stream iterator may never start, so its finally
+block alone cannot own cleanup. Use execution and response completion signals,
+not a next-tick timeout. Test the served helper against the installed plugin
+bundle as well as the source factory; bundled dependency copies can differ.

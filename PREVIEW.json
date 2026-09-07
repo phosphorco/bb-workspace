@@ -1,9 +1,9 @@
 {
   "purpose": "Cole-authorized isolated Tailnet identity test; not normal promotion",
-  "coreTree": "00e5fb5f9e703f1820744c524c60065b821b8eb2",
+  "coreTree": "064f32c8b630bad312c57eab1bdb4bc2f48f4153",
   "repos": {
-    "fork": "0881caf39e2ca8aa0320e1c20d3a948c6d6d84d6",
-    "plugins": "bf3848abb9e6b70095d148217f290edd84f830d1",
+    "fork": "1f64dc7a4687449ecdc6eb62be79d6ec60017408",
+    "plugins": "59d1a29a9524039f1515760c9a137e9963b66b49",
     "community-plugins": "ff4f24d25ff94b63d2140f1066c84592ab1110da"
   },
   "dataDir": "/home/ubuntu/.local/share/bb-service-preview",
@@ -116,6 +116,12 @@
         "liveQueueRetryDrain": "passed",
         "previewRestart": "passed",
         "normalRuntimeChanged": false
+      },
+      "finiteCall": {
+        "receipt": "preview/agent-connect-finite-call-closeout.json",
+        "liveStreamAndNonstream": "passed",
+        "pluginCommit": "59d1a29a9524039f1515760c9a137e9963b66b49",
+        "forkCommit": "1f64dc7a4687449ecdc6eb62be79d6ec60017408"
       }
     }
   },
