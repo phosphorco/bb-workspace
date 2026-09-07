@@ -22,7 +22,8 @@
     "scopedReload": "passed; running",
     "activeOperationsBeforeReload": 0
   },
-  "remaining": "Disposable real-host cast/call, retry, and revocation workflow checks are in progress; source tests and successful reload do not establish their completion.",
+  "remaining": "This receipt covers the GraphQL/helper fix. Active QUEUE live acceptance is now recorded separately in the fork active-external-queue-verification receipt; broader plugin workflow coverage is not implied.",
   "normalRuntimeChanged": false,
-  "publication": false
+  "publication": false,
+  "queueRepairReceipt": "fork/plans/artifacts/bb-identity-kernel-960255b98/active-external-queue-verification.json"
 }
