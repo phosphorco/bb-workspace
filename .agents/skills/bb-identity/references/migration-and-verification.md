@@ -58,9 +58,10 @@ All package/tsconfig edits originate in the workspace generator. Ordinary checks
 must include libraries and must not import ignored proof output. Put exact-host
 SDK witnesses in explicit target jobs with pinned inputs. Test every published
 entry in an isolated packed consumer and invoke advertised constructors. Keep
-actual browser fixture sources under a static check with the consumer SDK alias
-map, JSX and DOM libraries; executing a browser bundle alone does not check its
-TypeScript contracts.
+actual browser fixture sources under a static check with the selected consumer
+SDK package, JSX and DOM libraries; executing a browser bundle alone does not
+check its TypeScript contracts. A fixture needing a different SDK from the
+portable library should declare that dependency in its own private test package.
 
 Do not remove a wrapper merely because it forwards a call. First identify its
 authority, codec, lifetime, ownership or compatibility role. Remove redundant
@@ -134,13 +135,27 @@ Mentioned recipients are frozen targets, separate from authorship; derive their
 keys and presentation through the active provider, and prevent daemon events from
 creating server-authored client requests.
 
-### Generated SDK identity
+### Shared SDK package identity
 
-A matching SDK version number is insufficient for fork extensions. Record the
-selected source tree, the actual CLI used by the supported type generator, and
-the emitted declaration hashes. Never restore a previous declaration merely to
-make a consumer compile: a clean refresh must reproduce it. A refresh that
-removes a required member exposes either a wrong build target or missing host
-behavior. Preserve the behavior through the selected host contract, then rerun
-generation and the consumer checks. Keep configured public URLs and native
-sidebar participant projection separate from request-author authority.
+A matching SDK version number is insufficient for fork extensions. Build and
+pack the selected SDK once, record its source tree and archive/declaration hashes,
+and install it through normal package resolution. Consumers import the public
+`@get-bb/plugin-sdk` entry points and declare their exact dependency. Do not copy
+whole SDK declarations into plugins or use TypeScript path aliases to make an
+upstream package look like the fork. Keep intentionally supported upstream SDK
+targets and the portable library's older development peer distinct.
+
+Frozen installation, public-export resolution, consumer typechecks and builds
+must pass before deleting obsolete copies. Never restore an old declaration to
+make a consumer compile: a clean package build must reproduce the contract. A
+missing member exposes a wrong artifact or missing host behavior. The upstream
+`bb plugin types` command repins package-based plugins to its SDK version; use
+the workspace artifact/generator update workflow when retaining a fork pin.
+Keep configured public URLs and native sidebar participant projection separate
+from request-author authority.
+
+Build-tool compatibility is separate from installed SDK compatibility. Verify
+the emitted SDK metadata and ensure a normal build does not recreate declaration
+copies. A CLI package version does not identify its bundled SDK version. If a
+copied declaration hid a removed API, preserve the behavior through the supported
+API and test that behavior; do not restore the declaration or cast around it.

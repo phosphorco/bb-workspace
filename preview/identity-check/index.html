@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BB · Tailnet identity check</title>
+<style>:root{color-scheme:light dark;font:16px/1.5 system-ui,sans-serif}body{max-width:620px;margin:10vh auto;padding:24px}h1{font-size:1.7rem}section{border:1px solid #8886;border-radius:14px;padding:24px;margin:24px 0}button,a{font:inherit}button{padding:10px 18px;border-radius:8px;cursor:pointer}a{color:inherit}#name{font-size:1.4rem;font-weight:650;overflow-wrap:anywhere}#login{overflow-wrap:anywhere}.muted{opacity:.7}#status{font-weight:600}#details{white-space:pre-wrap;overflow-wrap:anywhere}nav{display:flex;align-items:center;gap:20px}button:focus-visible,a:focus-visible{outline:3px solid #688fff;outline-offset:4px}</style>
+<h1>BB Tailnet identity check</h1><p>This is the isolated BB preview. It checks the identity received from your Tailnet connection.</p>
+<section aria-live="polite" aria-atomic="true"><p id="status">Checking your identity…</p><div id="name"></div><div id="login" class="muted"></div><p id="details"></p><small id="time" class="muted"></small></section>
+<nav><button id="check" type="button">Check again</button><a href="/">Open BB preview →</a></nav>
+<p><a href="/identity-check/workflows.html">Run preview plugin checks →</a></p>
+<p class="muted">A successful check means this BB instance resolved your request through the Tailnet provider and its current directory. It does not test every plugin workflow.</p>
+<script>
+const button=document.querySelector('#check');
+async function check(){button.disabled=true;document.querySelector('#status').textContent='Checking your identity…';for(const id of ['name','login','details','time'])document.getElementById(id).textContent='';
+try{const response=await fetch('/api/v1/plugins/identity-boundaries/rpc/getCurrentProfile',{method:'POST',headers:{'Content-Type':'application/json'},body:'null',credentials:'same-origin',cache:'no-store'});const result=await response.json();const profile=result?.result?.profile;
+if(response.ok&&result.ok&&profile?.assurance==='trusted-provider'){document.querySelector('#status').textContent='Tailnet identity verified';document.querySelector('#name').textContent=profile.displayName;document.querySelector('#login').textContent=profile.login;document.querySelector('#details').textContent='Confirm that this is you. You can now open the BB preview or check again from another Tailnet user’s browser.';}
+else{document.querySelector('#status').textContent='Identity not verified';document.querySelector('#details').textContent=result?.error?.message||'The provider did not resolve an identity for this request. Confirm that you opened the private Tailnet URL from your own signed-in device, then try again.';}
+}catch(error){document.querySelector('#status').textContent='Could not reach the identity check';document.querySelector('#details').textContent=error instanceof Error?error.message:String(error);}
+finally{document.querySelector('#time').textContent='Checked '+new Date().toLocaleString();button.disabled=false;}}
+button.addEventListener('click',check);check();
+</script></html>

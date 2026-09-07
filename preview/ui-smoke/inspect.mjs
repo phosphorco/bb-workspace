@@ -1,0 +1,12 @@
+import { chromium } from 'playwright-core';
+const browser=await chromium.launch({executablePath:'/home/ubuntu/.local/share/mise/installs/http-chrome-for-testing/149.0.7827.54/chrome',headless:true,args:['--no-sandbox']});
+const page=await browser.newPage();
+page.on('pageerror',e=>console.log('PAGEERROR',e.message));
+page.on('response',r=>{if(r.status()>=400)console.log('HTTP',r.status(),new URL(r.url()).pathname)});
+await page.goto('https://rosetta.banjo-tint.ts.net:40888/');
+await page.getByRole('button',{name:'Extensions',exact:true}).waitFor();
+await page.getByRole('button',{name:'Extensions',exact:true}).click();
+await page.waitForTimeout(1200);
+console.log('URL',page.url());console.log((await page.locator('body').innerText()).slice(0,8500));
+console.log('LINKS',await page.locator('a[href]').evaluateAll(els=>els.map(x=>({text:x.innerText,href:x.getAttribute('href')}))));
+await browser.close();

@@ -84,3 +84,13 @@ Run the checks relevant to every changed child before handoff.
 
 Do not advance this repository's gitlinks until the exact selected child
 commits have been pushed and the combined staging runtime has been exercised.
+
+## Cole-authorized isolated service preview
+
+Cole explicitly requested this separate `/home/ubuntu/bb-service` workspace for
+a Tailnet identity test on new ports. It is a temporary preview, not the normal
+runtime. Use only this workspace, its PREVIEW.json pins, and separate
+`/home/ubuntu/.local/share/bb-service-preview` state. Keep `/home/ubuntu/bb`,
+`bb.service`, `svc:bb`, existing proof ports/state and all normal credentials
+unchanged. This scoped instruction supersedes the original single-folder rule
+for this preview only; it does not authorize normal promotion.

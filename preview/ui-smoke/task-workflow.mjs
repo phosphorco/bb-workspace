@@ -1,0 +1,34 @@
+import {chromium} from 'playwright-core';
+import {writeFile,mkdir} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const run=new Date().toISOString().replaceAll(':','-');
+const dir=path.join(root,'runs','task-'+run);await mkdir(dir,{recursive:true});
+const fixture={projectName:'UI smoke '+run,taskTitle:'UI smoke persistence '+run,prefix:'S'+Date.now().toString(36).toUpperCase(),dispatched:false};
+const report={fixture,checks:[],status:'running'};
+const browser=await chromium.launch({executablePath:'/home/ubuntu/.local/share/mise/installs/http-chrome-for-testing/149.0.7827.54/chrome',args:['--no-sandbox']});
+const page=await browser.newPage();page.setDefaultTimeout(12000);
+try {
+ await page.goto('https://rosetta.banjo-tint.ts.net:40888/plugins/tasks/tasks');
+ await page.getByRole('button',{name:'New project',exact:true}).click();
+ await page.getByPlaceholder('e.g. Tasks Plugin').fill(fixture.projectName);
+ await page.getByPlaceholder('TSK',{exact:true}).fill(fixture.prefix);
+ await page.getByRole('button',{name:'Create project',exact:true}).click();
+ await page.getByRole('button',{name:'Create project',exact:true}).waitFor({state:'hidden'});
+ report.checks.push('Created isolated task project through UI');
+ await page.getByRole('button',{name:'New task',exact:true}).first().click();
+ await page.getByPlaceholder('Task title',{exact:true}).fill(fixture.taskTitle);
+ await page.getByRole('button',{name:'Create task',exact:true}).click();
+ await page.getByRole('button',{name:'Create task',exact:true}).waitFor({state:'hidden'});
+ await page.getByText(fixture.taskTitle,{exact:true}).first().waitFor();
+ report.checks.push('Created task through UI without dispatch');
+ await page.reload();
+ await page.getByText(fixture.taskTitle,{exact:true}).first().waitFor();
+ report.checks.push('Task persisted across reload');
+ report.status='pass';
+} catch(e){report.status='fail';report.error=e.message;}
+await page.screenshot({path:path.join(dir,'result.png')});
+await writeFile(path.join(dir,'page.txt'),await page.locator('body').innerText());
+await writeFile(path.join(dir,'report.json'),JSON.stringify(report,null,2));
+await browser.close();console.log(JSON.stringify({dir,...report}));process.exitCode=report.status==='pass'?0:1;

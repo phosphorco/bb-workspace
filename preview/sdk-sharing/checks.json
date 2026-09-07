@@ -1,0 +1,104 @@
+{
+  "scope": "SDK package migration in isolated bb-service preview only",
+  "sdkArchive": {
+    "sha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599",
+    "reproducible": true,
+    "coldInstallAndPublicExports": "passed"
+  },
+  "copiedDeclarations": {
+    "org": 53,
+    "community": 11,
+    "baselineBytes": 27551449,
+    "preservedArchive": "previous-vendored-declarations.tar.gz"
+  },
+  "browser": {
+    "status": "passed",
+    "cases": 6,
+    "report": "picker-browser/report.json",
+    "scope": "mounted picker on phone/desktop light/dark/custom; controlled SDK"
+  },
+  "org": {
+    "frozenInstall": "passed",
+    "sync": "passed",
+    "references": "passed",
+    "sdkTypes": "passed after build",
+    "typecheck": "passed",
+    "test": "passed with explicit Node22.19/Bun1.3.14 PATH",
+    "testLog": "org-final-node22-test.log",
+    "build": "passed for all28",
+    "copiedDeclarationsAfterBuild": 0
+  },
+  "community": {
+    "npmCi": "passed after final lock change",
+    "typecheck": "passed",
+    "test": "passed",
+    "selectedCliBuild": "passed for all7",
+    "log": "community-final-node22.log",
+    "copiedDeclarationsAfterBuild": 0,
+    "machineMonitor": "devSDK0.4.15 retained; selected preview buildSDK0.4.47, not target-version equality"
+  },
+  "runtime": {
+    "normalPid": 606208,
+    "previewPid": 3169769,
+    "restartedByMigration": false,
+    "stickyNotesReload": "passed; running from preview source, compatible SDK0.4.47 bundle, no status error",
+    "runningPluginCount": 47
+  },
+  "publication": false,
+  "limits": [
+    "No normal promotion",
+    "No new live external notification or attention delivery sent"
+  ],
+  "stickyNotes": {
+    "node": "22.19.0",
+    "nativeAbi": 127,
+    "focusedRegisteredHandlerTests": "5 passed",
+    "suite": "61 passed",
+    "typecheck": "passed",
+    "independentReview": "passed",
+    "behavior": [
+      "issued author and normalized target persisted",
+      "expiry during async lookup rejected before storage write",
+      "shortener uses selected host default source environment",
+      "existing stored attention and delivery payloads unchanged"
+    ],
+    "legacyLimit": "Pre-key rows require exact provider-issued issuer/subject equivalence; no aliases inferred from presentation"
+  },
+  "futureThreads": {
+    "check": "4 license tests passed",
+    "change": "accept settings dictionary with numeric values; still require string license key"
+  },
+  "resolution": {
+    "plugins": 35,
+    "fork": 24,
+    "upstream047": 10,
+    "upstream015": 1,
+    "errors": []
+  },
+  "sourceReceipts": {
+    "plugins": {
+      "baseTree": "18f38a13aa94df49075c57430035db1ae96df2c9",
+      "resultTree": "da24b80925bc053eeec211f4b6dc4e3a614c8545",
+      "replayTree": "da24b80925bc053eeec211f4b6dc4e3a614c8545",
+      "patch": "plugins-sdk-sharing.patch",
+      "sha256": "0d7914ce3b15fd68ebb84aa4fc1e3cc4564202ec3892721a5195ace8fd9a9f9e",
+      "pathCount": 235,
+      "sharedIndexChanged": false
+    },
+    "community-plugins": {
+      "baseTree": "076abc34aa37a8266f832b58a82dd6b84059325a",
+      "resultTree": "1ebcd417dba33dea7798a591cba1d3652810142c",
+      "replayTree": "1ebcd417dba33dea7798a591cba1d3652810142c",
+      "patch": "community-plugins-sdk-sharing.patch",
+      "sha256": "625a551463e7fea7b4fda6253e4278a186af362803be01676e125aca897a8868",
+      "pathCount": 45,
+      "sharedIndexChanged": false
+    }
+  },
+  "sourceCommits": {
+    "fork": "1a0b5baa9d53996e2e2ba6154d629e8f5ce0cb4f",
+    "plugins": "697d3e66123233370a4453cdc2aa7ff1e1d8bff0",
+    "community-plugins": "ff4f24d25ff94b63d2140f1066c84592ab1110da"
+  },
+  "reviewBranch": "bb/sdk-sharing-preview-thr_csw7br3yff"
+}

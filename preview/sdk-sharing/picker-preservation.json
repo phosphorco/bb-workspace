@@ -1,0 +1,42 @@
+[
+  {
+    "path": "packages/bb-identity/react-runtime.ts",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "packages/bb-identity/type-tests/browser/progress-inbox-collaborator-browser-run.mts",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "packages/bb-identity/type-tests/browser/progress-inbox-legacy-recovery-browser-run.mts",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "packages/bb-identity/type-tests/browser/view-picker-layout-browser-run.mts",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "plugins/thread-progress/app.css",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "plugins/thread-progress/components/progress-inbox.tsx",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "plugins/thread-progress/components/thread-sections-view-picker.tsx",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "plugins/thread-progress/test/section-sync-seam.test.ts",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "plugins/thread-progress/server.ts",
+    "unchangedExceptPublicSdkImport": true
+  },
+  {
+    "path": "plugins/thread-progress/test/thread-sections-preparation-wire.test.ts",
+    "unchangedExceptPublicSdkImport": true
+  }
+]

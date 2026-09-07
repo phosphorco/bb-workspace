@@ -1,0 +1,434 @@
+{
+  "rows": [
+    {
+      "collection": "plugins",
+      "id": "agent-connect",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "agentation",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "plugins/plugins/agentation/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+        "./app": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7"
+      }
+    },
+    {
+      "collection": "plugins",
+      "id": "agentd",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "background-jobs",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "bb-bug-reporter",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "btw",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "chronoscope",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "diffs",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "espresso-theme",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "firstmate",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "future-threads",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "identity-boundaries",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "learning",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "notifications",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "plugins/plugins/notifications/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+        "./app": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7"
+      }
+    },
+    {
+      "collection": "plugins",
+      "id": "ntfy",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "perspectives",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "plugins/plugins/perspectives/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0"
+      }
+    },
+    {
+      "collection": "plugins",
+      "id": "phosphor-checkouts",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "plan-graph",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "plan-portfolio",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "prompt-stacks",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "rosetta-slack",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "plugins/plugins/rosetta-slack/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+        "./app": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7"
+      }
+    },
+    {
+      "collection": "plugins",
+      "id": "snippets",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "sticky-notes",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "subscription-router",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "thread-links",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "thread-manager",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "thread-peek",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "plugins",
+      "id": "thread-progress",
+      "pin": "file:../../../sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "version": "0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c",
+      "resolved": "plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "370078c41cbe201fbeca705633a1ee372106d3f7590af89357dec2801fdf08eb",
+        "./app": "d695363431193fbded282afc9bdc257970282f96cb0a7db1db52081a6eb6a091"
+      },
+      "archive": "sdk-artifacts/get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+      "archiveSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599"
+    },
+    {
+      "collection": "community-plugins",
+      "id": "agentation-mentions",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "community-plugins/plugins/agentation-mentions/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+        "./app": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7"
+      }
+    },
+    {
+      "collection": "community-plugins",
+      "id": "analytics",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "community-plugins/plugins/analytics/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+        "./app": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7"
+      }
+    },
+    {
+      "collection": "community-plugins",
+      "id": "bb-ui-reference",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "community-plugins/plugins/bb-ui-reference/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+        "./app": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7"
+      }
+    },
+    {
+      "collection": "community-plugins",
+      "id": "machine-monitor",
+      "pin": "0.4.15",
+      "version": "0.4.15",
+      "resolved": "community-plugins/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "a61f28b011aafbcc4526b149fba8c2fbb7fddc2354479eb3279f9c2c6a14be43",
+        "./app": "57af0dfbb958e7425ed996c699d50a7a97f0785b74f4eded81abeeae10afa407"
+      }
+    },
+    {
+      "collection": "community-plugins",
+      "id": "perspectives",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "community-plugins/plugins/perspectives/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0"
+      }
+    },
+    {
+      "collection": "community-plugins",
+      "id": "restart-resume",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "community-plugins/plugins/restart-resume/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+        "./app": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7"
+      }
+    },
+    {
+      "collection": "community-plugins",
+      "id": "sticky-notes",
+      "pin": "0.4.47",
+      "version": "0.4.47",
+      "resolved": "community-plugins/plugins/sticky-notes/node_modules/@get-bb/plugin-sdk",
+      "declarations": {
+        ".": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+        "./app": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7"
+      }
+    }
+  ],
+  "errors": []
+}
