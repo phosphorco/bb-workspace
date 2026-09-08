@@ -20,8 +20,8 @@ Core persisted `host-daemon-restarted` interruptions; Restart Resume detected th
 
 The first disposable project/thread was deleted. These completed preview threads and their local fixture directories remain for Cole to inspect:
 
-- [Alpha](https://rosetta.banjo-tint.ts.net:40888/threads/thr_gk6ackcjc7)
-- [Beta](https://rosetta.banjo-tint.ts.net:40888/threads/thr_3enappe4kn)
+- [Alpha](https://rosetta.banjo-tint.ts.net:40888/projects/proj_gsrqzwxaki/threads/thr_gk6ackcjc7)
+- [Beta](https://rosetta.banjo-tint.ts.net:40888/projects/proj_gsrqzwxaki/threads/thr_3enappe4kn)
 
 There are no active test workers or observers. Runtime configuration and plugin databases remain operator-owned and are not committed. A fresh installation still needs the explicit plugin activation; a Git checkout alone does not enable it.
 
