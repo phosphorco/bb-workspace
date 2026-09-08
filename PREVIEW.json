@@ -3,8 +3,8 @@
   "coreTree": "064f32c8b630bad312c57eab1bdb4bc2f48f4153",
   "repos": {
     "fork": "1f64dc7a4687449ecdc6eb62be79d6ec60017408",
-    "plugins": "59d1a29a9524039f1515760c9a137e9963b66b49",
-    "community-plugins": "267af0233ee800f5821092e59bedfbb9b9ffffc2"
+    "plugins": "90f91e148a922e5a53e014b05eae164b109aa4bb",
+    "community-plugins": "9ec81c2120760f3108be84f676a5a81cdaca2214"
   },
   "dataDir": "/home/ubuntu/.local/share/bb-service-preview",
   "serverPort": 40886,
@@ -122,6 +122,13 @@
         "liveStreamAndNonstream": "passed",
         "pluginCommit": "59d1a29a9524039f1515760c9a137e9963b66b49",
         "forkCommit": "1f64dc7a4687449ecdc6eb62be79d6ec60017408"
+      }
+    },
+    "communityPerspectivesPruning": {
+      "receipt": "preview/plugin-pruning-community-perspectives.json",
+      "sourceCommits": {
+        "plugins": "90f91e148a922e5a53e014b05eae164b109aa4bb",
+        "community-plugins": "9ec81c2120760f3108be84f676a5a81cdaca2214"
       }
     }
   },

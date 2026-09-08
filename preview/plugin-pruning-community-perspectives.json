@@ -1,0 +1,46 @@
+{
+  "removedOrganizationPlugins": [
+    "phosphor-checkouts",
+    "prompt-stacks",
+    "snippets",
+    "perspectives",
+    "firstmate"
+  ],
+  "previewUninstalled": [
+    "firstmate",
+    "prompt-stacks",
+    "snippets"
+  ],
+  "notPreviouslyInstalled": [
+    "phosphor-checkouts",
+    "perspectives (organization)"
+  ],
+  "communityPerspectives": {
+    "version": "0.2.1",
+    "source": "path:/home/ubuntu/bb-service/community-plugins/plugins/perspectives",
+    "enabled": true,
+    "status": "running",
+    "tools": [
+      "help",
+      "gather_perspectives"
+    ],
+    "comparison": "Normal deployment source at ~/bb/plugins/plugins/perspectives differs from preview organization source only in two-lens minimum and label formatting after import normalization. Community already contains the execution settings, timing and cancellation improvements; retained those and ported the two-lens minimum with a registration regression.",
+    "releaseTag": "perspectives/v0.2.1",
+    "releaseWorkflow": "https://github.com/phosphorco/bb-community-plugins/actions/runs/34235760687",
+    "npmPublication": "blocked: workflow npm publish returned E404 for existing package; npm still lists latest 0.2.0. Git release tag perspectives/v0.2.1 is pushed.",
+    "releaseChecks": "GitHub Actions install, tests, typecheck, build and package inspection passed; npm write rejected."
+  },
+  "sourceCommits": {
+    "plugins": "90f91e148a922e5a53e014b05eae164b109aa4bb",
+    "community-plugins": "9ec81c2120760f3108be84f676a5a81cdaca2214"
+  },
+  "checks": {
+    "organization": "frozen install; sync; references; SDK resolution before/after build; aggregate typecheck/test/build pass",
+    "community": "npm ci; aggregate typecheck/test/build pass; all seven selected-preview CLI builds pass",
+    "perspectivesRelease": "package-local bb-app 0.42.0 build stamps SDK 0.4.47; dry-run pack includes built server and approved artwork",
+    "workspace": "staging contract passed with existing fork authored-change warning",
+    "live": "46 running, 4 disabled; removed IDs absent; community Perspectives running with both tools",
+    "scope": "No expert/model invocation; activation and registration checked only"
+  },
+  "normalDeploymentChanged": false
+}
