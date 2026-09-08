@@ -1,0 +1,65 @@
+[
+  {
+    "id": "agent-connect",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/plugins/plugins/agent-connect",
+    "detail": null
+  },
+  {
+    "id": "background-jobs",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/plugins/plugins/background-jobs",
+    "detail": null
+  },
+  {
+    "id": "btw",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/plugins/plugins/btw",
+    "detail": null
+  },
+  {
+    "id": "diffs",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/plugins/plugins/diffs",
+    "detail": null
+  },
+  {
+    "id": "future-threads",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/plugins/plugins/future-threads",
+    "detail": null
+  },
+  {
+    "id": "machine-monitor",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/community-plugins/plugins/machine-monitor",
+    "detail": null
+  },
+  {
+    "id": "thread-links",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/plugins/plugins/thread-links",
+    "detail": null
+  },
+  {
+    "id": "thread-manager",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/plugins/plugins/thread-manager",
+    "detail": null
+  },
+  {
+    "id": "thread-progress",
+    "exitCode": 0,
+    "status": "running",
+    "source": "/home/ubuntu/bb-service/plugins/plugins/thread-progress",
+    "detail": null
+  }
+]

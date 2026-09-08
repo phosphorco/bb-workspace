@@ -1,0 +1,2108 @@
+[
+  {
+    "repository": "plugins",
+    "path": ".agents/skills/bb-ui/SKILL.md",
+    "sha256": "d6e28c95f132626a89e0a686f29e8203457fd4dc13103ac23c0bbb095ae2d5fc",
+    "disposition": "old workspace policy/documentation; current bb-service policy retained"
+  },
+  {
+    "repository": "plugins",
+    "path": "AGENTS.md",
+    "sha256": "804b60834d767422451b7222411639dfbfbfb26d848808d08787293301753094",
+    "disposition": "old workspace policy/documentation; current bb-service policy retained"
+  },
+  {
+    "repository": "plugins",
+    "path": "README.md",
+    "sha256": "597d22c9a999845f1458cccf94dd784c6b1ff11aa9852e43d71bcbff8c788438",
+    "disposition": "old workspace policy/documentation; current bb-service policy retained"
+  },
+  {
+    "repository": "plugins",
+    "path": "bun.lock",
+    "sha256": "cd68801c7481a8ff1f67ca6241a7fc108a92d74f3e511e0e18a8bf1f24a40677",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "docs/attention-forwarding-architecture.md",
+    "sha256": "184061571c936c10b16b07bc12a31a7dbc265d64a86f0f5fe79dcda6caacdc3e",
+    "disposition": "old workspace policy/documentation; current bb-service policy retained"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/app.css",
+    "sha256": "9f83827efd8a06575ec3babc8361cc42c995b58dedbf7aaaced7b7c1c64ac367",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/app.tsx",
+    "sha256": "c130cf9577fe7d84ee2d9921ec76d0f3cebf73be35ca7fa0917b69ae7582bace",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/call-client.js",
+    "sha256": "db5cf091412eaa614d7235ddcf60329b2ca84da5d3350b99e5bea997d22d3098",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/graphql-schema.ts",
+    "sha256": "f9139b2cc7d46ba31abe5a6dde54302e6e69430f1e330c12f55e11961ddd0ed1",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/message-api.ts",
+    "sha256": "e1be92e74f871ca070854269c79a30915bec7d634a59a9fd37819379588b08f6",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/send-capability.ts",
+    "sha256": "2fc3ed985a3e94398421e3f154d75ad73415f9617ee9a5c1c5299bdccd72effe",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/server.ts",
+    "sha256": "25d3a9c47a32cfe65a1a390c5769c55a2263cdb3215004abfcc5ce78f9937195",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/test/app-pulse-source.test.ts",
+    "sha256": "b00ed24cf7120792218a9d042a3eb20f58847686e37bf21354ed8d7e5ceff9e0",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/test/call-events.test.ts",
+    "sha256": "87ade6d0b156594dca2969b6b608a1109fdf4ed9e0d501e5e90b0015ecb23714",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/test/graphql-schema.test.ts",
+    "sha256": "0aee6c0fc62412f45e0433172befc1d7cce20aade968e69ad8f5eea80174c07d",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/test/message-api.test.ts",
+    "sha256": "6cd5ab5aaa5f61f72a1157f29123084c2c7f26f8baf9edb5f30312249fb077cb",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/test/send-capability.test.ts",
+    "sha256": "e5eae0732d960cd8c43ba0d4430f78042c16192de4cabb8935fa2a66b78b9677",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/test/server-route-context.test.ts",
+    "sha256": "48480d528dffe9c2cc4496e11c7fd6312ea3b34808af7f53fee4c5a78c5ac1cf",
+    "disposition": "current durable transport retained; URL feedback and author display ported through public identity history; old route/status regressions excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agent-connect/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/agentd/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/background-jobs/README.md",
+    "sha256": "fc37d3e3482f82e3c691473823ce35b984c2871aaab01c53a0c8b328984de79b",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/background-jobs/lib/prompt-schedule.ts",
+    "sha256": "32151b7ed9a11085666de72e5f8f8c47fb71b941e08822beb539bb60cbf483d0",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/background-jobs/server.ts",
+    "sha256": "c46f6df88753cb58feb2193b12a2c11230c960cd561b48f172c5423a02e404d4",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/background-jobs/test/prompt-schedule.test.ts",
+    "sha256": "5c08912b0f2bd987fec9be06e00531d8d282b1d07b0e068bcac495aa9e4ad894",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/background-jobs/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/background-jobs/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/bb-bug-reporter/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/bb-bug-reporter/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/btw/README.md",
+    "sha256": "19f1dfb1d36d14ef35fff6802956322e9d80e70e7ac316b450f8f009227fd0f9",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/btw/app.css",
+    "sha256": "788d7eb654e02240ed12ab761ea722ab53d7136b5fbd8e7ff52ab79fb12c049c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/btw/app.tsx",
+    "sha256": "20eb89dc40007175dbf802d7ec5267c54082c1845df04fc1294f6de4df29a320",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/btw/server.ts",
+    "sha256": "cbb670459ceb27ce33066d39ce392d989f35322e527935015a71bc2b75c25ca7",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/btw/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/btw/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/chronoscope/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/chronoscope/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/README.md",
+    "sha256": "cb07348a60bcccdabf0d4342e7829d2f07c5e4ac9ee70fe696f05e2789b1380c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/app.tsx",
+    "sha256": "e8898ac11da5a6495523b59d0046072092703dab53db22eb60e7db6701fc080a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/host-contract.ts",
+    "sha256": "125984be875e15d2002e09ce49ca98a91a30cca9a9d5561bde04ad81e7aa6942",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/host.ts",
+    "sha256": "5557adf1d11f0658bc4db7d606f26f7b9988acb2905b13902af8d356ba095e25",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/package.json",
+    "sha256": "6b62718ed9d7c0ef0082135ad267a69a130dfd9568e6c42d461fe1fcf66abdf5",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/repository-profile-cache.ts",
+    "sha256": "78ca199aaefeee38617522210b1dae535c2b36c0b96a2cee9a5a6a504f78dbd1",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/repository-profile.ts",
+    "sha256": "9908dc383442f15b23418501b26c98cf8c4c61cb6da06b9719cfa9c98f3706bf",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/repository-scan.ts",
+    "sha256": "0b0144b3fff6f10668bb8adef8e19200d637c63812d6862f762aec96704b4776",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/server.ts",
+    "sha256": "6ba47d0692004997c53dfb127576a16146bc466634c33b52dfe3a65e2633711a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/test/repository-profile-cache.test.ts",
+    "sha256": "2a3b70f2e1afd4ef2cd676a29fe0568eb3c5a793168bbd7b275f5b5b94c50ea0",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/test/repository-profile.test.ts",
+    "sha256": "0f647e25fb9ba09d4c6572f3844661617bd2228bc5566318294896d85b8d57b5",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/test/server-cache.test.ts",
+    "sha256": "226f00aacfa49268bc1a52404cbaf9866d61fdaff00ad10d756cb68887947125",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/tsconfig.json",
+    "sha256": "01a95a4b19ae5edec41d2fbdae123c6ae2b8b4ff5d10f1936bdddae5d855ddb4",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/diffs/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/espresso-theme/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/firstmate/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/firstmate/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/future-threads/app.css",
+    "sha256": "a5baa1efd61fd287a8ba90ad4dea744b8653da6737a7ccf34cfa5caed9495aed",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/future-threads/app.tsx",
+    "sha256": "0f375b2d642b321e4cfdb588a4c800af4bcf721c4add37386dd4f66b07264dde",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/future-threads/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/future-threads/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/identity-boundaries/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/identity-boundaries/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/learning/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/learning/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/ntfy/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/ntfy/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/perspectives/README.md",
+    "sha256": "82cf75090ca06add035139433af89edcabffb61b8072edcbb72d4ceea6a8e2bf",
+    "disposition": "published community implementation already supersedes old copies"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/perspectives/package.json",
+    "sha256": "845f3286c251eca77331abfced894be8392e8ee961e58498588c84f197cac2d4",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/perspectives/server.ts",
+    "sha256": "6c634ed2c9cc4ae82fb8a97a5e473442fa1274383bfa5cb4991933add2ce45ed",
+    "disposition": "published community implementation already supersedes old copies"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/perspectives/test/server.test.ts",
+    "sha256": "6e38dec811213a3231f5e29e85528e1d46ea1b640307a3c8c5d4a3f9bdb6a5d7",
+    "disposition": "published community implementation already supersedes old copies"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/perspectives/tsconfig.json",
+    "sha256": "db32d6a5c64162ec9ab6428102038ef0eff9d38b818f1630917a3b44dca9adb4",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/perspectives/types/bb-plugin-sdk.d.ts",
+    "sha256": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/phosphor-checkouts/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/phosphor-checkouts/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/plan-graph/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/plan-graph/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/plan-portfolio/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/plan-portfolio/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/prompt-stacks/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/snippets/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/LICENSE",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/README.md",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/app.css",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/app.tsx",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/attention-forwarding.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/geometry.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/link-metadata.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/links.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/note-state.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/notes.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/overlay-bounds.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/package.json",
+    "sha256": null,
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/save-queue.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/server.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/attention-forwarding.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/create-gesture.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/geometry.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/human-context-authority.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/human-context-integration.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/link-metadata.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/links.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/notes.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/overlay-bounds.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/save-queue.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/test/typography.test.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/tsconfig.json",
+    "sha256": null,
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/types/bb-plugin-sdk-app.d.ts",
+    "sha256": null,
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/types/bb-plugin-sdk.d.ts",
+    "sha256": null,
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/sticky-notes/typography.ts",
+    "sha256": null,
+    "disposition": "retain current identity-aware organization Sticky Notes; port community citations separately"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/README.md",
+    "sha256": "31843938640fd1e8b066847a9642403a993ca2043d86175fc704437590a2a1cf",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/UPGRADE_RUNBOOK.md",
+    "sha256": "b92392e97e665b43ca3ca5db047918f9c0d54f9cef479a65e38dc85753e5ed80",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/app.css",
+    "sha256": "be901b44eadae087eb6de4ea2afa9ba5b78bd4bf3509c1247e0a4380bed69c7f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/app.tsx",
+    "sha256": "686d674c668896f307b3f527b1d0d2ace58e7099bc24c8356175457402964aa7",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/deployment.ts",
+    "sha256": "802e2fdd98d31233bbd4d2f0da81bb96924de8b9c4d4e6d6b818a259c06a399f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/host/accounts.d.mts",
+    "sha256": "42537a77d05ea30a710a7d9a04e5768fea95f9f87753fa1da58361dddaea2d3b",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/host/accounts.mjs",
+    "sha256": "70ddb28d12002a4466bb38962736e2af3ae91e28f8d27b58c85f59fd08b42774",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/host/migration.mjs",
+    "sha256": "156901607b98039695e0c2c03de78cc3067e36d1de604000de2c17137cc38071",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/host/router.mjs",
+    "sha256": "a923b81aea49c2042768c6ce905ef6d805b1c16d353c27e8a5c379bc420c07f2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/host/session-migration.d.mts",
+    "sha256": "d4b46af2f0467cd5652e5bdefef34963e87e9bf9987767d70343c2405cf1aef9",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/host/session-migration.mjs",
+    "sha256": "e5f9f7e98d7d49d20819bf15e2c071299076baa76fe140f056d04b9996723db3",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/host/sqlite-state.d.mts",
+    "sha256": "26456935b99e39ddf64d8bbba7e332c45ad06b0d5f1bf1eddda8091c1c274eb1",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/host/sqlite-state.mjs",
+    "sha256": "920d78cfd121bda1f4351516e655224deaa797799dfa999b63ab407e11821f22",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/package.json",
+    "sha256": "5aca66ab53a868e7024fe1f33e192ad3b36bfc472d3939b3ddb33245dd515207",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/rpc-contract.ts",
+    "sha256": "3590f41efc734d4af81070b23e8fc8e14637a94746b23cdfe1fb20970c583f67",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/server.ts",
+    "sha256": "7566cd4e20ae4c30b86ff90bd4660ea3b18ba3f69dea2246d48046f9bd5bb59a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/terminal-session.ts",
+    "sha256": "8c792d284c4c004a3a6305c1a230d056542e720dd0596a53e502b670cadddccd",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/cli.test.ts",
+    "sha256": "fa1e4457ae05b171a92b9d160369d689ed482b1ab2aa4c60cc93bc148808855d",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/deployment.test.ts",
+    "sha256": "e342aa3bf25ffe002044f9e1cebb2f7dfd0b7ea80d8c5e72e574df4bb7835a9f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/migration.test.ts",
+    "sha256": "2f696d6d34de39cd917c21776864c7a538f219af8d130747dcf55f373a63a5e5",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/native-codex-oracle.test.ts",
+    "sha256": "42cb25598235eb9657e7eb4b8b0cfb8d64f9ea37864462045896a7ba667fbee2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/proxy.test.ts",
+    "sha256": "5f40f860c5c80c88d52c2ef8ceb87627047125b1a0599db7beff271631a76136",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/session-migration.test.ts",
+    "sha256": "2c7079f07c9ed2bc3431988cdf054d8e62f340230775530607c79537674ba4f4",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/sqlite-state.test.ts",
+    "sha256": "cda1ebb16196aec98c9a87e27066326ff9404e4d583bd2808453055661a52734",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/state-crash-stress.test.ts",
+    "sha256": "c2d84601189185762076bc26b1af2dd19eecce3b4df28e85e7ce520198a2d564",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/test/terminal-session.test.ts",
+    "sha256": "e118a3c562445a68fd3b099632f093684a56b53c69283e1897a52bc7b0db8a06",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/subscription-router/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-links/README.md",
+    "sha256": "fac1ad2bfe84c85247d1be0a09832bdd574e2abb324be2c27a3cf45e10fde697",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-links/app.css",
+    "sha256": "05fe9173aab1c4d435a8c53873a2fbcf9aca1b0adb1e0654a84dd2f916bc88e7",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-links/app.tsx",
+    "sha256": "2f66b5624e067a80c2f284c55f66c0eafd8e0d7b2750435406bc5f0bc823576f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-links/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-links/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/README.md",
+    "sha256": "877688d935e3f4ca9d689abd1b1a2b2578fce628502979a8e859cb5b85aa41fa",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/app.css",
+    "sha256": "8017940a8e737368b32ac55e1ce79ca9696c6e0e7be7c69d336f5fcba0c14daf",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/app.tsx",
+    "sha256": "32c0ce8f25a57b37dee6f6aa4fe561e74e825dc036de0eb06737a84cb522941d",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/dialog.tsx",
+    "sha256": "e842c1405aa99ac8d4b69034736dac68174545716046b212e8ab1d0b98aab4d2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/execution-change-dialog.tsx",
+    "sha256": "b6ac2676803419c8ccf79e7ec61de1b2bd83b9e370ba5b6f0d9eda97f728da13",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/execution-change.ts",
+    "sha256": "65d8607413baad1fb5fe84671f30be97d6bd08e48c40233c8901fdb6b684373f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/execution-mutation-signals.ts",
+    "sha256": "b7e94f73526eb7a0841c6fd4f8db4b4012ace90d97c7b9af2be7f57df736615e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/package.json",
+    "sha256": "211400eac8ed1fa76a62332f73e406ef73b6e2e8e3e86568463b20e9c2c892b4",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/server.ts",
+    "sha256": "44c72f18c547b5a84e6df6f1ff38dca5264246d87cd6267a04f644c25c5b7983",
+    "disposition": "ported with current SDK/API conflict resolution; see README"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/sidebar-placeholder.ts",
+    "sha256": "6e8a5127db36e76e9832b5f77a906168999305129b1a62bb44f82d17f07bf941",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/table-model.ts",
+    "sha256": "2f97c7d4654888805ffa6633d9f2d75a1b48b94f61806960e3f7c8d4df0c4ebe",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/test/execution-change-dialog.test.tsx",
+    "sha256": "5efaf909afbde79a0eb7582b50364e78c69395ce5c4ec9db45245c09c40cc051",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/test/execution-change.test.ts",
+    "sha256": "7182bd6805a27ef9956e9f3bd27be6e9575bc3e046b1573ae3e2a85914bc4f77",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/test/execution-mutation-signals.test.ts",
+    "sha256": "da5a42fe05d7eca96064e0f8ef2849f914d18ffa6cb5dd7ccbf7a1574105b8d1",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/test/table-model.test.ts",
+    "sha256": "01d422efd2b2fc61c2ec63f778e3ca397af9f69d3dc559b7057886ab3ba03045",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/tsconfig.json",
+    "sha256": "3caafa0a3176ac490505ab67061286d011e91a5227eae34c7da1c9bf120fe66f",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-manager/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-peek/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-peek/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/lib/thread-list-pipeline.ts",
+    "sha256": "399319fc636c26149cdbd186dc4eb5801e209ad4933bb825be78bdeb9b0d7a39",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/lib/thread-phase-facet.ts",
+    "sha256": "9b793b1ef14ff823fd0fe6e436e2256466fde23ad6c0d704720e49cc1fa5ac3e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/lib/thread-progress-derivation.ts",
+    "sha256": "cf0307bb10ffa15554c3938f2a1fc1375182af3b0eb88dd7c574766ce997c52b",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/server.ts",
+    "sha256": "003781043454f9df82765240be00a35f563e37f9a9290f1b7623405392ecd7db",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/test/bb-identity-public-contract.compile.ts",
+    "sha256": "4448e3d34509b9e773617823407d4cd16b7487997831fdb50ff51cf960f82006",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/test/family-rendering-seam.test.ts",
+    "sha256": "d50acc711f1c96abdf96cbdf5770c0d72f959b6d891715a549c61782e6b75d3c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/test/thread-list-pipeline.test.ts",
+    "sha256": "8bdb7ea7c88cca86bc6f788b7d333bb2643e70fa9b39e2b02f0cbfcc24e7b0f1",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/test/thread-participants.test.ts",
+    "sha256": "20ab50d628b38524a4d652272e40d05a9235528a25d2bb90940ad2660feabb94",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/test/thread-phase-facet.test.ts",
+    "sha256": "e136e1513491e7a93a514e1797be27b266ed214d75ff227aee80b0e368bf2dc0",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/test/thread-progress-derivation.test.ts",
+    "sha256": "e9129f8be39011d9a86500a72f0ad3064abd70b3cfc01eb0ff5f6eba594d4c9d",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "plugins/thread-progress/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "plugins",
+    "path": "tools/workspaces-sync/definition.ts",
+    "sha256": "a590f8bd30c834cfce427bb94801ff6188819ea212e50c253892a30bc919572b",
+    "disposition": "selected feature manifest/dependency deltas incorporated through current generator; retired plugin changes excluded"
+  },
+  {
+    "repository": "plugins",
+    "path": "tsconfig.json",
+    "sha256": "2f248be7400bd04cd346f21cb05a977d63a3b4c8b2aea3d959ff79432b2be3b6",
+    "disposition": "regenerated using current package/SDK contract"
+  },
+  {
+    "repository": "community-plugins",
+    "path": ".bb/plugins.json",
+    "sha256": "d5a0515f6e25567aea225622a1f7ce8c6a394c721f7a270481f45c1988d6d3df",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": ".github/workflows/publish.yml",
+    "sha256": "2cec0df0659a775d3b210ba52f9bffce363fd3cc9540195cd4da89e4a95e441b",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": ".github/workflows/validate-pull-request.yml",
+    "sha256": "7084587b94207955d9efce1318ea812d55c7db7e62085c7b0cebd90157541854",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "README.md",
+    "sha256": "122848d52a57c6fbbb3eda8de9bfbdaa34d24818bfec626b78b201ca81b2f357",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "package-lock.json",
+    "sha256": "740e5582bb21a0887bb51d21fc60f0009a2b0af7b45b1bfcde560981e7e604b0",
+    "disposition": "regenerate from merged manifests"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "package.json",
+    "sha256": "3b7b4516f316db81857ee4099cf1e2da56127c6e7dc32573ee175d2c24941be9",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/README.md",
+    "sha256": "3106360e753f15e8056be260d6c9c1e6f5578814fa548b580a5cb11670be242c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/lib/afs.ts",
+    "sha256": "511c1915e225fd805bd466c0ce2f731452e43cb372207c7c020fb985cf39a43d",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/lib/attachment.ts",
+    "sha256": "8bcfb48960c3e8751dae833280e1f1c4277ceec74f3e9e486175c32de2becd26",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/lib/identity.ts",
+    "sha256": "d1f550d1042ba1b5d0f2acce5b76655b23da58ea330f4ff25aaa4b249f50237a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/lib/store.ts",
+    "sha256": "d58ff9ee320e1c63cd3414aae861f75b12049b841617d103e86e2875b2fb79ca",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/lib/toolbar.ts",
+    "sha256": "3fe215f950d38b9daf822fb9ffdd65d640264441ec8b307b156814715c8ddeed",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/package.json",
+    "sha256": "b4ffc33331388595b4ed58d6348075ec34b786e3376c249b32c15687cdac2ee9",
+    "disposition": "ported with current SDK/API conflict resolution; see README"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/server.ts",
+    "sha256": "5de2517ecf36229de502813d7e9667d3f49d44d1c18c48fb45d8abb423370ea2",
+    "disposition": "ported with current SDK/API conflict resolution; see README"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/test/identity.test.ts",
+    "sha256": "2d35e804409a39cfa959ecc40605c73cd35f59485b99bd739dad5adf6d29b609",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/test/public-identity-binding.test.ts",
+    "sha256": "b617ff7585d3310dcc6c847d1c6ea88f78f407d547672505c345f0941a66fc8b",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/test/public-identity-boundary-source.test.ts",
+    "sha256": "159bb6dbd3a19bded10da4f2acc5c6398becbe940b9d7a9869bd1cfe683f60a5",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/test/store.test.ts",
+    "sha256": "aca099f9163b90c34389c141e8edfff1ad92387f7ac46f72ce40c8c4bd04b794",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/test/tool-presentation.test.ts",
+    "sha256": "3e35512d5d351afb1a0e1a5f1e8b138fb14656c8c3b3e92640ca81d1d3bdb75c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/tsconfig.json",
+    "sha256": "b3b181e1aa2b43dc8fe28fd83577eb5409c0244e6808d829155d6ede991c4351",
+    "disposition": "ported with current SDK/API conflict resolution; see README"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "70d5f3eefc369b830bc9141fb1f76a9f671041ed35d230e2206c05d319fbd2b7",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/agentation-mentions/types/bb-plugin-sdk.d.ts",
+    "sha256": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/README.md",
+    "sha256": "7419514c3cc698bb098626b2d9f7c36194c8531532a202bbfb0e574ba8307906",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/THIRD_PARTY_NOTICES.md",
+    "sha256": "2fb667f3c545a5e72bf3dc03d8382a6241fec430d1762595cc9cb9e4e0997a80",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/analytics-export.ts",
+    "sha256": "0b46eaf9f425ecfa760a527dcf6632c278dea0e3e08c444106333ce83d152817",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/analytics-model.ts",
+    "sha256": "f32272f321eb4a95462e03068b0b65edcf297fde712de626ad3cf4980da34878",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/analytics-reference.ts",
+    "sha256": "69e4829a1d914ca0bd76a8f3b79b8fb4df57304e66f05d3af3ef9d0fb36c222f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/analytics-status.ts",
+    "sha256": "620f84578a1b4ebcff911d35e157af1b79c70a0cf9e18d11b36a292d79ce0515",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/analytics-verifier.ts",
+    "sha256": "7a7f386aba109f92dcb202320349106d820f28b95bd7f31f8a8b4f23e9ab7efb",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/app.css",
+    "sha256": "79e44f948e303880d1ab17795f9080229d169e1312c3f0367fc598900e044ae6",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/app.tsx",
+    "sha256": "2d5fd645d7d74db7993bcbf5e091a06bb3568fb1f31d640b384ea5ad475f6893",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/browser-engine.ts",
+    "sha256": "94ab5c0b9e7d856be4ca384a8eebcd4bd0bb1ff80fb471e735ce935277f8a5d7",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/builtin-bundles.ts",
+    "sha256": "041f5ce4fbd0dd2edba12baaefd080367ea1fc83b88fc17b35f69d87a88fae5f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/bundle-contract.ts",
+    "sha256": "cf8ecf15a1a83ace47114e93069b71b4f51582472e4e5d53b30ccac560215ce0",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/chart-environment.ts",
+    "sha256": "8007e593e417cc4890e01ce16a0fc446f552b3598dbb9028a8f49b30591aff1d",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/command-signature.ts",
+    "sha256": "94c819d8f1b1a533b08776b04a5720b435884a745b488a6436ef0dd4718ae750",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/docs/architecture-evidence/probes/README.md",
+    "sha256": "4406699f892d96d7bb98741ec1949aaddc7c9482fa188ceb0f4fc3e524130eec",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/docs/architecture-evidence/probes/baseline/README.md",
+    "sha256": "01eb40fb517f54e0f63304d910df6e2424dda46697a57cee9fbbe0c8163a40bb",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/docs/architecture-evidence/probes/baseline/containment-options.md",
+    "sha256": "52c29770d264a6e9241a6afdbad8007380214814ca8a82b44ae9f6230ce06762",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/docs/architecture-evidence/probes/baseline/packaging.md",
+    "sha256": "c53a3ebe05432620222c2c6e388dcbebca9c88ddc668cca7a8f836d516d0e0a4",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/docs/architecture-evidence/probes/runtime/runtime-feasibility.md",
+    "sha256": "3ef1f3ffbafc7aec21eab28f68b941b9cb7ab0e675b7c0ee6546e0d2c557ade2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/docs/architecture-evidence/probes/source/README.md",
+    "sha256": "34c4eb401f1c5800fe46ca5c379de96e3755a689b6a34e31c66833c8da08f6f7",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/docs/execution-contract.md",
+    "sha256": "fc0122471a37a4e205e11e99d91fa5dc4903712cad36171a223724dad4e6899e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/echarts-figure.tsx",
+    "sha256": "b094abc87039906693368b75cfcd93dd31ffa552e6f6df85608fb8c08789f034",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/echarts-options.ts",
+    "sha256": "eb05c7bc8c9f93a2343fd39293f4a09678802fe90576a9bec8782eb30395b1fb",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/echarts-registry.ts",
+    "sha256": "ff3dc7dba529afdeb9ff890a50b6ce3357d8ca69d7cee1856d3d15111ac97f59",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/echarts-update-policy.ts",
+    "sha256": "f1ed71a844383bb8edb3c6461167a5b55b5c829d43273b08113b1ad1ff3e7790",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/execution-contract.ts",
+    "sha256": "c269bfa782f0890d360a62487ae14d729e209b2a2063634c254ef48d5103fbba",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/fact-projection.ts",
+    "sha256": "e6f8219814b3a0565371ad108944f377360ffdfa52a9775ebe2c0c843a52741d",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/fact-schema.ts",
+    "sha256": "1e95ba810a299816d556a00f2d86d7fad0a01f54c6733a0b0d1eac93c33fc08e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/formatting.ts",
+    "sha256": "8b496fee6a16d8b77adb23f86acaa26a3a77f26591213cfa45335e2c90dfb275",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/package.json",
+    "sha256": "7a3f1f4c19d8a2e592fba491b0e0213c03bae9e9d9e32cec9ff92b6b6c44a410",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/query-runtime/index.d.mts",
+    "sha256": "54dad02f49237e850b6fddff799952201e65b4cb247e601e5ee238e87437fa6c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/query-runtime/index.mjs",
+    "sha256": "a3a0abd5657db090ac938fd60e3a64c95657b81f4b44425a62f59d6a826b08ba",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/query-runtime/parameter-bridge.cjs",
+    "sha256": "335d6aa6ba0002118ae970b7b60663cff1f80be42efdf986029c3b5f46aa36f2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/query-runtime/worker.cjs",
+    "sha256": "87de0f37d5776d0dba86c016dd46d0cb33ef69fe63285162d428a0904e15ecd2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/rpc-contract.ts",
+    "sha256": "973ea126544666653c4c500450c6bcc41ec2439ce6345cf6f19f58b64f7aa4e7",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/server.ts",
+    "sha256": "46385306b359314295cf8d594ee38fc3603527728bf316f3070211607c6e6fba",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/sql-policy.ts",
+    "sha256": "ddafbe5673c2107945676ad8937c60e72a16491b52c1cb2efbb884eb60882388",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/store.ts",
+    "sha256": "714e1a44830a6da45dd83d636b6b46dcb8f2de6c4880e2e1dd0a8b0dc0a17155",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/analytics-export.test.ts",
+    "sha256": "13be2320a8b0d23b874adce4c6852dd51e51557c1ef964bda06aeaebc16cc702",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/analytics-reference.test.ts",
+    "sha256": "c561ba7385c6f6025497ea1117a8b4a44104b9007b83e08a541528fa6cb83a45",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/analytics-status.test.ts",
+    "sha256": "bbd4d0c56ffea0af3e12c06cbc5e8c0cfa4212e94f920aeade6c77804eb60254",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/analytics-verifier.test.ts",
+    "sha256": "87fc4a199b454965a7d863386ae9ac16cd3aa24ab67922be2f1ae7b0cc53a5af",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/acceptance.mjs",
+    "sha256": "a6d88a6ba09c6213962b7bad66972c0c75af183938c67c09e8c9c08396043db9",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/acceptance-binding.mjs",
+    "sha256": "26c3e2332feab2ae231d42d68bcfdbcb2feaed56896b6b55f87ef17206b9b913",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/fixtures/runner-65th-fail.mjs",
+    "sha256": "9748ad57a72557ece337f2dfaa3a4c71f589a1d7eed34d9e0ea9fa517cebb877",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/fixtures/runner-contradiction.mjs",
+    "sha256": "f3a8d55953d753414a87ecd225e6d52318e03e4d872321683115a18fe23b41db",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/fixtures/runner-ignore-term.mjs",
+    "sha256": "2a9e23310effb3ea77c9fdc643bcd45b009c5249182f4bdfb289e144ee48b262",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/fixtures/runner-multibyte-output.mjs",
+    "sha256": "c2bf2206f0b50cce4c05604a0f0b59c83ceb926f4bbd42ebfd30b0ffb841a929",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/fixtures/runner-output.mjs",
+    "sha256": "01cf76ccf6ef7258772dbceaff802f3b7cb4a6835ee9d25ecb23dc11fe2cbcca",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/fixtures/runner-print-pass-exit23.mjs",
+    "sha256": "cbb4da493843f8ee3e85a8a56c03f7af2a71e5005d2a657ab1cbf4ddad9d9d6e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/fixtures/runner-timeout.mjs",
+    "sha256": "4365243629b224c5c597ccef2a026f78eac70d21dd92ef202c7fb5a771b3aa5e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/runner-controls.test.mjs",
+    "sha256": "7951095833f07716ea0c49b6b4809971207332992b85470e348dcccc064424ef",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/suite-child.mjs",
+    "sha256": "ff486323c535a5c10a034aa8ca5ec6f8f4922ee4fabc81876317d1c12e03f895",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/browser/supervised-node.mjs",
+    "sha256": "0eb3bc97fcfecf22188efe731a76f150dabef25a4ebd12bfd9851412752d2999",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/fixtures/execution-contract.fixtures.test.ts",
+    "sha256": "eef04d7bc1527f710d3726eeb3db757b3f8ded9646188239adad1f80dd68f57d",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/baseline/fixtures/historical/browser-engine.ts",
+    "sha256": "94ab5c0b9e7d856be4ca384a8eebcd4bd0bb1ff80fb471e735ce935277f8a5d7",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/baseline/fixtures/historical/sql-policy.ts",
+    "sha256": "10ecf53e1e02ed4db148add0e57f1e1642eb86be10e8606ad895948ca3fe226e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/baseline/packaging/probe.mjs",
+    "sha256": "a3fa5c6c94db42f6b9401ea237db0b055b7ecaf6a8dfd4b9dade80bacbd15f61",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/baseline/packaging/wasm-owned-child-probe.mjs",
+    "sha256": "575db5f88118401f591846b2ecb82c011cfa3e473fc208c5836a503d8aea4c1c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/baseline/probe.mjs",
+    "sha256": "11b7f255e886ec4b85df084c711cb193edc3ea6c6488f0f6b0e171c980b308d2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/baseline/probe.test.mjs",
+    "sha256": "7a23f8e2fcaf65c1cdeda835de0dd3d22ed50c58a14ad12a1ad6b74951645104",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/run.mjs",
+    "sha256": "f71fc88db0a89bf2c74783e790b3ac92543b68847e165b24b64f9562189d97cc",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/runtime/engine-child.cjs",
+    "sha256": "fc627d256a8273fe1b738ccb74c9455f888acafcb904c7532535bcf611c1fc1d",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/runtime/probe.mjs",
+    "sha256": "bc89e04f155ed8f2b0bd6bc07ade9bf10f41ab9eef3f9de6dcecd93a31954bf8",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/source/node-sqlite-handoff.mjs",
+    "sha256": "a835aabebf22897aa269004d5dd8a42fb625f5fd69b56ac8a1bb580aa5970348",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/probes/source/probe.mjs",
+    "sha256": "525bc56094efbf7eac3c169cd3f5c6a928a8c7dd8cb77add5120cd9bb2ac5f67",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/baseline-witnesses.mjs",
+    "sha256": "2801d1dfcf9a115e79e0d0599930de291cd4b5c9c966cac1b4807ee3626235f9",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/composition.mjs",
+    "sha256": "0c73740cf7eb39a534c88313427dcea418b1d63017f1b9ba73c5948281063127",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/data/common.mjs",
+    "sha256": "0a67bfb64868b4d1ce6b0ec6c87a45f11935439bac8c9e8b5105068dcdc38d43",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/data/fixtures.mjs",
+    "sha256": "4af7b54359e7e03d84e8f99369a474a278b185cb3e824a91e0fe8fd7e170afc3",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/data/instrument-self-test-adapter.mjs",
+    "sha256": "715a8f2bef7c88e119155e570ad7289fb05bbcd7106d8d81c82ce12050dcb13a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/data/migration-fixture.mjs",
+    "sha256": "9dca42c276b3e985d543642d331e67f479837ff0042ea355520153de3d5ca4c4",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/end-to-end.mjs",
+    "sha256": "d897535ee2ed3f1b546c98b6ceba42f0d38e758a68713099f22032d914fc39c1",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/extraction.mjs",
+    "sha256": "0f2bc41086a3d46b7e98cfad50fa312bcc4f01e186a6cfeb7b594614eb713780",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/migration-packaging.mjs",
+    "sha256": "1900cd397b533a3a8f20ed0f8b0db0c49588eafe614bea5a376eb4a6df04f0be",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/performance.mjs",
+    "sha256": "70827916c0d5308306d22701387470e503b65d1c7d86ce7c5dae4374d3401f72",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/query-runtime.mjs",
+    "sha256": "7f52aae25cb9892470d01ca734d2963b2a1863ca316f88850af3bb5a22b3ea31",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/query-runtime/binding.mjs",
+    "sha256": "c4da7dfa45cf46787f8eb56d0f478ec87d5197566078d21fb0b03885ae223155",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/query-runtime/builtin-summary-admission-control.mjs",
+    "sha256": "729b807b5fc0a1915524eb19111e4f9846e05be19c7e75338af462cd1a8fe006",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/query-runtime/fixture.mjs",
+    "sha256": "3d0eb09e835a431bd5f4753f15663dcbd3bf0c7119206c7d783507365b32d3e5",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/query-runtime/named-binding-control.mjs",
+    "sha256": "51311511bb4a6f007207799d4f0fdb7d91cf7839fb52977f60d41e3b4fe72e99",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/query-runtime/parameter-bridge-controls.mjs",
+    "sha256": "97c9cc4d2953f7470fa71456e08892959fa0d0740d39efce436115c12232ec50",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/query-runtime/scheduler-controls.mjs",
+    "sha256": "16ad3a69fce7cda4a66abd5952302b5813dc8d98e8de0170a0e2e7c3e0563d03",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/references.mjs",
+    "sha256": "89ec715ae25cfaed8cb70b89e2644dbfa70878ed0e2e4a867946a4da1a655c76",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/ui.mjs",
+    "sha256": "e8ad42e456dc9728ef0d5497d0b12f7818b0e9d5f2943f47fe3037118c95e04f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/ui/performance-fixtures.mjs",
+    "sha256": "79355be1047ae1164a0ce692746f9a699094f01ffe17b8f1a175fbac543409cd",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/architecture/suites/ui/performance-fixtures.test.mjs",
+    "sha256": "0aa903bc9e21ac28a551fe0da6bf99841a3786f2209c8ed0bc4e511185d60900",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/browser-engine.test.ts",
+    "sha256": "1a88340f83a97372b5c2861fb6306e77f4247a9e3b94af6d0c55cc45b3c0c734",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/bundle-contract.test.ts",
+    "sha256": "da96418a8a0d8e027a41535d42d8c53e55188289a158eb1b703deb399ab0ce6a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/command-signature.test.ts",
+    "sha256": "1c70102f435247b36a1f5e6100c09895d2390bd2dbd70fa1992be6944dd81b4a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/echarts-options.test.ts",
+    "sha256": "a6e2f24bbd3b739a4b79ff7278e7975142fa2fcc244a9a24e5124dbf24c22c3f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/echarts-update-policy.test.ts",
+    "sha256": "b13dfda12b3e19bc7ae871ceb0c802a9426ebd05bb354282b3504e60a0cb4267",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/fact-projection.test.ts",
+    "sha256": "d1842320ad511178a388caf2d84860aff0ea582cc193f2ea6a6e9acf18ed6564",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/sql-policy.test.ts",
+    "sha256": "e0d93bbdfde58af3a5a58a213d82e54432b762413c3a41d7bfb7bfa79ffdb93e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/test/store.test.ts",
+    "sha256": "4551d41bc5f077d901f7abecaa587d872706548e7ce4a84eb85ab9561f081788",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/analytics/tsconfig.json",
+    "sha256": "b94b2de56fcca86ef821ef48d7b7aee19f36052490d00fd7babc2d62c06e60db",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/bb-ui-reference/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/bb-ui-reference/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/ARCHITECTURE.md",
+    "sha256": "3bb4613c82dd5cbb3d6acb2e9a40b04bebea2cea586d1f003b2a9898abeeb8f6",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/IMPLEMENTATION.md",
+    "sha256": "41264e4541ee4d7b52dea55752cd2120634f35f526084a3a2e56231a07911790",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/LICENSE",
+    "sha256": "f30ba1b66519792e48d30d250fcc83fc54772a856a5589b7d809701eb5e9b756",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/README.md",
+    "sha256": "298d706ead91cd110ca9de7eed20bfc7ff4640eee6893b37ab38700a1936d4cc",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/app.css",
+    "sha256": "4e459f65f9cea8f5023900dbd1fedcbe107aec02d857e78073303f76450ace0c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/app.tsx",
+    "sha256": "d4c924e30b21e3f7c19f5873650afc595385df52ef4fa51dcafc791a885bfecf",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/canonical.ts",
+    "sha256": "13e91302bfc47cbc50b2c4702c39a04d8de434bc2c08c4bf7d3346f87f9cdfc1",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/model.ts",
+    "sha256": "2bf14447294cb12de8d0c3269da4f1bdf4698da647d8021a1b336566ee53351f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/package.json",
+    "sha256": "6f7ae3800cd16df4eba81465e4a538cffbca382aa11b9bfd51989294db55bfad",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/rpc-contract.ts",
+    "sha256": "04766a4b78d648680081b8e567daa2e8dcee473406d36580a9b0d165bb717383",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/server.ts",
+    "sha256": "81d76ad3f2644a8c10efcb8ab02f3ada67ccb3828874e449d3e0c1d3c2acebea",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/store.ts",
+    "sha256": "6ba1bb4f8ffe61f24093e9094fbbe45c5849fe35780b2c0b18ec3e1f281ff3ca",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/test/app.test.tsx",
+    "sha256": "51dc6e69ef924c5d5d0216803e8ab1f83c1485c34c23cb4389f86460a31cfd77",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/test/canonical.test.ts",
+    "sha256": "1e2725fc1e5c538514dff7aade8aa513ff673809e80154b68d3ecee762411de2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/test/server.test.ts",
+    "sha256": "4e372a8a7babf018b8e0ce1c6260ec9ddd99d95a7f84ad7fa74f7846366fa8c5",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/test/store.test.ts",
+    "sha256": "659577c713acde0fcdcdee88ea8ff92240fdc9d9141ec166f721f38c3b2b0817",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/cross-references/tsconfig.json",
+    "sha256": "6e5d8fbbbcef931f203bde658985cde3c336711ff06e880bbfd18ac03137a462",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/README.md",
+    "sha256": "349f3518023a2bf5f48dfbe832faa5871a5665eb3a020b1a70efa9028da6579a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/app.css",
+    "sha256": "3a7881578f85e2438e938afd19e6927a11b95eb320a52366b9dcaa72ce31375b",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/app.tsx",
+    "sha256": "9eabd5cd82eb05e31970acee3aabdfeec611c1442c1a912036f98a2c40da48fa",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/attachment-contract.ts",
+    "sha256": "8d4e3d6e3f3aa8104ec711c41c974545a5aa68a88c789c5505c1c6604f38b911",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/attachment-delivery.ts",
+    "sha256": "9e28db692af102184bc93d12f0fbdbc3b53ebc7983fb82e4524df4780b3f3841",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/attachments.tsx",
+    "sha256": "a52d63359b7b253fced30bf85a85f619847132aff4d3d1be5789ff15631f3657",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/monitor.ts",
+    "sha256": "442e05ab52b4f5f868b13dca945c21f136c4a4db16c55c976194f5796c02cf1f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/package.json",
+    "sha256": "5481c7c0e5489b792f7ea7211d8929d4d862f7748112f40d6b70049da9bc373c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/rpc-contract.ts",
+    "sha256": "9424454deef93ee6788921cc9cfc827e8e41402d4d531e9879491eaebea38ca1",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/server.ts",
+    "sha256": "c56abea1a205ae37c438a7988627dff9deab8dfe8754908364940794be175d4e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/store.ts",
+    "sha256": "4d9c5bd1ea162c83379163d2378221e358ad03bca1741cf1b51c54e53c60eb79",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/test/app.test.tsx",
+    "sha256": "2ea493b74562c3681b40fa35872d664285506f397a2ee0d180b6f014da6b64a6",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/test/attachment.test.ts",
+    "sha256": "3937439351d96ff995befdeff645b3e2e897fe12bb6a05d68d0d810beb58a70b",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/test/echarts-hover.test.ts",
+    "sha256": "e06f23883657f4c097d2527a5be5b82f9ed4e894b53040576a7a939d634aa8cc",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/machine-monitor/test/monitor.test.ts",
+    "sha256": "c31da6becd9cf9dfbb6f49f6544e7b38f7e3a15801d0056a1220e9b7d9137ba2",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/perspectives/README.md",
+    "sha256": "9abd77203de74eed28a80124a1559f31c76650a537bc4e0cbd5c35f6cf44601f",
+    "disposition": "published community implementation already supersedes old copies"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/perspectives/package.json",
+    "sha256": "c9247dccb8f333f2fee6fdc870c7f934b4e0d0d17e4b977597b6916dc6fbfe9c",
+    "disposition": "published community implementation already supersedes old copies"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/perspectives/server.ts",
+    "sha256": "fd3900840d283c9f6c136e8cca82cd2f3eec1a00332390d98921ac912fc8b082",
+    "disposition": "published community implementation already supersedes old copies"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/perspectives/test/server.test.ts",
+    "sha256": "e11cb5fa8075f422bf8c6239fba3d1d7c9dfdb776460970a528f049aa391466b",
+    "disposition": "published community implementation already supersedes old copies"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/perspectives/tsconfig.json",
+    "sha256": "b3b181e1aa2b43dc8fe28fd83577eb5409c0244e6808d829155d6ede991c4351",
+    "disposition": "published community implementation already supersedes old copies"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/perspectives/types/bb-plugin-sdk.d.ts",
+    "sha256": "9edf99ed6beabd434e472a3deca7baa9e8d4693885eb4eb99be910997a2d2bf0",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/restart-resume/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/README.md",
+    "sha256": "e2b139695172ac36435c81da667443762c49866953fd161d44dac19743f44e05",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/app.css",
+    "sha256": "e10619d0653721f758f07c1954e0391780f91b46bdaaac70583c56a730c52769",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/app.tsx",
+    "sha256": "dd18bb7bbfe9fdc9ffcb3559615af26f582d320be1608a445b799775e7f8dfc5",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/link-metadata.ts",
+    "sha256": "c00d7fce98cbb4ad96d63b840e4a7d1067db1eb14b8092db9b61ba26a5912a92",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/links.ts",
+    "sha256": "b5bfda37af9d219df57c48b45d5cf8fc42d94c60311cac393de8ce8d4ecec47c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/note-state.ts",
+    "sha256": "412731bd88fbc681c737abdf43b632c6e88a10084e530a981a6301d0a80d456a",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/notes.ts",
+    "sha256": "e50f235bb6abfe0a0062d872b81fa95b97b169e2f2d64667f3e7ee24d9213f06",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/package.json",
+    "sha256": "57dfae0cc427dc0c7aa204381a9fed737f0e6853c6b5a78e28c5d911753d178c",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/save-queue.ts",
+    "sha256": "f13e11b26e4f085465fc2789672816809e4169ece379170fad3e20415ae220a6",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/server.ts",
+    "sha256": "c6f4ce39c6fb53f9c141e2d36a8e50425d6fc2975aeb8dace7f58368c876e18f",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/test/link-metadata.test.ts",
+    "sha256": "a3bc86dee5ca937b762c497907c11e7becf3402bcb246d4439fa3ccf38fa6977",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/test/links.test.ts",
+    "sha256": "bfabf6f959a5aa50cb7f46576b26879055963e03ba99c9d9441b27a1eabc7a42",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/test/notes.test.ts",
+    "sha256": "6ebda8333c09ba66a5778cf0ab911e043ab154adf889d9a46283c604066c33a7",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/test/save-queue.test.ts",
+    "sha256": "012042c14d3621d11f1013f07b70addfef8dd884dac70efa038c4c4521992c0e",
+    "disposition": "selected feature source; validated in destination package"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/types/bb-plugin-sdk-app.d.ts",
+    "sha256": "bc88df49741d96e07d40311fbc0a183af7e7d144d913526caf28bead99f491ca",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "plugins/sticky-notes/types/bb-plugin-sdk.d.ts",
+    "sha256": "fa7015f7bd1da3fb6e32597af2bc11e4cdab4588ed6bcff1ebc3dac67d23a75c",
+    "disposition": "obsolete copied SDK declarations"
+  },
+  {
+    "repository": "community-plugins",
+    "path": "tools/bb-target-cli.mjs",
+    "sha256": "609ac0e74971bacaccc5191d7ee346051b2108acf1ecc6501caccc494f095f0a",
+    "disposition": "selected feature source; validated in destination package"
+  }
+]

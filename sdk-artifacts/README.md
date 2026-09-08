@@ -1,5 +1,15 @@
 # Shared fork plugin SDK
 
+The unpublished feature port also supplies
+`phosphorco-bb-identity-0.1.0.7964b11db94d.tgz` for community consumers of the
+shared identity package. Its SHA-256 is
+`7964b11db94d0d19e5631659c03368a98d57eb62284890f7fe62479d4520522e`;
+the adjacent provenance receipt identifies its organization source commit and
+package path. All nine public entry points were checked through the installed
+consumer package. This archive is a preview dependency, not a registry release.
+See [the port receipt](../preview/unpublished-port/README.md) for selected changes
+and validation.
+
 This directory holds the SDK package used by the isolated `bb-service` preview.
 It is a development dependency artifact, not a server deployment or npm release.
 Plugins import `@get-bb/plugin-sdk` and its public subpaths through ordinary
