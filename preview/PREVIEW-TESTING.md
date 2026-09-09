@@ -2,8 +2,9 @@
 
 This preview is for Cole to exercise the selected fork and organization plugins. Normal BB remains unchanged. All commands use the preview CLI wrapper and port 40888.
 
-Rosetta Slack follow-up: the queue-health repair now loads and reloads on the
-selected SDK 0.4.47. There are 48 enabled, running plugins. Slack credentials
+Rosetta Slack follow-up: the queue-health and conversation-request repairs now
+load and reload on the selected SDK 0.4.47; all 171 Rosetta tests pass. There are
+48 enabled, running plugins. Slack credentials
 remain unassigned, so real HTTP readiness correctly returns 503/unconfigured.
 See [the deployment candidate and cutover steps](rosetta-slack/README.md) for
 verification, source receipts, and the remaining normal-host activation.

@@ -12,11 +12,26 @@ immutable observations, bounds dispatch retries, separates queue workers, and
 exposes current queue and recovery failures through HTTP, CLI, and settings.
 The failure predates preview startup; preview had no Slack consumer.
 
+The subsequent apparent self-reply loop had a different cause: each old human
+message became a separate request even after the first recovery turn had seen
+the whole conversation. Later turns saw fresh Rosetta replies as context and
+were required to post another completion. No self-authored work items were
+found in the reported thread.
+
+The current candidate gives requests durable ownership of explicit, frozen
+human inputs. It groups pending updates from the same sender in the same
+conversation, preserves other senders' attribution, and treats fetched history
+as context rather than new instructions. Retries retain the original inputs.
+An agent can finish silently for acknowledgments or handoffs; direct questions
+and receipt tests still call for a reply. Verified self-authored events are also
+excluded at ingress. The reported live replay queue was contained separately;
+this source change is loaded only in preview.
+
 ## Verification
 
 - Frozen install, generated workspace sync, references, selected SDK types,
   aggregate organization typecheck, tests, and production build pass.
-- All 165 Rosetta tests pass, including full SDK factory registration/reload
+- All 171 Rosetta tests pass, including full SDK factory registration/reload
   and a real queue-worker regression with controlled Slack/BB responses.
 - The affected identity browser fixture passes single and paired component
   checks. The fixture supplies both selected SDK original-component props and
@@ -30,9 +45,12 @@ The failure predates preview startup; preview had no Slack consumer.
   no retained errors or queued work.
 
 The curated [runtime receipt](runtime.json) records endpoint results and bundle
-hashes. [verification.json](verification.json) records selected commits and
-check results. Raw check logs remain in the originating BB thread storage,
-`thr_95n9xtuqrf/deploy-candidate`; they are evidence, not deployment sources.
+hashes. [verification.json](verification.json) records the initial queue repair;
+[request-lifecycle-verification.json](request-lifecycle-verification.json)
+records the current request model, selected plugin commit, and complete checks.
+Raw check logs remain in the originating BB thread storage under
+`thr_95n9xtuqrf/deploy-candidate` and `thr_95n9xtuqrf/replay-loop`; they are
+evidence, not deployment sources.
 
 Recheck the isolated preview from this workspace:
 
@@ -73,6 +91,8 @@ At cutover:
    Operator-quarantined work is retained with an `operator-quarantine:<work-id>`
    metadata receipt. Inspect those records explicitly; they predate the new
    retry scheduler and must not be inferred from retry counts alone.
+   Use `bb rosetta-slack requests` to inspect request ownership and grouped input
+   counts. Health reports grouped inputs and silent completions separately.
 4. Observe queued work advancing and inspect delivered Slack timestamps. A new
    human test mention can verify ingress through response after cutover. No live
    Slack send or reassignment of production credentials was performed here.
