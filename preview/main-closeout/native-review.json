@@ -1,0 +1,18 @@
+{
+  "sourceTree": "8b7b8f22cf42a166d1cf3c95605feb78ae6362c9",
+  "reviewedFiles": 27,
+  "checks": {
+    "databaseTests": 34,
+    "serverTests": 53,
+    "appTests": 5,
+    "threadViewTests": 16,
+    "typecheck": "Six affected packages, ten Turbo tasks passed"
+  },
+  "failFirst": "Malformed unknown-key envelope failed before strict-schema correction; original A/B overwrite was source-confirmed, not executed before edits.",
+  "limits": [
+    "SQLite reopen is a fresh reader over serialized state, not a live host restart.",
+    "Legacy author arrays remain readable; old runtimes cannot read new author/editor envelopes.",
+    "Controlled admitted-person tests do not claim real two-browser authentication."
+  ],
+  "reviewerReceiptDirectory": "/home/ubuntu/.bb/thread-storage/thr_hb39hm9bj6"
+}

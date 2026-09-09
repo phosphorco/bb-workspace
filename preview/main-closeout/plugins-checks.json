@@ -1,0 +1,97 @@
+{
+  "repository": "plugins",
+  "head": "81157cc34fb6d6f39687b399e6574fa7391607c8",
+  "node": "v22.21.1",
+  "checks": [
+    {
+      "command": [
+        "bun",
+        "install",
+        "--frozen-lockfile"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.63,
+      "log": "plugins-0.log"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "references:sync"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.12,
+      "log": "plugins-1.log"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "sync:check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.09,
+      "log": "plugins-2.log"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "references:check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.1,
+      "log": "plugins-3.log"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "sdk-types:check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.83,
+      "log": "plugins-4.log"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 20.53,
+      "log": "plugins-5.log"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 22.69,
+      "log": "plugins-6.log"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.73,
+      "log": "plugins-7.log"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "sdk-types:check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.22,
+      "log": "plugins-8.log"
+    }
+  ]
+}

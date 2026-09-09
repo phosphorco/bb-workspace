@@ -1,0 +1,24 @@
+{
+  "source": "/home/ubuntu/bb/plans",
+  "destination": "/home/ubuntu/bb-service/plans",
+  "copiedFileSha256BeforeTargetReadmeUpdate": {
+    "identity-experience.plan.pkl": "6e5dfcbb4f77837ab69e4aeb85f9bf1ce2d2dc526f96df251da1d795b31315c2",
+    "identity-experience.ledger.jsonl": "599d7ea88e57d50c42d54e089d909fc21f5636962dbdc2211df0014fc965d712",
+    "identity-experience/crosswalk.md": "219198d4f5fa29bb4d9ca5b2f140e990b8bfae8c5dd9dffb1d326cc12e8f53a3",
+    "identity-experience/README.md": "6c3fea3adc7e1b24463fd1458eb5e856ecd770420cb608baab511c91f464f5be",
+    "identity-experience/briefs/plugins.md": "cca7fd8052143fd5172d29aeaee3aa28a92b32842a059e0150884ff98118c26b",
+    "identity-experience/briefs/native.md": "e988fc1ce99e0061f8cf10e5a757b9b2e9eb5e7e4bfdf4592a6dab01a10bd711",
+    "identity-experience/briefs/common.md": "1dc5207e4a747da569c67f0ac683b1972fb0ae06e9469956df3cc8da64a67968",
+    "identity-experience/briefs/release.md": "b60bddf98b816c5bf5ced65f9bf7c3c05823bd470fd08e2387a0472841473c4a",
+    "identity-experience/contracts/plugins.md": "f30668494160bf5b8714282cd31eb49ca1bcb996065ca866e77efefb01f790e5",
+    "identity-experience/contracts/native.md": "ed9188aed3c6e373e34fea68c294f007bfb216df34c12bbb7fae281162c36c7a",
+    "identity-experience/contracts/authority-boundary.md": "fa16023732f32f2ee16cb5428f1c18397e0d3474c810c567414756e478bf408c",
+    "identity-experience/evidence/plugins.md": "44527fa87487d5182fc3e5fbb1de5435d5cd4459997547cd66d91d6ffddc6712",
+    "identity-experience/evidence/native.md": "cddcfad8048c11ec869b49c35d7344d7ff5cf188d96c055535949ac8d7282091",
+    "identity-experience/evidence/release.md": "0f0f72ce59d03cdfb3296353df46fa78d347421ecea6403aa07de8e5424efdf7",
+    "identity-experience/contracts/plugin-fixtures/distribution-consumers.md": "abd96ac2b040fb2cba41b50606a438a8a9d31a78265d04e1c757ed3b4acb8fd7",
+    "identity-experience/contracts/native-fixtures/attribution-contract.md": "2603f64cbac69c493ab79f0c5840408baaf243fef94e005140d8f3d3c386255d",
+    "identity-experience/contracts/native-fixtures/attribution-cases.json": "58768b75215795e98b55acb05d0cefeb2ffd707142f05c80a5e19adada4913cb",
+    "identity-experience/contracts/native-fixtures/appearance-presence-cases.json": "ed48c97c8417671a2cb6ff46fe16ada86a580f5ff9e90d8325436c0a6ae94767"
+  }
+}
