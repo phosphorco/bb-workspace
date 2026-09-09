@@ -61,11 +61,18 @@ At cutover:
 2. Start the selected compatible composition using the deployment's retained
    state and credentials. Ensure exactly one runtime owns the Slack app.
    The schema migrations run on plugin load.
+   Verify the configured agent provider can authenticate, too: a connected
+   Slack transport cannot compensate for workers failing before their first
+   turn. The normal bridge was switched to Codex on September 9 after its
+   Claude workers reported an expired, unrefreshable OAuth session.
 3. Check `bb rosetta-slack health` and the settings queue diagnostics. Readiness
    may remain degraded while old requests, unavailable BB workers, or dead
    letters need attention. Inspect the work IDs and remote acceptance before
    retrying anything. The historical missing-column delivery failure does not
    by itself prove that Slack never accepted that message.
+   Operator-quarantined work is retained with an `operator-quarantine:<work-id>`
+   metadata receipt. Inspect those records explicitly; they predate the new
+   retry scheduler and must not be inferred from retry counts alone.
 4. Observe queued work advancing and inspect delivered Slack timestamps. A new
    human test mention can verify ingress through response after cutover. No live
    Slack send or reassignment of production credentials was performed here.
