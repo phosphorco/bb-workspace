@@ -1,10 +1,10 @@
 {
-  "purpose": "Cole-authorized isolated Tailnet identity test; not normal promotion",
-  "coreTree": "3a13415c671958d47c96ff283f55095ec9bd6358",
+  "purpose": "Current selected BB composition in the Cole-authorized isolated service; source published to main, not a normal-host runtime promotion",
+  "coreTree": "af159af6746af0c4b3073b25a08ba1792bfa6a4c",
   "repos": {
-    "fork": "96f4d7cc954d0b1fd07d4c7135500e96818ffd32",
-    "plugins": "90f91e148a922e5a53e014b05eae164b109aa4bb",
-    "community-plugins": "9ec81c2120760f3108be84f676a5a81cdaca2214"
+    "fork": "ef387cd8ad60abd386db38d13f4ca46d543c3969",
+    "plugins": "81157cc34fb6d6f39687b399e6574fa7391607c8",
+    "community-plugins": "31498646dbd7d6ce08ce6fabe0488a444cbc589d"
   },
   "dataDir": "/home/ubuntu/.local/share/bb-service-preview",
   "serverPort": 40886,
@@ -159,6 +159,16 @@
         "plugins": "90f91e148a922e5a53e014b05eae164b109aa4bb",
         "community-plugins": "9ec81c2120760f3108be84f676a5a81cdaca2214"
       }
+    },
+    "authorshipAndDirectory": {
+      "patches": [
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "receipt": "preview/main-closeout/closeout.json"
     }
   },
   "initialRepos": {
@@ -166,5 +176,8 @@
     "plugins": "1bce7bbb7a84a18971578679aaca58fecfbaa991",
     "community-plugins": "7a28e61f1816499cf6b9c6faca4a1f7ab4662e18"
   },
-  "reviewBranch": "bb/sdk-sharing-preview-thr_csw7br3yff"
+  "reviewBranch": "main",
+  "historicalReviewBranch": "bb/sdk-sharing-preview-thr_csw7br3yff",
+  "currentVerification": "preview/main-closeout/closeout.json",
+  "historicalReceipts": "localRepairs and initialRepos retain earlier checkpoints; current source and runtime are described by currentVerification."
 }

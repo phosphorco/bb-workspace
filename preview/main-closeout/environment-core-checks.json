@@ -1,0 +1,86 @@
+{
+  "sourceTree": "46f03446a9ad7ec54926371e57cb4c00ae5a4cfc",
+  "node": "v22.21.1",
+  "packages": [
+    "@bb/server",
+    "@bb/app",
+    "@bb/cli",
+    "@bb/db",
+    "@bb/domain",
+    "@bb/thread-view",
+    "@bb/server-contract",
+    "@bb/sdk",
+    "@get-bb/plugin-sdk",
+    "@bb/host-daemon"
+  ],
+  "threadManagerFixture": "plugins/plugins/thread-manager",
+  "checks": [
+    {
+      "command": [
+        "pnpm",
+        "install",
+        "--frozen-lockfile"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.17,
+      "log": "environment-core-0.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "typecheck",
+        "--filter=@bb/server",
+        "--filter=@bb/app",
+        "--filter=@bb/cli",
+        "--filter=@bb/db",
+        "--filter=@bb/domain",
+        "--filter=@bb/thread-view",
+        "--filter=@bb/server-contract",
+        "--filter=@bb/sdk",
+        "--filter=@get-bb/plugin-sdk",
+        "--filter=@bb/host-daemon",
+        "--continue=always"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.47,
+      "log": "environment-core-1.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "test",
+        "--filter=@bb/server",
+        "--filter=@bb/app",
+        "--filter=@bb/cli",
+        "--filter=@bb/db",
+        "--filter=@bb/domain",
+        "--filter=@bb/thread-view",
+        "--filter=@bb/server-contract",
+        "--filter=@bb/sdk",
+        "--filter=@get-bb/plugin-sdk",
+        "--filter=@bb/host-daemon",
+        "--concurrency=2",
+        "--continue=always"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 135.69,
+      "log": "environment-core-2.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 18.59,
+      "log": "environment-core-3.log"
+    }
+  ],
+  "disposition": "Typecheck and build passed; complete suites found stale Identity palette count, Turbo-stripped fixture root, and unrelated /tmp/.git ancestor. Palette assertion updated; explicit test environment now preserves fixture root and uses private /var/tmp fixtures. All three focused suites passed unchanged production behavior."
+}

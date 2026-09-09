@@ -30,3 +30,32 @@ preview restart use the existing bb-service checkout, ports and state. Source
 pushes do not change the other host's deployment or claim its runtime was
 verified. The final composition receipt will identify pushed child commits,
 materialized source tree, builds and local runtime checks.
+
+`check-core.py` verifies the selected server, app, CLI, database, domain,
+thread-view, contracts, SDK and host-daemon packages, then runs the production
+build. The initial run built successfully but exposed two stale public-contract
+expectations: the existing identity method and optional author/editor metadata.
+Test-only patch 0019 corrects those explicit expectations; it does not loosen
+validation. The subsequent receipt records the repeated matrix.
+
+`seal-patch.py` exports only declared source paths through a temporary Git index;
+it does not change the materialization's HEAD or shared index. Full patch replay
+and a separate whole-tree comparison verify that the built source matches the
+recorded result tree. Patch hashes and per-file hashes are retained alongside
+the reviewed native test summary.
+
+`check-runtime.py` checks the restarted preview's health, identity route, all
+previously enabled plugins, built artifact hashes, and the unchanged normal
+service PID. The browser harness in `preview/native-identity/browser.mjs` covers
+phone/desktop settings layout and explicitly separates live connection state
+from controlled ready-state presentation. Neither claims real two-person edit
+acceptance or personal theme storage.
+
+The complete matrix also exposed an omitted CLI skill index entry and a stale
+palette count from the identity settings addition. Patches 0020 and 0021 cover
+those discoverability expectations. Test execution uses Turbo's explicit loose
+environment mode to preserve `BB_THREAD_MANAGER_PLUGIN_ROOT`, plus a private
+`TMPDIR` beneath `/var/tmp`: this host has an unrelated `/tmp/.git` marker that
+changes ancestor-discovery fixtures. Nothing under `/tmp/.git` was changed.
+The three affected focused suites passed with these corrections before the
+final aggregate rerun. `check-environment.py` reproduces that bounded check.

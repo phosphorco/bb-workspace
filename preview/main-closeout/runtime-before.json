@@ -1,0 +1,89 @@
+{
+  "services": {
+    "bb.service": {
+      "MainPID": "606208",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "bb-service-preview.service": {
+      "MainPID": "208908",
+      "ActiveState": "active",
+      "SubState": "running"
+    }
+  },
+  "previewThreadStatuses": [
+    {
+      "id": "thr_3enappe4kn",
+      "status": "idle"
+    },
+    {
+      "id": "thr_gk6ackcjc7",
+      "status": "idle"
+    },
+    {
+      "id": "thr_8k2ydmnk35",
+      "status": "idle"
+    },
+    {
+      "id": "thr_d7ij7g3zz4",
+      "status": "idle"
+    },
+    {
+      "id": "thr_3zp47wf6r7",
+      "status": "idle"
+    },
+    {
+      "id": "thr_n8gus58sde",
+      "status": "idle"
+    }
+  ],
+  "enabledPluginIds": [
+    "agent-connect",
+    "agentation",
+    "analytics",
+    "ask-user-question",
+    "automations",
+    "background-jobs",
+    "bb-bug-reporter",
+    "bb-ui-reference",
+    "btw",
+    "concurrency-limit",
+    "custom-instructions",
+    "diffs",
+    "espresso-theme",
+    "future-threads",
+    "github",
+    "identity-boundaries",
+    "inline-vis",
+    "machine-monitor",
+    "monaco-editor",
+    "notifications",
+    "pdf-preview",
+    "perspectives",
+    "plan-graph",
+    "plan-portfolio",
+    "plugin-api-docs",
+    "plugin-api-tester",
+    "provider-acp",
+    "provider-claude-code",
+    "provider-codex",
+    "provider-pi",
+    "provider-retry",
+    "provider-usage",
+    "push-notifications",
+    "restart-resume",
+    "scheduled-send",
+    "secrets",
+    "side-chat",
+    "simple-notes",
+    "sticky-notes",
+    "subscription-router",
+    "tasks",
+    "theme-preview",
+    "thread-links",
+    "thread-manager",
+    "thread-peek",
+    "thread-progress",
+    "workflows"
+  ]
+}

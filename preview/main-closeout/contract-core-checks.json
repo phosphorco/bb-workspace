@@ -1,0 +1,84 @@
+{
+  "sourceTree": "8984712c0bc8b00422d489eb57c6d0a3128cf98d",
+  "node": "v22.21.1",
+  "packages": [
+    "@bb/server",
+    "@bb/app",
+    "@bb/cli",
+    "@bb/db",
+    "@bb/domain",
+    "@bb/thread-view",
+    "@bb/server-contract",
+    "@bb/sdk",
+    "@get-bb/plugin-sdk",
+    "@bb/host-daemon"
+  ],
+  "threadManagerFixture": "plugins/plugins/thread-manager",
+  "checks": [
+    {
+      "command": [
+        "pnpm",
+        "install",
+        "--frozen-lockfile"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.87,
+      "log": "contract-core-0.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "typecheck",
+        "--filter=@bb/server",
+        "--filter=@bb/app",
+        "--filter=@bb/cli",
+        "--filter=@bb/db",
+        "--filter=@bb/domain",
+        "--filter=@bb/thread-view",
+        "--filter=@bb/server-contract",
+        "--filter=@bb/sdk",
+        "--filter=@get-bb/plugin-sdk",
+        "--filter=@bb/host-daemon"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 11.18,
+      "log": "contract-core-1.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "test",
+        "--filter=@bb/server",
+        "--filter=@bb/app",
+        "--filter=@bb/cli",
+        "--filter=@bb/db",
+        "--filter=@bb/domain",
+        "--filter=@bb/thread-view",
+        "--filter=@bb/server-contract",
+        "--filter=@bb/sdk",
+        "--filter=@get-bb/plugin-sdk",
+        "--filter=@bb/host-daemon",
+        "--concurrency=2"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 15.74,
+      "log": "contract-core-2.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 43.55,
+      "log": "contract-core-3.log"
+    }
+  ],
+  "disposition": "Types and production build passed; CLI skill command index omitted the existing p6r-identity command. Corrected in documentation patch0020. Rerun continues all suites to report every remaining failure."
+}

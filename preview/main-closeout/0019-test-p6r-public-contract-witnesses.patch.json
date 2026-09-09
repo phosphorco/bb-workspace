@@ -1,0 +1,14 @@
+{
+  "baseTree": "8b7b8f22cf42a166d1cf3c95605feb78ae6362c9",
+  "resultTree": "8984712c0bc8b00422d489eb57c6d0a3128cf98d",
+  "patch": "0019-test-p6r-public-contract-witnesses.patch",
+  "patchSha256": "634e7285a965cd94e9c7e15e8a318e2de76ddb4c977fd2bf35ed80989c199eb5",
+  "paths": [
+    "packages/sdk/test/public-types.test.ts",
+    "packages/server-contract/test/contract.test.ts"
+  ],
+  "sourceSha256": {
+    "packages/sdk/test/public-types.test.ts": "3c9de1e08e556c9db20803ff4bdda28a086566032736261810dfd81d2985d06f",
+    "packages/server-contract/test/contract.test.ts": "662c30a90555a54cb22b80ae660b7ed7fd6b74ad95e5a401a0426bbe2fa18b81"
+  }
+}
