@@ -39,22 +39,21 @@ the `ubuntu` user). The default BB service and CLI run from
 - Keep `~/.bb/` as operator-owned runtime state. It is not source and must not
   be committed here.
 
-## Staging and normal roles
+## Deployment roles
 
-`bb-machine` is the staging workspace. Its three top-level child repositories
-are ordinary editable checkouts, normally on `main`; dirty changes and feature
-branches are allowed and must remain visible in `bin/status`. Build and reload
-there before promotion. Staging does not claim `svc:bb` while Rosetta is normal.
+`bb-machine` is an independent normal deployment on the evolving workspace
+`main` branch. Its canonical workspace remains directly editable, dirty state
+must remain visible in `bin/status`, and its dedicated ingress is
+`svc:bb-next`. It does not claim or modify Rosetta's `svc:bb` deployment.
 
-The normal host checks out an exact committed `bb-workspace` revision. Its
-top-level submodule HEADs must equal that workspace commit's gitlinks. A dirty
-tree must be reported, never erased. Normal remains available while staging is
-being edited or broken.
+A frozen normal host instead checks out an exact committed `bb-workspace`
+revision. Its top-level submodule HEADs must equal that workspace commit's
+gitlinks. A dirty tree must be reported, never erased.
 
-Promotion means: verify the staging behavior, commit and push every selected
-child change, update the three workspace gitlinks to the tested commits, commit
-and push this repository, then advance the single normal-host workspace pin in
-`rosetta-machine`.
+For either model, verify the combined behavior, commit and push every selected
+child change, then update and push the three workspace gitlinks. Evolving hosts
+advance their declared branch; only explicitly frozen hosts advance a
+`MACHINE_BB_WORKSPACE_REV` pin in `rosetta-machine`.
 
 ## Agent working directory
 
@@ -71,8 +70,8 @@ unrelated worktrees as runtime or plugin sources.
 
 Run the checks relevant to every changed child before handoff.
 
-- Workspace composition: `./bin/check --role staging` or
-  `./bin/check --role normal`
+- Workspace composition: `./bin/check --role normal` on `bb-machine`; use
+  `--role staging` only on a host explicitly assigned that role
 - Fork: follow `fork/README.md`; verify and materialize through its scripts,
   then run the BB install, typecheck, test, and build commands in
   `fork/build/bb/`.
@@ -83,14 +82,14 @@ Run the checks relevant to every changed child before handoff.
   `npm run typecheck`, and `npm run build`.
 
 Do not advance this repository's gitlinks until the exact selected child
-commits have been pushed and the combined staging runtime has been exercised.
+commits have been pushed and the combined runtime has been exercised.
 
-## Cole-authorized isolated service preview
+## Authorized implementation checkout on Rosetta
 
-Cole explicitly requested this separate `/home/ubuntu/bb-service` workspace for
-a Tailnet identity test on new ports. It is a temporary preview, not the normal
-runtime. Use only this workspace, its PREVIEW.json pins, and separate
-`/home/ubuntu/.local/share/bb-service-preview` state. Keep `/home/ubuntu/bb`,
-`bb.service`, `svc:bb`, existing proof ports/state and all normal credentials
-unchanged. This scoped instruction supersedes the original single-folder rule
-for this preview only; it does not authorize normal promotion.
+Cole selected `/home/ubuntu/bb-service` as the implementation home for the
+current identity campaign and its isolated preview. Work there in place and
+preserve the existing `/home/ubuntu/bb` source, `bb.service`, `svc:bb`, proof
+runtime, and normal credentials. The preview uses only its existing ports and
+`/home/ubuntu/.local/share/bb-service-preview` state. This explicit local
+exception does not change the canonical path or deployment policy on
+`bb-machine`; deploying a normal host is a separate action.
