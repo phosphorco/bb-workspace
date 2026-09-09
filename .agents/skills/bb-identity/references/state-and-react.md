@@ -25,7 +25,7 @@ the default-user host. View-as changes the subject without impersonation.
 
 Recovery actions capture the exact binding, owner session, and conflict token
 or checkpoint revision when presented. Check that same scope after awaits.
-`reconnect(expectedOwnerSession)` verifies authority, reconciles any original
+`reconnect(expectedOwnerSession)` checks the captured owner, reconciles any original
 uncertain operation, and reloads; it is not `client.refresh()` or a new save.
 Display pending/error, not “Saved” merely because reconnect returns success.
 The controller may resume ordinary pending edits after recovery.
@@ -37,7 +37,7 @@ Initialization adopts an existing winner; keep a losing local candidate
 available for explicit recovery instead of silently replacing its provenance.
 
 Draft storage must work after detach/network failure without acquiring new
-server authority. Persist the full `PendingDraft`, including base, desired,
+server identity resolution. Persist the full `PendingDraft`, including base, desired,
 generation and exact in-flight mutation. Atomic revision-conditional deletion
 cannot erase a newer checkpoint. Enumerate by full address plus actual actor
 across old controller sessions, without automatically choosing one or expiring it.

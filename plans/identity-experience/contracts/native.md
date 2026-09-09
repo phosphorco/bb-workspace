@@ -1,10 +1,20 @@
 # Native identity experience contract
 
+> Policy update — 2026-09-09: the approved [Identities and multiplayer ADR](../../../docs/adrs/2026-09-identities-and-multiplayer.md)
+> governs this trusted shared deployment. Use verified people when available,
+> applicable carried attribution next, and a stable machine actor otherwise;
+> missing or failed person verification must not block ordinary operations.
+> Never relabel fallback as a verified person or redirect pending personal-state
+> writes to another owner. Independent access checks and data validation remain.
+> Earlier rejection requirements below are superseded; versioned API descriptions
+> and test receipts remain historical evidence, not proof of ADR implementation.
+
+
 Proposed contract for `native-contract` in [the campaign graph](../../identity-experience.plan.pkl). Root adjudicates with the plugins coordinator. This document specifies future behavior; proposed shapes and operations below are not existing public APIs or implementation grants. Root alone owns the ledger and exact future grants. Read together with [the crosswalk](../crosswalk.md) and [reconciliation evidence](../evidence/native.md).
 
 ## Accepted boundary and inputs
 
-Preserve native patch 0016: provider-neutral Identity settings, captured native request admission, immutable stored sender snapshots on ordinary sends, and the existing command dispatcher. Correct its creator/editor gaps rather than introduce a second sender implementation. No claimed identity fallback; no core import of `@phosphorco/bb-identity` or named providers. Snapshot presentation explains a historical actor; it is never current write authority. Core owns native atomic acceptance; plugins own provider verification and feature policy; the shared package adapts the host protocol.
+Preserve native patch 0016: provider-neutral Identity settings, captured native request admission, immutable stored sender snapshots on ordinary sends, and the existing command dispatcher. Correct its creator/editor gaps rather than introduce a second sender implementation. Use machine fallback, never a fabricated verified person; no core import of `@phosphorco/bb-identity` or named providers. Snapshot presentation explains a historical actor; it is never current write authority. Core owns native atomic acceptance; plugins own provider verification and feature policy; the shared package adapts the host protocol.
 
 Source observations are from comparison-only `/home/ubuntu/bb-service/fork` at `ad974140351d64e6ffc7df47005c7ce110d1dafa`. Materialized source and earlier controlled tests are not a fresh selected-artifact or live proof. Implementation must revalidate these paths after `source-ready`.
 
@@ -61,7 +71,8 @@ Concurrency and failures:
 
 ## Provider-neutral self presentation
 
-Existing `sdk.system.p6rIdentity()` and `/settings/p6rIdentity` remain the self-status source. Ready/loading/unconfigured/unauthenticated/unavailable are distinct. Refresh hides a previous verified person until current evidence is known. Configured rejection does not become ordinary single-user success.
+Existing `sdk.system.p6rIdentity()` and `/settings/p6rIdentity` remain the self-status source. Ready/loading/unconfigured/unauthenticated/unavailable are distinct. Refresh hides a previous verified person until current evidence is known. Configured rejection must resolve to explicitly labeled carried or machine
+attribution, never an impersonated person. Ordinary operations continue.
 
 Agreed with plugins coordinator: propose an optional descriptor containing a bounded display label and supported plugin settings destination. Existing registration ownership supplies routing identity; do not duplicate a provider namespace in this payload. No existing friendly descriptor API was established during inspection. This is a semantic extension for review, not a fabricated method. Core validates destination against the installed plugin/settings registry; it is not an arbitrary URL. Labels and configuration belong to the plugin, availability to host observation, and assurance to admitted identity. Registration staged/active/retired, current-session ready/unauthenticated/unavailable, and optional directory readiness remain distinct; active registration does not prove the current person. No secrets, ingress headers or provider credential schema enter the DTO. Missing descriptor leaves current neutral self-status behavior; a second provider must work without changes to the core page. Plugin reload/removal retires old descriptor generation and stale destinations.
 

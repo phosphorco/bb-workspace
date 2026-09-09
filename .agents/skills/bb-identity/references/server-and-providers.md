@@ -6,8 +6,10 @@ and exact declarations in [bb.d.ts](../../../../plugins/packages/bb-identity/bb.
 Create one `bindBbIdentity(bb)` per plugin factory. Handle the factory Result;
 register identity-dependent RPCs and resources through that binding. Keep the binding tied
 to plugin disposal. `binding.rpc.register` gives handlers a `BbInvocation`;
-open `invocation.person()` only for person work and dispose the opened request.
-Do not obtain an ambient person for background work or fabricate a scope.
+Open `invocation.person()` for actor-scoped work and dispose the opened request.
+The legacy method name can return a machine actor; inspect the actor kind when
+person-specific behavior is required. Background work uses the shared machine
+fallback, never an invented person or fabricated scope.
 
 For personal resources register `policy: {kind: 'self-only'}` for writes and,
 where preview is intended, `readPolicy: {kind: 'collaborators'}` for reads.
@@ -38,10 +40,11 @@ The `/bb` entry registers native RPC/state routes and exposes `http.route` for
 feature HTTP APIs. Its handler receives the SDK HTTP context and a package-issued
 invocation. Interactive routes require local host auth; external routes must
 validate their credential before effects. Keep streamed work inside the response
-lifetime: completion, cancellation, abort and disposal release its authority.
+lifetime: completion, cancellation, abort and disposal release its resources.
 Identity fetch route mappings are explicit; registration does not infer them.
 Use `background(invocation => endpoint.search/profiles/participants(...))` for
-nonperson evidence reads. Background does not open a person or authorize writes.
+nonperson evidence reads. Background attribution does not imply a person;
+owner and route policies still govern writes.
 
 Provider wrapper objects may be recreated on every enumeration. Fence async reads
 by the declared provider generation, not object identity. Direct profile lookups
@@ -53,9 +56,10 @@ them at generation changes; late results cannot repopulate a retired generation.
 For feature-owned durable writes outside a state resource, retain the issued
 write target across awaited preparation and call `binding.server.commits.validate`
 with the exact owner/session/address scope inside the synchronous transaction.
-An earlier successful `target()` call does not authorize a later commit after
-identity invalidation. The validator is the same package-issued target registry
-used by state services; a copied target or client-supplied actor is not accepted.
+A later commit must still match the captured namespace, actor, owner and current
+lifecycle. An equivalent copied target does not fail solely because it lacks
+private issuance provenance; trusted-process identity forgery is not a supported
+security boundary.
 
 A baseline SDK declaration may omit the optional enhanced protocol while the
 candidate host provides it at runtime. Feature code passes its public `bb` to
@@ -65,11 +69,11 @@ SDK witness before calling this a capability gap. A true baseline without the
 protocol cannot activate an IdP; report that unsupported provider boundary while
 keeping ordinary portable features usable.
 
-Credential-only service calls are a separate authority domain. Background
+Credential-only service calls retain their independent integration access checks. Background
 delivery may use ordinary SDK RPC with feature-issued route credentials; the
 receiving handler validates them before mutation and never opens an ambient
-person. Do not force this work through PersonRequest or invent a background
-actor. Actor-scoped nested calls use PersonRequest.callPlugin so their original
+person. Use the common machine fallback for attribution; do not invent a background
+person or duplicate actor resolution in the feature. Actor-scoped nested calls use PersonRequest.callPlugin so their original
 request and destination generation remain fenced.
 
 A feature Codec can adapt its own JSON schema with decode returning validated

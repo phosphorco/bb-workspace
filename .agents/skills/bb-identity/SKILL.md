@@ -7,11 +7,12 @@ description: Build, migrate, or review BB plugins using the shared bb-identity p
 
 Use `@phosphorco/bb-identity` as the shared identity and synchronization layer.
 Features own their data model, storage, credential verification, and product UI.
-Core owns admitted request authority and atomic native attribution. This is a
-high-trust shared workspace, not a private multi-tenant authorization model.
+Core owns best-effort request attribution and atomic native history. Follow the
+[approved identities ADR](../../../docs/adrs/2026-09-identities-and-multiplayer.md):
+this is a trusted shared workspace, with identity used for attribution.
 
-Optimize core changes for upstream synchronization: keep authority and lifecycle
-implementation behind explicit plugin-host hooks. Plugin adoption does not by
+Optimize core changes for upstream synchronization: remove person-admission
+machinery and keep attribution and necessary lifecycle handling behind shared hooks. Plugin adoption does not by
 itself require native app attribution, presence, provider formatting, or new
 native UI. Treat those as separately selected product work. Retain acceptance
 receipts and history when the public package promises them; do not shrink the
@@ -40,12 +41,19 @@ and executable witness before teaching consumers a workaround.
 
 ## Rules that apply across plugins
 
+Identity forgery resistance is explicitly unsupported here. Do not add or retain
+a check solely to prevent trusted code from fabricating attribution. Every
+retained check must address a concrete attribution, lifecycle, data or owner-
+consistency failure; history preservation is product behavior, not tamper proof.
+
 - Import public package subpaths. A feature supplies `bb` to `bindBbIdentity`;
   it does not assemble raw adapters, scopes, route tables, or provider RPCs.
 - Distinguish actual actor, viewed subject, and mutation target. Target selection
   is data, not authority. Capture the issued owner/session token for delayed UI.
-- Capability absence selects a stable host-scoped default user. Configured
-  identity failure suspends work; it never silently redirects to that default.
+- In this deployment, use verified people, applicable carried context, then a
+  stable machine actor. Provider failure does not suspend ordinary new work.
+  Portable interactive baseline behavior retains its host-scoped default user.
+  Pending writes retain their captured owner; fallback never retargets them.
 - Use the package controller and binding for identity-scoped synchronization.
   Do not add a parallel load/save effect, polling feed, or per-feature controller.
 - Persist immutable operations and reconcile the same operation after uncertainty.

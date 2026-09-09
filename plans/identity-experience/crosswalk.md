@@ -1,10 +1,20 @@
 # Master-plan reconciliation
 
+> Policy update — 2026-09-09: the approved [Identities and multiplayer ADR](../../docs/adrs/2026-09-identities-and-multiplayer.md)
+> governs this trusted shared deployment. Use verified people when available,
+> applicable carried attribution next, and a stable machine actor otherwise;
+> missing or failed person verification must not block ordinary operations.
+> Never relabel fallback as a verified person or redirect pending personal-state
+> writes to another owner. Independent access checks and data validation remain.
+> Earlier rejection requirements below are superseded; versioned API descriptions
+> and test receipts remain historical evidence, not proof of ADR implementation.
+
+
 This is the acceptance map for the Pkl graph, not a second execution ledger. Source observations are dated 2026-09-08 and must be refreshed after source selection. The lane evidence files refine the facts below; the sibling ledger records acceptance. `fork/plans/bb-fork-master-plan.md` remains the governing product rationale.
 
 | Obligation / decision | Current evidence and correction | Remaining graph obligations |
 | --- | --- | --- |
-| Master §3.1, §5.1: stable identity, honest origin | Selected provider registry and bindings enforce opaque issuer/subject identities and lifetime. Historical unknown, agent/system and external author must remain distinct. No claimed identity mode. | `native-contract`, `plugin-contract`, `native-authorship`, `consumer-parity`, `human-native-proof` |
+| Master §3.1, §5.1: stable identity, honest origin | Selected provider registry and bindings enforce opaque issuer/subject identities and lifetime. Historical unknown, agent/system and external author must remain distinct. Machine fallback is explicit; it does not claim person verification. | `native-contract`, `plugin-contract`, `native-authorship`, `consumer-parity`, `human-native-proof` |
 | §5.2: resolve at correct authenticated boundary | Native0016 adds captured admission and same-process validity at native writes; capability routes and external operations remain distinct. CLI/tool/background transport policy still needs full acceptance. | `native-contract`, `native-instruments`, `native-authorship`, `human-native-proof` |
 | §5.2: generation, socket and request lifetime | Existing provider/invocation contracts have retirement, abort, expiry and failure checks. Full current-host reload/re-authentication evidence is narrower than source coverage. | `plugin-instruments`, `provider-experience`, `personal-state-proof` |
 | §5.3: creator and latest editor | Native0016 labels accepted sender but native/queue edits capture the editing actor into the author field. This conflicts with creator-plus-latest-editor, not an optional full audit archive. | `native-authorship` (specific failing witness, storage/projection correction, same witness) |

@@ -1,0 +1,143 @@
+{
+  "sourceMachine": "rosetta",
+  "transport": "BB terminal executing CLI to https://bb-next.banjo-tint.ts.net",
+  "terminals": [
+    "term_r5w5tehpr7",
+    "term_9aa6dnwdjb"
+  ],
+  "attribution": "receiving server fallback; source host not identified by this transport",
+  "children": [
+    {
+      "threadId": "thr_wajhzu5cew",
+      "providerThreadId": "01a0881d-576f-7962-9c4e-89bbadd4bdef",
+      "accepted": {
+        "direction": "outbound",
+        "source": "spawn",
+        "initiator": "user",
+        "request": {
+          "method": "thread/start",
+          "params": {}
+        },
+        "requestId": "creq_4nwhizy3qw",
+        "senderThreadId": null,
+        "input": [
+          {
+            "type": "text",
+            "text": "Bounded identity proof from remote transport. Do not edit files or create children. Send parent thr_kmhguukhgy your thread ID and received sender wrapper using bb thread tell, then finish. Never bb wait.",
+            "mentions": []
+          }
+        ],
+        "p6rAuthors": [
+          {
+            "evidence": "machine",
+            "identity": {
+              "kind": "machine",
+              "key": "p6r-machine:v1:p6r%3A8911b92b-92c4-4510-ba69-2f81ad2086b9:server",
+              "instanceId": "p6r:8911b92b-92c4-4510-ba69-2f81ad2086b9",
+              "hostId": null
+            },
+            "presentation": {
+              "displayName": "bb-machine",
+              "handle": null,
+              "avatarUrl": null
+            }
+          }
+        ],
+        "target": {
+          "kind": "thread-start"
+        },
+        "execution": {
+          "model": "gpt-5.6-luna",
+          "permissionMode": "auto",
+          "reasoningLevel": "low",
+          "serviceTier": "fast",
+          "source": "client/turn/requested"
+        }
+      },
+      "providerInputs": [
+        {
+          "text": "[from=machine:bb-machine]\nBounded identity proof from remote transport. Do not edit files or create children. Send parent thr_kmhguukhgy your thread ID and received sender wrapper using bb thread tell, then finish. Never bb wait.\n[/from=machine:bb-machine]",
+          "sha256": "56f55048cc03f04cb5ca934f82074ff0bf65d0b23bd7fbad6a5e8629aa68a3ce"
+        }
+      ],
+      "messagePassingEvidence": [
+        {
+          "command": "/usr/bin/zsh -lc 'bb thread tell --help'",
+          "exitCode": 0,
+          "aggregatedOutput": "Usage: bb thread tell [options] <id> <message>\n\nSend a follow-up message to a thread\n\nOptions:\n  --json                     Print machine-readable JSON output\n  --model <model>            Model ID for this message\n  --service-tier <tier>      Service tier: fast or default\n  --reasoning-level <level>  Reasoning level: low, medium, high, xhigh, max\n                             (provider-dependent)\n  --permission-mode <mode>   Permission mode: accept-edits, auto, or full\n  --mode <mode>              Message mode: steer (default), queue, or auto\n                             (steer a live turn, else start one)\n  --send-at <when>           Dispatch at an ISO 8601 timestamp\n                             (2026-08-25T09:00) or a duration from now (30s,\n                             10m, 2h, 7d)\n  --plan                     Send the message as the provider's /plan action so\n                             the agent proposes a plan for approval before\n                             executing\n  --file <path>              Pass a host-readable absolute or uploaded\n                             attachment file path (repeatable) (default: [])\n  --image <path>             Pass a host-readable absolute or uploaded\n                             attachment image path (repeatable) (default: [])\n  -h, --help                 display help for command\n"
+        },
+        {
+          "command": "/usr/bin/zsh -lc \"bb thread tell thr_kmhguukhgy 'Thread ID: thr_wajhzu5ce\nReceived sender wrapper:\n[from=machine:bb-machine]\nBounded identity proof from remote transport. Do not edit files or create children. Send parent thr_kmhguukhgy your thread ID and received sender wrapper using bb thread tell, then finish. Never bb wait.\n[/from]' --mode steer\"",
+          "exitCode": 0,
+          "aggregatedOutput": "Thread thr_kmhguukhgy steered\n"
+        }
+      ]
+    },
+    {
+      "threadId": "thr_ne9gc2hbea",
+      "providerThreadId": "01a0881d-8f49-75b1-82ec-22696d620f31",
+      "accepted": {
+        "direction": "outbound",
+        "source": "spawn",
+        "initiator": "user",
+        "request": {
+          "method": "thread/start",
+          "params": {}
+        },
+        "requestId": "creq_xvdfnsz2vn",
+        "senderThreadId": null,
+        "input": [
+          {
+            "type": "text",
+            "text": "Bounded identity transport proof. Do not edit files or create children. Send parent thr_kmhguukhgy your thread ID and received sender wrapper using bb thread tell, then finish. Never bb wait. This worktree is only a proof workspace, never a runtime or plugin source.",
+            "mentions": []
+          }
+        ],
+        "p6rAuthors": [
+          {
+            "evidence": "machine",
+            "identity": {
+              "kind": "machine",
+              "key": "p6r-machine:v1:p6r%3A8911b92b-92c4-4510-ba69-2f81ad2086b9:server",
+              "instanceId": "p6r:8911b92b-92c4-4510-ba69-2f81ad2086b9",
+              "hostId": null
+            },
+            "presentation": {
+              "displayName": "bb-machine",
+              "handle": null,
+              "avatarUrl": null
+            }
+          }
+        ],
+        "target": {
+          "kind": "thread-start"
+        },
+        "execution": {
+          "model": "gpt-5.6-luna",
+          "permissionMode": "auto",
+          "reasoningLevel": "low",
+          "serviceTier": "fast",
+          "source": "client/turn/requested"
+        }
+      },
+      "providerInputs": [
+        {
+          "text": "[from=machine:bb-machine]\nBounded identity transport proof. Do not edit files or create children. Send parent thr_kmhguukhgy your thread ID and received sender wrapper using bb thread tell, then finish. Never bb wait. This worktree is only a proof workspace, never a runtime or plugin source.\n[/from=machine:bb-machine]",
+          "sha256": "5e9abf4d781ff1e8ee02633792d240f157d9a2f99b9a4b86a3dcf775f779350c"
+        }
+      ],
+      "messagePassingEvidence": [
+        {
+          "command": "/usr/bin/zsh -lc 'bb thread tell --help'",
+          "exitCode": 0,
+          "aggregatedOutput": "Usage: bb thread tell [options] <id> <message>\n\nSend a follow-up message to a thread\n\nOptions:\n  --json                     Print machine-readable JSON output\n  --model <model>            Model ID for this message\n  --service-tier <tier>      Service tier: fast or default\n  --reasoning-level <level>  Reasoning level: low, medium, high, xhigh, max\n                             (provider-dependent)\n  --permission-mode <mode>   Permission mode: accept-edits, auto, or full\n  --mode <mode>              Message mode: steer (default), queue, or auto\n                             (steer a live turn, else start one)\n  --send-at <when>           Dispatch at an ISO 8601 timestamp\n                             (2026-08-25T09:00) or a duration from now (30s,\n                             10m, 2h, 7d)\n  --plan                     Send the message as the provider's /plan action so\n                             the agent proposes a plan for approval before\n                             executing\n  --file <path>              Pass a host-readable absolute or uploaded\n                             attachment file path (repeatable) (default: [])\n  --image <path>             Pass a host-readable absolute or uploaded\n                             attachment image path (repeatable) (default: [])\n  -h, --help                 display help for command\n"
+        },
+        {
+          "command": "/usr/bin/zsh -lc 'bb thread tell thr_kmhguukhgy $'\"'Thread ID: thr_ne9gc2hbea\\\\nReceived sender wrapper:\\\\n[from=machine:bb-machine]\\\\nBounded identity transport proof. Do not edit files or create children. Send parent thr_kmhguukhgy your thread ID and received sender wrapper using bb thread tell, then finish. Never bb wait. This worktree is only a proof workspace, never a runtime or plugin source.\\\\n[/from=machine:bb-machine]'\"",
+          "exitCode": 0,
+          "aggregatedOutput": "Thread thr_kmhguukhgy steered\n"
+        }
+      ]
+    }
+  ]
+}

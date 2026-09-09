@@ -1,5 +1,15 @@
 # Plugin reconciliation — reconcile-plugins
 
+> Policy update — 2026-09-09: the approved [Identities and multiplayer ADR](../../../docs/adrs/2026-09-identities-and-multiplayer.md)
+> governs this trusted shared deployment. Use verified people when available,
+> applicable carried attribution next, and a stable machine actor otherwise;
+> missing or failed person verification must not block ordinary operations.
+> Never relabel fallback as a verified person or redirect pending personal-state
+> writes to another owner. Independent access checks and data validation remain.
+> Earlier rejection requirements below are superseded; versioned API descriptions
+> and test receipts remain historical evidence, not proof of ADR implementation.
+
+
 Bounded read-only report; root owns plan/ledger and source selection. No product/runtime edits, installations, tests, HEAD movement or external deliveries performed. Only this assigned report is written. Worker: `thr_nj6b3bisad`, spawned by `bb thread spawn --parent-self`, provider `codex`, model `gpt-5.6-terra`, reasoning `high`, service tier `fast`, environment `env_cug27tifde`; spawn receipt and worker STARTED confirm tuple. Coordinator `thr_a8bnpntna7`.
 
 ## Source and evidence corrections
@@ -19,7 +29,7 @@ Names below are proposed inputs; root maps them to the authoritative graph.
 
 | Obligation | Proposed node / narrow footprint | Acceptance oracle and dependencies |
 | --- | --- | --- |
-| Provider-neutral consumers and Tailnet settings/health/name | `plugins-provider-contract`; identity-boundaries provider/settings plus only demonstrated active consumers; shared library fixes owned once by root | Actual configured provider→public binding→normalized session/directory; resolver-only provider; rejected/unavailable fails closed; absent capability yields stable local host-store owner across independently bundled plugins. Rename display preserves plugin ID, issuer/config/state. Worker supplies precise consumer inventory. |
+| Provider-neutral consumers and Tailnet settings/health/name | `plugins-provider-contract`; identity-boundaries provider/settings plus only demonstrated active consumers; shared library fixes owned once by root | Actual configured provider→public binding→normalized session/directory; resolver-only provider; rejected/unavailable discards person evidence and core supplies carried or machine attribution; absent capability yields stable local host-store owner across independently bundled plugins. Rename display preserves plugin ID, issuer/config/state. Worker supplies precise consumer inventory. |
 | Personal state, view-as and recovery | `plugins-state-acceptance`; Thread Progress server/resource and ProgressInbox only where witnesses fail; shared state/controller contract changes serialized | Two actual admitted people/two clients; collaborator read and self-only write; actor A→B→A distinct sessions; delayed save after owner switch rejected; dirty draft retained and explicit recovery reaches defined outcome. Lost response reconciles same immutable operation; conflict/reconnect cannot write previous owner's record. Preserve exact malformed/legacy bytes and losing initializers; cold/drained migration gate belongs release. |
 | Notification policy and ntfy | `plugins-notification-acceptance`; notifications and ntfy feature stores/routes/UI | Current actor differs from viewed subject and addressed recipient. Inbox/read/handled/snooze/follow behavior persists. Begin/complete/expire/replay link binds actual initiator, one-use registration survives response loss, unlink works. Durable delivery retry retains operation/recipient/initiator across restart; callback cannot borrow ambient browser identity. Run loopback transport first; actual phone/external delivery needs explicit human authorization. |
 | Slack durable external author | `plugins-slack-acceptance`; rosetta-slack immutable operation/store/transport boundary | Capture plugin-namespaced external subject and exact payload before dispatch. Same-key concurrent/restart retry preserves reservation, changed payload rejects, final replay works after receipt expiry, unknown lookup never resends. Preserve read/reply/thread mapping and source context. No real sends under reconciliation grant; separately authorized destination required for live delivery. |

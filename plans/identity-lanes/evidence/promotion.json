@@ -1,0 +1,35 @@
+{
+  "children": {
+    "fork": {
+      "commit": "720f812c782142796451bf0acf5d9c364fd40c06",
+      "tree": "1e168c7f1d00e1ed59f8fe0e8c335b9bc197a52c",
+      "branch": "main",
+      "remote": "https://github.com/phosphorco/bb-fork.git",
+      "pushed": true
+    },
+    "plugins": {
+      "commit": "268fd598d9187135c6076bf7fec5fd1d2e805611",
+      "tree": "c2195a2a42a778d95d8daa6388eb4e2b45939fcc",
+      "branch": "tokyo-dusk-theme",
+      "remote": "https://github.com/phosphorco/bb-plugins.git",
+      "pushed": true
+    },
+    "community-plugins": {
+      "commit": "c6a000fbe4c8041584d41efcd8e125d8f96caa90",
+      "tree": "6a7a6034d30087a8f9942ccd4651f181697d40c9",
+      "branch": "main",
+      "remote": "https://github.com/phosphorco/bb-community-plugins.git",
+      "pushed": true
+    }
+  },
+  "runtimeTree": "3881eefb2ece57fe20af647ed94b0addb98e0b57",
+  "runtimeReplay": "83a1c2928735aba553edf9f46c77995134497350",
+  "liveChildren": [
+    "thr_fnhrvkt8ny",
+    "thr_wajhzu5cew",
+    "thr_ne9gc2hbea"
+  ],
+  "rollback": "Machine-attributed records now exist. Rollback must preserve machine-capable readers; do not rewrite history to fit older readers.",
+  "authorship": "Commits use BB machine <ubuntu@bb-machine.banjo-tint.ts.net>; no operator Git configuration changed.",
+  "concurrentWork": "Unrelated plugin working-tree overlays remain visible and excluded; live composition was exercised with those overlays present."
+}

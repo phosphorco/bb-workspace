@@ -1,27 +1,28 @@
 # Shared fork plugin SDK
 
-The unpublished feature port also supplies
-`phosphorco-bb-identity-0.1.0.7964b11db94d.tgz` for community consumers of the
+The workspace also supplies
+`phosphorco-bb-identity-0.1.0.11b0f79122ef.tgz` for community consumers of the
 shared identity package. Its SHA-256 is
-`7964b11db94d0d19e5631659c03368a98d57eb62284890f7fe62479d4520522e`;
-the adjacent provenance receipt identifies its organization source commit and
-package path. All nine public entry points were checked through the installed
-consumer package. This archive is a preview dependency, not a registry release.
+`11b0f79122ef7881057fefc93f4797b919f81627272a510860cab88baab6b2ac`;
+the adjacent provenance receipt identifies the exact organization package tree
+and packing baseline. All nine public entry points were checked through the installed
+consumer package. This archive is a workspace dependency, not a registry release.
 See [the port receipt](../preview/unpublished-port/README.md) for selected changes
 and validation.
 
-This directory holds the SDK package used by the isolated `bb-service` preview.
+This directory holds the SDK package selected by the canonical BB workspace.
+Earlier preview artifacts remain retained for receipts and historical pins.
 It is a development dependency artifact, not a server deployment or npm release.
 Plugins import `@get-bb/plugin-sdk` and its public subpaths through ordinary
 package resolution. Do not copy `bundled-types` into individual plugins.
 
 The selected package is:
 
-- File: `get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz`
-- SHA-256: `79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599`
+- File: `get-bb-plugin-sdk-0.4.47+phosphor.3881eefb2ece.sdk.263608e91421.tgz`
+- SHA-256: `ea4fade90af485fda52943b30d62e8a7b8ad8aa1383b95b7fc04490c1c4d943b`
 - Name: `@get-bb/plugin-sdk`
-- Version: `0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c`
-- Selected source receipt: `c30b12255a7f9f098e7bf9b6d1999410e7956785`
+- Version: `0.4.47+phosphor.3881eefb2ece.sdk.263608e91421`
+- Selected source receipt: `3881eefb2ece57fe20af647ed94b0addb98e0b57`
 
 The version suffix identifies the fork and packaged input. Semver compatibility
 alone is not provenance: the archive hash and adjacent `.provenance.json` receipt
@@ -61,7 +62,7 @@ Then, from the workspace root, pack into a fresh output directory:
 ```sh
 node sdk-artifacts/prepare-plugin-sdk.mjs \
   --source fork/build/bb \
-  --source-receipt c30b12255a7f9f098e7bf9b6d1999410e7956785 \
+  --source-receipt 3881eefb2ece57fe20af647ed94b0addb98e0b57 \
   --output /tmp/bb-sdk-reproduction
 ```
 

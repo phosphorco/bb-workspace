@@ -1,5 +1,15 @@
 # Identity experience campaign — execution contract
 
+> Policy update — 2026-09-09: the approved [Identities and multiplayer ADR](../../../docs/adrs/2026-09-identities-and-multiplayer.md)
+> governs this trusted shared deployment. Use verified people when available,
+> applicable carried attribution next, and a stable machine actor otherwise;
+> missing or failed person verification must not block ordinary operations.
+> Never relabel fallback as a verified person or redirect pending personal-state
+> writes to another owner. Independent access checks and data validation remain.
+> Earlier rejection requirements below are superseded; versioned API descriptions
+> and test receipts remain historical evidence, not proof of ADR implementation.
+
+
 Cole requested reconciliation against the master plan, followed by BB child-thread execution: sub-orchestrators use provider `codex`, model `gpt-6-astra`, reasoning `low`; implementation workers use provider `codex`, model `gpt-5.6-terra`, reasoning `high`, service tier `fast`. Root is BB thread `thr_csw7br3yff`.
 
 Read `/home/ubuntu/bb-service/AGENTS.md`, the relevant child instructions and identity skill. The root plan is `/home/ubuntu/bb-service/plans/identity-experience.plan.pkl`; its sibling ledger is authoritative execution evidence. Root alone edits the root plan and ledger. Lane reports are inputs, not parallel status databases.

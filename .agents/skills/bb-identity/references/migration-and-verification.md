@@ -30,7 +30,7 @@ Choose tests that cross the changed boundary:
 | --- | --- | --- |
 | Pure/controller test | Controlled transitions, tokens, CAS outcomes | Mounted React or actual SDK composition |
 | Controlled-SDK browser | Actual component/DOM/IndexedDB behavior | Real provider/core route connection |
-| Connected public binding | Wire decode, request authority, callbacks, storage | Host installation and app loading |
+| Connected public binding | Wire decode, captured attribution, callbacks, storage | Host installation and app loading |
 | Isolated packed consumer | Emitted graph, declarations, exports, dependencies | Same-artifact runtime portability |
 | Identical artifact on both hosts | The exercised real baseline/fork workflows | Untested features or future versions |
 
@@ -42,9 +42,10 @@ Assert route counts and original operation IDs through response loss and retry.
 For native facet consumers, exercise more participants than the initial summary
 page and filter on a participant found only on a continuation page. Run the
 authored plugin factory against the host SDK routes. A direct query test alone
-does not verify the consumer's DTO, readiness guard or pagination. For signed
-execution changes, cover an intervening edit between preflight and apply; check
-expiry and provider/catalog changes again after asynchronous reads, at commit.
+does not verify the consumer's DTO, readiness guard or pagination. For execution changes, cover an intervening edit between preflight and apply;
+check cancellation, destination lifecycle and relevant data revisions after
+asynchronous reads, at commit. Do not turn person-evidence freshness into an
+operation gate.
 Do not assume a clean UI means the draft store is empty: an earlier checkpoint
 may remain after its receipt becomes final. Assert exact actor/address eligibility
 and the recovery result, rather than an incidental total row count.
@@ -130,7 +131,7 @@ flag. Select imported companion files before calling a consumer commit-ready.
 A rejection test must prove which boundary rejected the input. Parse a supposedly
 valid adversarial fixture with the real schema, avoid double casts, and assert the
 specific rejection reason plus unchanged durable state. A malformed request ID
-can otherwise make an authority test pass without reaching its intended guard.
+can otherwise make a consistency test pass without reaching its intended guard.
 Mentioned recipients are frozen targets, separate from authorship; derive their
 keys and presentation through the active provider, and prevent daemon events from
 creating server-authored client requests.
@@ -152,7 +153,7 @@ missing member exposes a wrong artifact or missing host behavior. The upstream
 `bb plugin types` command repins package-based plugins to its SDK version; use
 the workspace artifact/generator update workflow when retaining a fork pin.
 Keep configured public URLs and native sidebar participant projection separate
-from request-author authority.
+from request authorship.
 
 Build-tool compatibility is separate from installed SDK compatibility. Verify
 the emitted SDK metadata and ensure a normal build does not recreate declaration
