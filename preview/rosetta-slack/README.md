@@ -31,7 +31,7 @@ this source change is loaded only in preview.
 
 - Frozen install, generated workspace sync, references, selected SDK types,
   aggregate organization typecheck, tests, and production build pass.
-- All 171 Rosetta tests pass, including full SDK factory registration/reload
+- All 182 Rosetta tests pass, including full SDK factory registration/reload
   and a real queue-worker regression with controlled Slack/BB responses.
 - The affected identity browser fixture passes single and paired component
   checks. The fixture supplies both selected SDK original-component props and
@@ -48,6 +48,10 @@ The curated [runtime receipt](runtime.json) records endpoint results and bundle
 hashes. [verification.json](verification.json) records the initial queue repair;
 [request-lifecycle-verification.json](request-lifecycle-verification.json)
 records the current request model, selected plugin commit, and complete checks.
+The subsequent [review follow-up](review-followup.md) and
+[review verification receipt](review-verification.json) cover ordering,
+revision retention, immutable replay, and inbox-health corrections on top of
+that initial request model.
 Raw check logs remain in the originating BB thread storage under
 `thr_95n9xtuqrf/deploy-candidate` and `thr_95n9xtuqrf/replay-loop`; they are
 evidence, not deployment sources.
@@ -84,8 +88,9 @@ At cutover:
    turn. The normal bridge was switched to Codex on September 9 after its
    Claude workers reported an expired, unrefreshable OAuth session.
 3. Check `bb rosetta-slack health` and the settings queue diagnostics. Readiness
-   may remain degraded while old requests, unavailable BB workers, or dead
-   letters need attention. Inspect the work IDs and remote acceptance before
+   may remain degraded while requests or events stall, retry, or await unavailable
+   BB workers. Retained failed requests and dead letters appear separately as
+   incidents. Inspect the work IDs and remote acceptance before
    retrying anything. The historical missing-column delivery failure does not
    by itself prove that Slack never accepted that message.
    Operator-quarantined work is retained with an `operator-quarantine:<work-id>`
