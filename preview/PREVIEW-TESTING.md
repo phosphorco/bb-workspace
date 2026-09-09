@@ -12,6 +12,13 @@
 
 This preview is for Cole to exercise the selected fork and organization plugins. Normal BB remains unchanged. All commands use the preview CLI wrapper and port 40888.
 
+Rosetta Slack follow-up: the queue-health and conversation-request repairs now
+load and reload on the selected SDK 0.4.47; all 182 Rosetta tests pass. There are
+48 enabled, running plugins. Slack credentials
+remain unassigned, so real HTTP readiness correctly returns 503/unconfigured.
+See [the deployment candidate and cutover steps](rosetta-slack/README.md) for
+verification, source receipts, and the remaining normal-host activation.
+
 ## Available surfaces
 
 24 bundled plugins are enabled. Organization activation covers 20 additional plugins plus the pre-existing Identity Boundaries provider. Those 45 plus community Analytics, BB UI Reference and Machine Monitor are enabled initially (48 total); Prompt Stacks was subsequently disabled after a verified missing-host-API failure, leaving 47 running. GitHub now finds the existing pinned gh binary on preview PATH. `bundled-activation.json` and `org-plugin-activation.json` record exact dispositions and sources.

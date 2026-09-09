@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "scope": "Rosetta Slack repair on the SDK 0.4.47 deployment candidate; normal deployment preserved",
+  "composition": {
+    "fork": "dabaea42ed1a186606c41ef1fbda2d9a4a3e24c6",
+    "plugins": "609ddd54c319481a2f85b6b5093c9189a373d0ea",
+    "community-plugins": "31498646dbd7d6ce08ce6fabe0488a444cbc589d"
+  },
+  "organizationChecks": {
+    "install": {
+      "exitCode": 0,
+      "logSha256": "2654b22d5faaadfe77a43ea28631466c053bdb96cc3d173c4c628aa7763bee96"
+    },
+    "sync-check": {
+      "exitCode": 0,
+      "logSha256": "7de6ed19b14d03f00a7fffed3049442667f0ab15b930412a56c82c0d4c97b7e9"
+    },
+    "references-check": {
+      "exitCode": 0,
+      "logSha256": "d7a042bd68ff60ce7dd83998468620469624c6fb7bd715739175d5278dd3c4d4"
+    },
+    "sdk-types-check": {
+      "exitCode": 0,
+      "logSha256": "05952a1fc2bb0ffeccce042fb0b66f49e0a3ed20ed9fcbdea67fc77e8843d343"
+    },
+    "typecheck-final": {
+      "exitCode": 0,
+      "logSha256": "e9b839713fc19708a348351ff3e40a6aba3d2c9095890cf190b5bab846665471"
+    },
+    "test": {
+      "exitCode": 0,
+      "logSha256": "47774c6e185c97497e525a7fd647ef5f9395e4c550252e10e66d200ddb720832"
+    },
+    "build": {
+      "exitCode": 0,
+      "logSha256": "b57a79b42118f7c7d589b3a456cfe2461ea3da97ae9cc72cf05e65f4dc7bf2f4"
+    },
+    "rosetta-final-test": {
+      "exitCode": 0,
+      "logSha256": "09cf02a5ba2f9cc224bdab892079bc9c1868ab2385b684942dca2f1b4b7bd01f"
+    }
+  },
+  "rosettaTests": {
+    "passed": 165,
+    "failed": 0,
+    "includes": [
+      "production plugin factory on selected SDK",
+      "factory reload with retained database",
+      "independent queue dispatch after earlier fetch failure",
+      "real HTTP handler readiness",
+      "immutable evidence migration and acquisition paths"
+    ]
+  },
+  "browserChecks": {
+    "singleProgressInbox": "passed",
+    "pairedProgressInbox": "passed",
+    "browserFixtureTypecheck": "passed"
+  },
+  "resolvedFailures": [
+    "Aggregate typecheck: shared browser fixture needed both selected SDK Original props",
+    "Focused factory typecheck: compare the complete SQLite row instead of reading an untyped field",
+    "Browser reload: allow multiple valid refresh notifications while asserting no extra save"
+  ],
+  "migrationProof": {
+    "source": "private normal-state snapshot from original investigation",
+    "evidenceRecordsPreserved": 1024,
+    "historicalFieldsPreserved": true,
+    "formerlyConflictingAcquisition": "passed"
+  },
+  "runtimeReceipt": "runtime.json",
+  "remainingDeploymentActions": [
+    "Promote the selected compatible composition with retained runtime state",
+    "Assign one runtime exclusive ownership of Slack credentials",
+    "Observe backlog recovery and verify a human test mention through delivered response"
+  ],
+  "limits": [
+    "No real Slack test send",
+    "No production credential transfer",
+    "No normal service restart",
+    "Unrelated preview limitations retain their own receipts"
+  ]
+}
