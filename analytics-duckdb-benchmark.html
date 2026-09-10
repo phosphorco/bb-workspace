@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analytics benchmark</title>
+    <style>
+      :root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #0b1020; color: #edf2ff; padding: 22px; }
+      .eyebrow { color: #8aa5ff; font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+      h1 { margin: 5px 0 4px; font-size: 25px; letter-spacing: -.03em; }
+      .sub { margin: 0 0 18px; color: #aebbd8; font-size: 13px; }
+      .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+      .card, .panel { background: #121a30; border: 1px solid #263454; border-radius: 11px; }
+      .card { padding: 13px; }
+      .num { font-size: 24px; font-weight: 760; letter-spacing: -.04em; color: #fff; }
+      .label { color: #9fb0d5; font-size: 11px; margin-top: 3px; line-height: 1.35; }
+      .grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 12px; }
+      .panel { padding: 14px; }
+      h2 { font-size: 13px; margin: 0 0 12px; color: #f6f8ff; }
+      .row { display: grid; grid-template-columns: 118px 1fr 60px; gap: 8px; align-items: center; margin: 9px 0; font-size: 11px; }
+      .track { height: 8px; border-radius: 99px; background: #202b49; overflow: hidden; }
+      .bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #6e8cff, #b5a1ff); min-width: 4px; }
+      .hot { background: linear-gradient(90deg, #f3a35b, #ee6578); }
+      .value { text-align: right; color: #cbd7f5; font-variant-numeric: tabular-nums; }
+      .callout { margin-top: 12px; padding: 10px 11px; border-left: 3px solid #e9a35b; background: #242036; border-radius: 0 8px 8px 0; color: #dce3fa; font-size: 12px; line-height: 1.4; }
+      .pipe { display: flex; align-items: stretch; gap: 8px; margin-top: 11px; }
+      .stage { flex: 1; padding: 11px 8px; background: #1a2541; border-radius: 8px; text-align: center; color: #dce5ff; font-size: 11px; line-height: 1.35; }
+      .arrow { align-self: center; color: #8296cb; }
+      .note { margin-top: 15px; font-size: 10px; line-height: 1.45; color: #8f9fbe; }
+      code { color: #c9d4ff; font-family: ui-monospace, SFMono-Regular, monospace; }
+      @media (max-width: 620px) { .cards, .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="eyebrow">Real BB event data · read-only benchmark</div>
+    <h1>DuckDB works well—after projection, not on the live SQLite event log.</h1>
+    <p class="sub">One 6.5 GB operational database / 2,256,029 events. No product data was modified.</p>
+
+    <section class="cards">
+      <div class="card"><div class="num">248,946</div><div class="label">completed capability facts projected<br>(commands, file reads, tool calls)</div></div>
+      <div class="card"><div class="num">3.6 MB</div><div class="label">Zstd Parquet fact slice<br>from the 6.5 GB source database</div></div>
+      <div class="card"><div class="num">2.59 s</div><div class="label">one-off extract time<br>(background work; peak 1.55 GB RSS)</div></div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>Same failure rollup: serving-path comparison</h2>
+        <div class="row"><span>SQLite, indexed tool-only</span><div class="track"><div class="bar" style="width:4%"></div></div><span class="value">66.5 ms</span></div>
+        <div class="row"><span>DuckDB, Parquet facts</span><div class="track"><div class="bar" style="width:4%"></div></div><span class="value">10 ms</span></div>
+        <div class="row"><span>DuckDB, attach live SQLite</span><div class="track"><div class="bar hot" style="width:88%"></div></div><span class="value">5.27 s</span></div>
+        <div class="row"><span>SQLite, raw all-capability JSON</span><div class="track"><div class="bar hot" style="width:100%"></div></div><span class="value">&gt;30 s*</span></div>
+        <div class="callout">Direct SQLite attachment is a good analyst convenience, but DuckDB cannot use BB’s generated <code>tool_name</code> column/index there. Keep interactive queries off the live event log.</div>
+      </div>
+
+      <div class="panel">
+        <h2>What the projected facts already answer</h2>
+        <div class="row"><span>Command execution</span><div class="track"><div class="bar hot" style="width:100%"></div></div><span class="value">19,809 failures</span></div>
+        <div class="row"><span>Read</span><div class="track"><div class="bar hot" style="width:24%"></div></div><span class="value">48 failures</span></div>
+        <div class="row"><span>gather_perspectives</span><div class="track"><div class="bar hot" style="width:15%"></div></div><span class="value">29 failures</span></div>
+        <div class="row"><span>Skill invocations</span><div class="track"><div class="bar" style="width:7%"></div></div><span class="value">469 seen</span></div>
+        <div class="callout">Window SQL found 202,411 third-or-later command executions after two adjacent commands in a turn—exactly the “repeated use” shape we want, but it needs a more specific retry definition before becoming a quality score.</div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:12px">
+      <h2>Recommended operational boundary</h2>
+      <div class="pipe">
+        <div class="stage">SQLite events<br><small>source of truth</small></div><div class="arrow">→</div>
+        <div class="stage">transactional typed facts<br><small>no raw args/output</small></div><div class="arrow">→</div>
+        <div class="stage">idempotent exporter<br><small>watermark + Parquet partitions</small></div><div class="arrow">→</div>
+        <div class="stage">DuckDB read worker<br><small>curated views + built-ins / AI SQL</small></div>
+      </div>
+      <div class="note">*Stopped after 30 seconds to avoid competing with the live service. Timings are one local host and should be rechecked under concurrent production load. “Failure” means a failed tool status or a nonzero command exit; these are useful diagnostics, not comparable success metrics. Legacy records sometimes omit the tool server, and existing events cannot prove that a skill’s contents were read—both are instrumentation requirements for Analytics.</div>
+    </section>
+  </body>
+</html>

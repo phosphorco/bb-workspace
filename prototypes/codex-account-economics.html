@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Codex subscription economics prototype</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0c0d0f; --panel:#131519; --panel2:#181b20; --text:#f2f3f5; --muted:#9298a3; --line:#292d34; --blue:#81a9ff; --green:#66d19e; --amber:#e7b35f; --red:#ef7a7a; --radius:12px; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:13px/1.45 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button,select { font:inherit; }
+    .app { max-width:1240px; margin:auto; padding:22px; }
+    header { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:18px; }
+    h1 { margin:0 0 4px; font-size:20px; letter-spacing:-.02em; }
+    h2 { margin:0; font-size:14px; }
+    p { margin:0; }
+    .sub,.muted { color:var(--muted); }
+    .scope { display:flex; align-items:center; gap:8px; color:var(--muted); white-space:nowrap; }
+    select,.segmented { border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--text); }
+    select { padding:7px 28px 7px 9px; }
+    .grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; }
+    .card { border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); }
+    .metric { min-height:128px; padding:14px; }
+    .label-row { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--muted); font-size:11px; font-weight:650; text-transform:uppercase; letter-spacing:.055em; }
+    .tag { border:1px solid var(--line); border-radius:999px; padding:2px 6px; color:var(--muted); font-size:9px; letter-spacing:.04em; }
+    .tag.modeled { border-color:color-mix(in srgb,var(--amber) 45%,var(--line)); color:var(--amber); }
+    .value { margin-top:9px; font-size:28px; font-weight:720; letter-spacing:-.04em; }
+    .value small { color:var(--muted); font-size:13px; font-weight:550; letter-spacing:0; }
+    .delta { margin-top:4px; color:var(--green); font-size:11px; }
+    .meter { height:6px; margin-top:11px; overflow:hidden; border-radius:99px; background:#24272d; }
+    .meter > i { display:block; height:100%; border-radius:inherit; background:var(--blue); }
+    .meter.green > i { background:var(--green); }
+    .meter.amber > i { background:var(--amber); }
+    .section { margin-top:10px; padding:14px; }
+    .section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:13px; }
+    .segmented { display:flex; padding:2px; }
+    .segmented button { border:0; border-radius:6px; background:transparent; padding:5px 9px; color:var(--muted); cursor:pointer; }
+    .segmented button[aria-pressed="true"] { background:var(--panel2); color:var(--text); box-shadow:0 0 0 1px var(--line); }
+    .economics { display:grid; grid-template-columns:1.25fr .75fr; gap:10px; }
+    .chart-grid { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,.75fr); gap:10px; }
+    .chart-tools { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .chart-shell { position:relative; min-height:260px; overflow:hidden; }
+    .chart-shell svg { display:block; width:100%; height:250px; overflow:visible; }
+    .gridline { stroke:var(--line); stroke-width:1; }
+    .axis-label { fill:var(--muted); font-size:10px; }
+    .area { opacity:.13; }
+    .line { fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+    .chart-legend { display:flex; flex-wrap:wrap; gap:12px; margin-top:4px; color:var(--muted); font-size:11px; }
+    .chart-legend i { display:inline-block; width:8px; height:8px; margin-right:5px; border-radius:50%; }
+    .token-stack { display:flex; height:14px; overflow:hidden; border-radius:999px; background:var(--line); }
+    .token-stack i { min-width:2px; height:100%; }
+    .token-list { display:grid; gap:11px; margin-top:15px; }
+    .token-row { display:grid; grid-template-columns:10px 1fr auto; align-items:baseline; gap:8px; }
+    .token-row i { width:8px; height:8px; border-radius:2px; }
+    .token-row span { color:var(--muted); }
+    .token-row strong { font-variant-numeric:tabular-nums; }
+    .heatmap { display:grid; grid-template-columns:repeat(15,1fr); gap:4px; margin-top:13px; }
+    .heatmap i { aspect-ratio:1; border:1px solid color-mix(in srgb,var(--line) 75%,transparent); border-radius:3px; background:color-mix(in srgb,var(--blue) calc(var(--level) * 1%),var(--panel2)); }
+    .heatmap-axis { display:flex; justify-content:space-between; margin-top:5px; color:var(--muted); font-size:10px; }
+    .scatter-shell { min-height:216px; }
+    .scatter-shell svg { height:208px; }
+    .dot { stroke:var(--panel); stroke-width:2; }
+    .quality { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; overflow:hidden; margin-top:12px; border:1px solid var(--line); border-radius:9px; background:var(--line); }
+    .quality div { background:var(--panel); padding:10px; }
+    .quality span { display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+    .quality strong { display:block; margin-top:4px; font-size:15px; }
+    .metric-ribbon { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:1px; overflow:hidden; margin-top:10px; border:1px solid var(--line); border-radius:var(--radius); background:var(--line); }
+    .ribbon-item { min-width:0; padding:11px 12px; background:var(--panel); }
+    .ribbon-item span { display:block; overflow:hidden; color:var(--muted); font-size:9px; font-weight:650; letter-spacing:.04em; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; }
+    .ribbon-item strong { display:block; margin-top:4px; font-size:16px; font-variant-numeric:tabular-nums; }
+    .ribbon-item small { display:block; margin-top:1px; color:var(--muted); font-size:9px; }
+    .donut-layout { display:grid; grid-template-columns:132px 1fr; align-items:center; gap:18px; }
+    .donut { display:grid; width:126px; aspect-ratio:1; place-items:center; border-radius:50%; background:conic-gradient(var(--blue) 0 42%,var(--green) 42% 69%,var(--amber) 69% 84%,var(--line) 84% 100%); }
+    .donut::after { content:""; grid-area:1/1; width:78px; aspect-ratio:1; border-radius:50%; background:var(--panel); }
+    .donut-center { z-index:1; grid-area:1/1; text-align:center; }
+    .donut-center strong { display:block; font-size:22px; }
+    .donut-center span { color:var(--muted); font-size:9px; text-transform:uppercase; }
+    .bars { display:grid; gap:9px; }
+    .bar-row { display:grid; grid-template-columns:98px 1fr 92px; align-items:center; gap:8px; }
+    .bar-row span { overflow:hidden; color:var(--muted); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+    .bar { height:7px; overflow:hidden; border-radius:999px; background:var(--line); }
+    .bar i { display:block; height:100%; border-radius:inherit; background:var(--blue); }
+    .bar-row strong { text-align:right; font-size:10px; font-variant-numeric:tabular-nums; }
+    .fleet { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .machine-list { display:grid; gap:1px; overflow:hidden; border:1px solid var(--line); border-radius:9px; background:var(--line); }
+    .machine { display:grid; grid-template-columns:minmax(110px,1fr) 62px 70px 74px; gap:10px; padding:9px 10px; background:var(--panel); align-items:center; }
+    .machine small,.machine-head { color:var(--muted); font-size:9px; }
+    .machine-head { text-transform:uppercase; letter-spacing:.04em; }
+    .machine strong { font-size:11px; font-variant-numeric:tabular-nums; }
+    .source-key { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:10px; }
+    .source-key b { color:var(--text); font-weight:600; }
+    .bridge { display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:center; gap:12px; min-height:96px; }
+    .bridge-item strong { display:block; font-size:20px; }
+    .bridge-item span { color:var(--muted); font-size:11px; }
+    .op { color:var(--muted); font-size:18px; }
+    .net strong { color:var(--green); }
+    .assumptions { display:grid; gap:7px; padding-left:2px; }
+    .assumptions div { display:flex; justify-content:space-between; gap:15px; }
+    .assumptions span:first-child { color:var(--muted); }
+    .accounts { overflow:hidden; }
+    .account-head,.account { display:grid; grid-template-columns:minmax(150px,1.25fr) 90px 95px minmax(150px,1fr) 92px; align-items:center; gap:14px; padding:9px 12px; }
+    .account-head { border-bottom:1px solid var(--line); color:var(--muted); font-size:10px; font-weight:650; letter-spacing:.05em; text-transform:uppercase; }
+    .account + .account { border-top:1px solid var(--line); }
+    .name { min-width:0; }
+    .name strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .name small { color:var(--muted); }
+    .plan,.status { justify-self:start; border:1px solid var(--line); border-radius:999px; padding:3px 7px; font-size:10px; }
+    .status.used { border-color:color-mix(in srgb,var(--green) 42%,var(--line)); color:var(--green); }
+    .status.idle { color:var(--muted); }
+    .status.off { border-color:color-mix(in srgb,var(--red) 42%,var(--line)); color:var(--red); }
+    .quota { display:grid; grid-template-columns:1fr 34px; align-items:center; gap:8px; font-variant-numeric:tabular-nums; }
+    .quota .meter { margin:0; height:5px; }
+    .money { text-align:right; font-variant-numeric:tabular-nums; }
+    .legend { display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; color:var(--muted); font-size:11px; }
+    .legend span::before { content:""; display:inline-block; width:7px; height:7px; margin-right:5px; border-radius:50%; background:var(--blue); }
+    .legend span:nth-child(2)::before { background:var(--green); }
+    .legend span:nth-child(3)::before { background:var(--amber); }
+    .note { margin-top:10px; border:1px dashed var(--line); border-radius:10px; padding:11px 12px; color:var(--muted); font-size:11px; }
+    .note strong { color:var(--text); }
+    @media (max-width:1000px) { .grid { grid-template-columns:repeat(3,1fr); } .metric-ribbon { grid-template-columns:repeat(4,1fr); } }
+    @media (max-width:800px) { .grid { grid-template-columns:repeat(2,1fr); } .economics,.chart-grid,.fleet { grid-template-columns:1fr; } .account-head { display:none; } .account { grid-template-columns:1fr auto; gap:7px 12px; } .quota { grid-column:1/-1; } .money { text-align:left; } .quality { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:480px) { .app { padding:14px; } header { display:grid; } .scope { white-space:normal; } .grid { grid-template-columns:1fr; } .bridge { grid-template-columns:1fr; gap:5px; } .op { display:none; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div><h1>Fleet usage &amp; subscription economics</h1><p class="sub">Account-wide allowance, exact token telemetry, BB machine attribution, and modeled API-equivalent value.</p></div>
+      <div class="scope"><label>Fleet <select><option>All BB machines</option><option>bb-staging</option><option>bb-normal</option><option>Unattributed usage</option></select></label><label>Window <select><option>Last 30 days</option><option>Last 7 days</option><option>Last 90 days</option></select></label></div>
+    </header>
+
+    <section class="grid" aria-label="Pool summary">
+      <article class="card metric"><div class="label-row"><span>Accounts used</span><span class="tag">Observed</span></div><div class="value">6 <small>of 8</small></div><div class="delta">75% successfully used in 30 days</div><div class="meter green"><i style="width:75%"></i></div></article>
+      <article class="card metric"><div class="label-row"><span>Pool saturation</span><span class="tag">Observed</span></div><div class="value">68%</div><div class="muted">Weighted account-wide allowance consumed</div><div class="meter amber"><i style="width:68%"></i></div></article>
+      <article class="card metric"><div class="label-row"><span>Subscription cost</span><span class="tag">Known</span></div><div class="value">$560 <small>/ mo</small></div><div class="muted">2 Plus · 2 Pro 5× · 2 Pro 20× · 2 unknown</div></article>
+      <article class="card metric"><div class="label-row"><span>API-equivalent value</span><span class="tag modeled">Modeled</span></div><div class="value" id="apiValue">$842 <small>/ 30d</small></div><div class="delta" id="multiple">1.5× subscription cost</div></article>
+      <article class="card metric"><div class="label-row"><span>BB machine share</span><span class="tag">Observed</span></div><div class="value">84%</div><div class="muted">5.36B of 6.38B tokens attributed to BB</div><div class="meter green"><i style="width:84%"></i></div></article>
+      <article class="card metric"><div class="label-row"><span>Active machines</span><span class="tag">Fleet</span></div><div class="value">3 <small>of 4</small></div><div class="muted">2 reporting now · 1 seen 4d ago</div><div class="meter"><i style="width:75%"></i></div></article>
+    </section>
+
+    <section class="metric-ribbon" aria-label="Token and cost metrics">
+      <div class="ribbon-item"><span>Total input</span><strong>6.06B</strong><small>94.9% of processed</small></div>
+      <div class="ribbon-item"><span>Cached input</span><strong>4.85B</strong><small>80.0% cache hit</small></div>
+      <div class="ribbon-item"><span>Uncached input</span><strong>1.21B</strong><small>$1.94k API rate</small></div>
+      <div class="ribbon-item"><span>Cache write</span><strong>87.5M</strong><small>where reported</small></div>
+      <div class="ribbon-item"><span>Total output</span><strong>319M</strong><small>$3.08k API rate</small></div>
+      <div class="ribbon-item"><span>Reasoning output</span><strong>122M</strong><small>38.2% of output</small></div>
+      <div class="ribbon-item"><span>Cache savings</span><strong>$24.7k</strong><small>vs uncached rates</small></div>
+      <div class="ribbon-item"><span>Cost / turn</span><strong>$1.93</strong><small>436 completed turns</small></div>
+    </section>
+
+    <section class="chart-grid">
+      <article class="card section">
+        <div class="section-head">
+          <div><h2 id="daily-title">Daily API-equivalent value by machine</h2><p class="muted" id="daily-subtitle">Observed tokens × versioned model API rates · illustrative data</p></div>
+          <div class="chart-tools">
+            <div class="segmented" id="metric-mode" role="group" aria-label="Chart metric"><button data-mode="cost" aria-pressed="true">Cost</button><button data-mode="tokens" aria-pressed="false">Tokens</button></div>
+            <div class="segmented" id="range-mode" role="group" aria-label="Date range"><button data-range="7" aria-pressed="false">7d</button><button data-range="30" aria-pressed="true">30d</button><button data-range="90" aria-pressed="false">90d</button></div>
+          </div>
+        </div>
+        <div class="chart-shell"><svg id="daily-chart" viewBox="0 0 720 250" role="img" aria-label="Daily API-equivalent value by subscription plan"></svg></div>
+        <div class="chart-legend"><span><i style="background:var(--blue)"></i>bb-staging</span><span><i style="background:var(--green)"></i>bb-normal</span><span><i style="background:var(--amber)"></i>Other BB machines</span></div>
+      </article>
+      <aside class="card section">
+        <div class="section-head"><div><h2>Token composition</h2><p class="muted">6.38B processed · 30 days</p></div><span class="tag">Observed</span></div>
+        <div class="token-stack" aria-label="Token composition"><i style="width:76%;background:var(--blue)"></i><i style="width:19%;background:var(--green)"></i><i style="width:5%;background:var(--amber)"></i></div>
+        <div class="token-list">
+          <div class="token-row"><i style="background:var(--blue)"></i><span>Cached input</span><strong>4.85B · 76%</strong></div>
+          <div class="token-row"><i style="background:var(--green)"></i><span>Uncached input</span><strong>1.21B · 19%</strong></div>
+          <div class="token-row"><i style="background:var(--amber)"></i><span>Output</span><strong>319M · 5%</strong></div>
+          <div class="token-row"><i style="background:var(--red)"></i><span>↳ Reasoning within output</span><strong>122M · 38%</strong></div>
+        </div>
+        <div class="quality"><div><span>Exact</span><strong>89%</strong></div><div><span>Estimated</span><strong>7%</strong></div><div><span>Unpriced</span><strong>4%</strong></div><div><span>Cache saved</span><strong>$2.1k</strong></div></div>
+      </aside>
+    </section>
+
+    <section class="fleet">
+      <article class="card section">
+        <div class="section-head"><div><h2>Where account usage happened</h2><p class="muted">Exact tokens attributed by durable machine ID</p></div><span class="tag">Fleet</span></div>
+        <div class="donut-layout"><div class="donut"><div class="donut-center"><strong>84%</strong><span>on BB</span></div></div><div class="bars">
+          <div class="bar-row"><span>bb-staging</span><div class="bar"><i style="width:100%"></i></div><strong>2.68B</strong></div>
+          <div class="bar-row"><span>bb-normal</span><div class="bar"><i style="width:64%;background:var(--green)"></i></div><strong>1.72B</strong></div>
+          <div class="bar-row"><span>bb-review</span><div class="bar"><i style="width:36%;background:var(--amber)"></i></div><strong>0.96B</strong></div>
+          <div class="bar-row"><span>Non-BB / unknown</span><div class="bar"><i style="width:38%;background:var(--muted)"></i></div><strong>1.02B</strong></div>
+        </div></div>
+      </article>
+      <article class="card section">
+        <div class="section-head"><div><h2>Machine contribution</h2><p class="muted">Compact fleet rollup · 30 days</p></div><strong>5.36B tokens</strong></div>
+        <div class="machine-list">
+          <div class="machine machine-head"><span>Machine</span><span>Tokens</span><span>Est. value</span><span>Turns</span></div>
+          <div class="machine"><div><strong>bb-staging</strong><small> reporting now</small></div><strong>2.68B</strong><strong>$391</strong><strong>206</strong></div>
+          <div class="machine"><div><strong>bb-normal</strong><small> reporting now</small></div><strong>1.72B</strong><strong>$267</strong><strong>141</strong></div>
+          <div class="machine"><div><strong>bb-review</strong><small> seen 4d ago</small></div><strong>0.96B</strong><strong>$128</strong><strong>89</strong></div>
+          <div class="machine"><div><strong>bb-lab</strong><small> no data in range</small></div><strong>—</strong><strong>—</strong><strong>—</strong></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="chart-grid">
+      <article class="card section">
+        <div class="section-head"><div><h2>Model cost &amp; token mix</h2><p class="muted">Bars encode tokens; labels retain API-equivalent cost</p></div><span class="tag modeled">Versioned pricing</span></div>
+        <div class="bars">
+          <div class="bar-row"><span>gpt-5.6-sol</span><div class="bar"><i style="width:100%"></i></div><strong>4.48B · $612</strong></div>
+          <div class="bar-row"><span>gpt-5.6-terra</span><div class="bar"><i style="width:31%;background:var(--green)"></i></div><strong>1.38B · $173</strong></div>
+          <div class="bar-row"><span>gpt-5.6-luna</span><div class="bar"><i style="width:11%;background:var(--amber)"></i></div><strong>0.49B · $41</strong></div>
+          <div class="bar-row"><span>Other / unpriced</span><div class="bar"><i style="width:3%;background:var(--muted)"></i></div><strong>0.13B · $16</strong></div>
+        </div>
+        <div class="quality"><div><span>Input cost</span><strong>$326</strong></div><div><span>Output cost</span><strong>$516</strong></div><div><span>Priced tokens</span><strong>96%</strong></div><div><span>Models seen</span><strong>7</strong></div></div>
+      </article>
+      <aside class="card section">
+        <div class="section-head"><div><h2>Throughput proxies</h2><p class="muted">Useful for trends—not a quality score</p></div><span class="tag">Observed</span></div>
+        <div class="quality"><div><span>Completed turns</span><strong>436</strong></div><div><span>Tokens / turn</span><strong>14.6M</strong></div><div><span>Output / turn</span><strong>732k</strong></div><div><span>Active days</span><strong>24 / 30</strong></div></div>
+        <div class="quality"><div><span>Threads touched</span><strong>118</strong></div><div><span>Turns / active day</span><strong>18.2</strong></div><div><span>Failover rate</span><strong>1.6%</strong></div><div><span>Median runtime</span><strong>11m</strong></div></div>
+      </aside>
+    </section>
+
+    <section class="chart-grid">
+      <article class="card section">
+        <div class="section-head"><div><h2>Allowance burn by account</h2><p class="muted">Saturation versus 30-day API-equivalent value</p></div><span class="tag modeled">Mixed evidence</span></div>
+        <div class="chart-shell scatter-shell"><svg id="scatter-chart" viewBox="0 0 720 208" role="img" aria-label="Account saturation plotted against estimated API-equivalent value"></svg></div>
+      </article>
+      <aside class="card section">
+        <div class="section-head"><div><h2>Pool activity</h2><p class="muted">Router-recorded turns · last 30 days</p></div><strong>218 turns</strong></div>
+        <div class="heatmap" id="heatmap" aria-label="Thirty-day router activity heatmap"></div>
+        <div class="heatmap-axis"><span>30 days ago</span><span>Today</span></div>
+        <div class="quality"><div><span>Active days</span><strong>24</strong></div><div><span>Peak day</span><strong>19 turns</strong></div><div><span>Accounts/day</span><strong>4.1</strong></div><div><span>Failovers</span><strong>7</strong></div></div>
+      </aside>
+    </section>
+
+    <section class="economics">
+      <article class="card section">
+        <div class="section-head"><div><h2>Estimated economics</h2><p class="muted">Illustrative—not an OpenAI bill.</p></div><div class="segmented" role="group" aria-label="Estimate scenario"><button data-factor=".62" aria-pressed="false">Low</button><button data-factor="1" aria-pressed="true">Base</button><button data-factor="1.55" aria-pressed="false">High</button></div></div>
+        <div class="bridge"><div class="bridge-item"><strong id="bridgeValue">$842</strong><span>API-equivalent token value</span></div><span class="op">−</span><div class="bridge-item"><strong>$560</strong><span>monthly plan cost</span></div><span class="op">=</span><div class="bridge-item net"><strong id="netValue">+$282</strong><span>modeled value above cost</span></div></div>
+      </article>
+      <aside class="card section"><div class="section-head"><h2>Model assumptions</h2><span class="tag modeled">Editable later</span></div><div class="assumptions"><div><span>Model mix</span><strong>Sol 44% · Terra 41% · Luna 15%</strong></div><div><span>Cache share</span><strong>52%</strong></div><div><span>Input : output</span><strong>7 : 1</strong></div><div><span>Quota → tokens</span><strong>Community midpoint</strong></div><div><span>Confidence</span><strong style="color:var(--amber)">Directional</strong></div></div></aside>
+    </section>
+
+    <section class="card section accounts">
+      <div class="section-head"><div><h2>Loaded accounts</h2><p class="muted">“Used” means provider allowance moved and/or the router recorded a turn in the selected period.</p></div><strong>6 / 8 used</strong></div>
+      <div class="account-head"><span>Account</span><span>Plan</span><span>30d use</span><span>Account-wide saturation</span><span style="text-align:right">Est. value</span></div>
+      <div id="rows"></div>
+      <div class="legend"><span>Provider quota used across surfaces</span><span>Successfully used by pool</span><span>Modeled dollar estimate</span></div>
+    </section>
+
+    <div class="note"><strong>Prototype data contract:</strong> each token delta is keyed by provider account, machine, thread, turn, model, and time bucket. Account quotas remain provider-wide; machine share comes from locally observed token deltas. Fleet totals deduplicate replayed events and copied rollout logs. “Non-BB / unknown” is the remainder between provider-account movement and BB-attributed telemetry—not assumed waste.</div>
+  </main>
+  <script>
+    const accounts = [
+      ["Cole · primary","Pro 20×","used",91,238],["Build pool 01","Pro 20×","used",86,190],
+      ["Build pool 02","Pro 5×","used",73,126],["Review pool","Pro 5×","used",69,113],
+      ["Plus · shared","Plus","used",58,92],["Plus · backup","Plus","used",42,67],
+      ["Warm spare","Unknown","idle",19,16],["Needs relink","Unknown","off",0,0]
+    ];
+    const rows = document.querySelector("#rows");
+    rows.innerHTML = accounts.map(([name,plan,status,quota,value]) => `<div class="account"><div class="name"><strong>${name}</strong><small>${status === "used" ? "Quota + router evidence" : status === "idle" ? "Quota movement only" : "Disconnected"}</small></div><span class="plan">${plan}</span><span class="status ${status}">${status === "used" ? "Used" : status === "idle" ? "Not routed" : "Unavailable"}</span><div class="quota"><div class="meter ${quota > 80 ? "amber" : ""}"><i style="width:${quota}%"></i></div><span>${quota}%</span></div><strong class="money" data-base="${value}">$${value}</strong></div>`).join("");
+    const daily = {
+      cost: [[8,11,9,14,17,13,22,26,21,19,31,28,24,38,42,36,51,47,39,55,61,58,49,71,68,64,73,77,69,82],[3,4,5,4,7,8,6,9,11,8,13,15,12,14,17,18,16,21,19,25,23,27,24,30,33,29,34,36,32,38],[1,2,1,3,2,4,3,4,5,4,6,5,7,6,8,7,9,8,10,9,11,12,10,13,12,14,13,15,14,16]],
+      tokens: [[51,69,58,88,107,82,139,164,132,120,195,176,151,239,264,226,321,296,245,346,384,365,308,447,428,403,459,484,434,516],[22,29,36,29,51,58,44,65,80,58,95,109,87,102,124,131,116,153,138,182,168,196,175,218,240,211,247,262,233,276],[9,15,8,22,15,29,22,29,36,29,44,36,51,44,58,51,65,58,73,65,80,87,73,95,87,102,95,109,102,116]]
+    };
+    let chartMetric = "cost", chartRange = 30;
+    const colors = ["#81a9ff","#66d19e","#e7b35f"];
+    function drawDaily() {
+      const svg = document.querySelector("#daily-chart"), width=720, height=250, left=42, right=10, top=12, bottom=28;
+      const count = chartRange; const series = daily[chartMetric].map((values,seriesIndex) => chartRange === 90
+        ? Array.from({length:90},(_,i)=>Math.round(values[i%values.length]*(.72+((i*7+seriesIndex*11)%23)/50)))
+        : values.slice(-count));
+      const max = Math.max(...series.flat()) * 1.12; const x = i => left + i/(count-1)*(width-left-right); const y = v => top + (1-v/max)*(height-top-bottom);
+      const ticks = [0,.25,.5,.75,1];
+      let html = ticks.map(t => `<line class="gridline" x1="${left}" x2="${width-right}" y1="${y(max*t)}" y2="${y(max*t)}"/><text class="axis-label" x="${left-7}" y="${y(max*t)+3}" text-anchor="end">${chartMetric === "cost" ? "$"+Math.round(max*t) : Math.round(max*t)+"M"}</text>`).join("");
+      series.forEach((values,index) => { const path=values.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' '); const area=`${path} L${x(values.length-1)},${height-bottom} L${x(0)},${height-bottom} Z`; html += `<path class="area" fill="${colors[index]}" d="${area}"/><path class="line" stroke="${colors[index]}" d="${path}"/>`; });
+      html += `<text class="axis-label" x="${left}" y="${height-7}">${count} days ago</text><text class="axis-label" x="${width-right}" y="${height-7}" text-anchor="end">Today</text>`;
+      svg.innerHTML = html; document.querySelector("#daily-title").textContent = chartMetric === "cost" ? "Daily API-equivalent value by machine" : "Daily processed tokens by machine";
+      document.querySelector("#daily-subtitle").textContent = chartMetric === "cost" ? "Observed tokens × versioned model API rates · illustrative data" : "Cached + uncached input + output · illustrative data";
+    }
+    document.querySelectorAll("#metric-mode button").forEach(button => button.addEventListener("click",()=>{ chartMetric=button.dataset.mode; document.querySelectorAll("#metric-mode button").forEach(item=>item.setAttribute("aria-pressed",String(item===button))); drawDaily(); }));
+    document.querySelectorAll("#range-mode button").forEach(button => button.addEventListener("click",()=>{ chartRange=Number(button.dataset.range); document.querySelectorAll("#range-mode button").forEach(item=>item.setAttribute("aria-pressed",String(item===button))); drawDaily(); }));
+    function drawScatter() { const svg=document.querySelector("#scatter-chart"), left=42,right=22,top=12,bottom=27,w=720,h=208; const points=accounts.filter(a=>a[3]>0); const x=v=>left+v/100*(w-left-right), y=v=>top+(1-v/250)*(h-top-bottom); let html=[0,25,50,75,100].map(v=>`<line class="gridline" x1="${x(v)}" x2="${x(v)}" y1="${top}" y2="${h-bottom}"/><text class="axis-label" x="${x(v)}" y="${h-7}" text-anchor="middle">${v}%</text>`).join(''); html += [0,100,200].map(v=>`<text class="axis-label" x="${left-7}" y="${y(v)+3}" text-anchor="end">$${v}</text>`).join(''); points.forEach((a,i)=>{html+=`<circle class="dot" cx="${x(a[3])}" cy="${y(a[4])}" r="${6+Math.min(5,a[4]/45)}" fill="${a[2]==='used'?colors[i%3]:'#9298a3'}"><title>${a[0]} · ${a[3]}% · $${a[4]}</title></circle>`}); html += `<text class="axis-label" x="${w-right}" y="${h-7}" text-anchor="end">Account-wide saturation →</text>`; svg.innerHTML=html; }
+    const heat=[0,12,20,43,67,34,0,25,48,72,83,37,61,29,0,52,91,73,42,65,18,0,38,56,79,100,71,44,62,88]; document.querySelector("#heatmap").innerHTML=heat.map((level,i)=>`<i style="--level:${level}" title="Day ${i+1}: ${Math.round(level/6)} turns"></i>`).join('');
+    drawDaily(); drawScatter();
+    document.querySelectorAll("[data-factor]").forEach(button => button.addEventListener("click", () => {
+      button.parentElement.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+      const factor = Number(button.dataset.factor); const total = Math.round(842 * factor); const net = total - 560;
+      document.querySelector("#apiValue").innerHTML = `$${total} <small>/ 30d</small>`;
+      document.querySelector("#multiple").textContent = `${(total / 560).toFixed(1)}× subscription cost`;
+      document.querySelector("#bridgeValue").textContent = `$${total}`;
+      document.querySelector("#netValue").textContent = `${net >= 0 ? "+" : "−"}$${Math.abs(net)}`;
+      document.querySelectorAll("[data-base]").forEach(item => item.textContent = `$${Math.round(Number(item.dataset.base) * factor)}`);
+    }));
+  </script>
+</body>
+</html>

@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="An interactive field guide to BB's plugin architecture for veteran SDK designers.">
+  <title>BB Plugins: An Extension Language in Four Seams</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09111f;
+      --panel: #101b2e;
+      --panel-2: #13233b;
+      --ink: #edf4ff;
+      --muted: #9db0c9;
+      --faint: #6d819c;
+      --line: #263b58;
+      --cyan: #67e8f9;
+      --violet: #b9a7ff;
+      --amber: #ffd479;
+      --green: #81e6b1;
+      --red: #ff9b9b;
+      --radius: 18px;
+      --shadow: 0 18px 60px rgba(0, 0, 0, .28);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 85% -10%, rgba(103, 232, 249, .16), transparent 34rem),
+        radial-gradient(circle at 0% 35%, rgba(185, 167, 255, .12), transparent 28rem),
+        var(--bg);
+      color: var(--ink);
+      font: 16px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--cyan); }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    code { color: #dce7ff; }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      border-bottom: 1px solid rgba(157, 176, 201, .18);
+      background: rgba(9, 17, 31, .82);
+      backdrop-filter: blur(16px);
+    }
+    .topbar-inner { min-height: 58px; display: flex; align-items: center; gap: 14px; justify-content: space-between; }
+    .brand { font-weight: 800; letter-spacing: -.02em; white-space: nowrap; }
+    .brand span { color: var(--cyan); }
+    .progress { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }
+    .progress-track { width: 110px; height: 6px; overflow: hidden; border-radius: 20px; background: #1b2a42; }
+    .progress-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--violet)); transition: width .25s ease; }
+    .hero { padding: 76px 0 54px; }
+    .eyebrow { color: var(--cyan); text-transform: uppercase; letter-spacing: .15em; font-size: 12px; font-weight: 800; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 860px; margin-bottom: 22px; font-size: clamp(42px, 8vw, 84px); line-height: .98; letter-spacing: -.065em; }
+    h2 { margin-bottom: 12px; font-size: clamp(28px, 4vw, 44px); line-height: 1.05; letter-spacing: -.04em; }
+    h3 { margin-bottom: 8px; font-size: 19px; line-height: 1.2; }
+    .lede { max-width: 760px; color: var(--muted); font-size: clamp(18px, 2.5vw, 23px); line-height: 1.45; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .button, .choice, .tab, .arch-node, .copy-button {
+      border: 1px solid var(--line); border-radius: 12px; background: var(--panel); cursor: pointer;
+      transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    }
+    .button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px; text-decoration: none; }
+    .button:hover, .choice:hover, .tab:hover, .arch-node:hover, .copy-button:hover { border-color: var(--cyan); background: var(--panel-2); transform: translateY(-1px); }
+    .button.primary { border-color: transparent; background: linear-gradient(100deg, #5bd8ea, #9e8bff); color: #08111e; font-weight: 800; }
+    .hero-grid, .card-grid, .seam-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+    .hero-card { grid-column: span 3; padding: 18px; min-height: 156px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(16, 27, 46, .8); box-shadow: var(--shadow); }
+    .hero-card .number { color: var(--faint); font-size: 12px; font-weight: 800; }
+    .hero-card h3 { margin: 20px 0 6px; }
+    .hero-card p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+    section { scroll-margin-top: 76px; padding: 58px 0; border-top: 1px solid rgba(157, 176, 201, .14); }
+    .section-intro { max-width: 720px; margin-bottom: 26px; color: var(--muted); }
+    .section-intro strong { color: var(--ink); }
+    .architecture { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; }
+    .arch-map { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(16, 27, 46, .7); }
+    .arch-node { min-height: 128px; padding: 15px; text-align: left; }
+    .arch-node strong { display: block; margin-bottom: 7px; font-size: 18px; }
+    .arch-node small { display: block; color: var(--muted); line-height: 1.4; }
+    .arch-node[data-arch="server"] { border-color: rgba(103, 232, 249, .55); }
+    .arch-node[data-arch="app"] { border-color: rgba(185, 167, 255, .55); }
+    .arch-node[data-arch="host"] { border-color: rgba(255, 212, 121, .55); }
+    .arch-node[data-arch="agent"] { border-color: rgba(129, 230, 177, .55); }
+    .arch-detail { min-height: 100%; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(19, 35, 59, .94), rgba(16, 27, 46, .88)); }
+    .arch-detail .label { color: var(--cyan); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .arch-detail ul { padding-left: 19px; color: var(--muted); }
+    .arch-detail li + li { margin-top: 8px; }
+    .note { padding: 14px 16px; border-left: 3px solid var(--cyan); color: var(--muted); background: rgba(103, 232, 249, .07); border-radius: 0 12px 12px 0; }
+    .seam-grid { margin-top: 24px; }
+    .quiz { grid-column: span 6; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+    .quiz.full { grid-column: span 12; }
+    .quiz .question { color: var(--ink); font-weight: 700; }
+    .choices { display: grid; gap: 8px; margin-top: 15px; }
+    .choice { padding: 10px 12px; text-align: left; color: var(--muted); }
+    .choice.correct { border-color: var(--green); background: rgba(129, 230, 177, .12); color: var(--green); }
+    .choice.incorrect { border-color: var(--red); background: rgba(255, 155, 155, .1); color: var(--red); }
+    .feedback { min-height: 25px; margin: 13px 0 0; color: var(--muted); font-size: 14px; }
+    .feedback.good { color: var(--green); }
+    .feedback.bad { color: var(--amber); }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0; }
+    .tab { padding: 9px 13px; color: var(--muted); }
+    .tab.active { border-color: var(--cyan); background: rgba(103, 232, 249, .12); color: var(--cyan); }
+    .taxonomy-panel { display: none; grid-template-columns: 1.1fr .9fr; gap: 18px; }
+    .taxonomy-panel.active { display: grid; }
+    .panel, .timeline, .lab, .checklist { padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+    .panel p, .panel li { color: var(--muted); }
+    .primitive { display: flex; justify-content: space-between; gap: 14px; padding: 11px 0; border-bottom: 1px solid rgba(157, 176, 201, .13); }
+    .primitive:last-child { border-bottom: 0; }
+    .primitive span:last-child { color: var(--cyan); text-align: right; }
+    .card-grid { margin-top: 20px; }
+    .choice-card { grid-column: span 4; padding: 19px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+    .choice-card .icon { display: grid; width: 34px; height: 34px; place-items: center; margin-bottom: 18px; border-radius: 10px; background: rgba(103, 232, 249, .12); color: var(--cyan); font-weight: 900; }
+    .choice-card p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+    .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 22px 0; }
+    .flow-step { position: relative; padding: 16px 14px; border: 1px solid var(--line); background: var(--panel); }
+    .flow-step:not(:last-child)::after { content: "→"; position: absolute; z-index: 1; top: 50%; right: -13px; color: var(--cyan); transform: translateY(-50%); }
+    .flow-step .num { color: var(--cyan); font-weight: 900; }
+    .flow-step p { margin: 7px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .code-card { margin-top: 18px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: #0b1424; }
+    .code-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .copy-button { padding: 5px 9px; color: var(--cyan); font-size: 12px; }
+    pre { overflow-x: auto; margin: 0; padding: 18px; color: #d8e5fb; font-size: 13px; line-height: 1.65; }
+    .kw { color: #d1b8ff; } .fn { color: #7ee7ff; } .str { color: #b8e89d; } .cm { color: #7187a4; }
+    .lab { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .lab-controls { display: grid; gap: 10px; align-content: start; }
+    .lab-controls label { color: var(--muted); font-size: 13px; }
+    .lab-controls input { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; outline: 0; background: #0b1424; color: var(--ink); }
+    .lab-controls input:focus { border-color: var(--cyan); }
+    .lab-output { min-height: 218px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #0b1424; }
+    .status { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 12px; font-size: 13px; font-weight: 800; }
+    .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+    .status.good { color: var(--green); } .status.good::before { background: var(--green); }
+    .status.bad { color: var(--red); } .status.bad::before { background: var(--red); }
+    .lab-output pre { padding: 0; color: var(--muted); font-size: 12px; }
+    .mode-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
+    .mode-row .button { padding: 7px 10px; font-size: 13px; }
+    details { border-top: 1px solid var(--line); }
+    details:first-of-type { border-top: 0; }
+    summary { cursor: pointer; padding: 15px 0; font-weight: 800; }
+    details p { color: var(--muted); }
+    .checklist { display: grid; gap: 11px; }
+    .check { display: flex; gap: 10px; align-items: flex-start; color: var(--muted); }
+    .check input { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--cyan); }
+    .check input:checked + span { color: var(--green); text-decoration: line-through; text-decoration-color: rgba(129, 230, 177, .55); }
+    .sources { columns: 2; column-gap: 34px; padding-left: 20px; color: var(--muted); }
+    .sources li { break-inside: avoid; margin-bottom: 9px; }
+    footer { padding: 30px 0 60px; color: var(--faint); font-size: 13px; }
+    .tiny { color: var(--faint); font-size: 13px; }
+
+    @media (max-width: 800px) {
+      .hero { padding-top: 50px; }
+      .hero-card { grid-column: span 6; }
+      .architecture, .taxonomy-panel, .lab { grid-template-columns: 1fr; }
+      .choice-card { grid-column: span 6; }
+      .flow { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .flow-step:not(:last-child)::after { display: none; }
+    }
+    @media (max-width: 520px) {
+      .wrap { width: min(100% - 22px, 1120px); }
+      .topbar-inner { min-height: 52px; }
+      .progress-track { width: 70px; }
+      .hero-card, .quiz, .quiz.full, .choice-card { grid-column: span 12; }
+      .arch-map { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .sources { columns: 1; }
+      section { padding: 44px 0; }
+      h1 { font-size: clamp(42px, 14vw, 68px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand"><span>BB</span> / extension atlas</div>
+      <div class="progress" aria-live="polite"><span id="progress-label">Start here</span><div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="start" style="border-top: 0">
+      <div class="wrap">
+        <div class="eyebrow">Interactive field guide · for veteran SDK designers</div>
+        <h1>BB is an extension language with a host around it.</h1>
+        <p class="lede">The plugin SDK is not one oversized callback. It is a set of deliberately different seams: durable state, product surfaces, supervised execution, agent affordances, and signals. Learn to place a need in the right seam—and the rest of the architecture starts to feel inevitable.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#model">Start the tour <span aria-hidden="true">↓</span></a>
+          <a class="button" href="#lab">Jump to the RPC lab</a>
+        </div>
+        <div class="hero-grid" style="margin-top: 42px">
+          <article class="hero-card"><div class="number">01 / THE THESIS</div><h3>One capability</h3><p>Can appear in UI, CLI, agent tools, mentions, and automation without duplicating its core logic.</p></article>
+          <article class="hero-card"><div class="number">02 / THE BOUNDARY</div><h3>Plain data first</h3><p>Settings, schemas, slots, errors, and events stay inspectable by the host and safe to evolve.</p></article>
+          <article class="hero-card"><div class="number">03 / THE LIFECYCLE</div><h3>Durable by default</h3><p>Persistence and RPC are explicit; realtime is an ephemeral invalidation signal, never a hidden database.</p></article>
+          <article class="hero-card"><div class="number">04 / THE TRUST MODEL</div><h3>Full trust, tight seams</h3><p>Plugins can do real work, but registration, validation, teardown, and ownership remain host-visible.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="model">
+      <div class="wrap">
+        <div class="eyebrow">01 · mental model</div>
+        <h2>Think in placements, not features.</h2>
+        <p class="section-intro">A plugin is a small product distributed across runtimes. Click a placement to see what it owns and what it deliberately does not own.</p>
+        <div class="architecture">
+          <div class="arch-map" aria-label="BB plugin runtime map">
+            <button class="arch-node" type="button" data-arch="server"><strong>Server</strong><small>Durable capability, validation, auth, DB, RPC.</small></button>
+            <button class="arch-node" type="button" data-arch="app"><strong>App</strong><small>React surfaces, slots, composer, navigation.</small></button>
+            <button class="arch-node" type="button" data-arch="host"><strong>Host worker</strong><small>Long-lived I/O, providers, files, external systems.</small></button>
+            <button class="arch-node" type="button" data-arch="agent"><strong>Agent surface</strong><small>Tools, skills, mentions, context, commands.</small></button>
+          </div>
+          <article class="arch-detail" id="arch-detail">
+            <div class="label">Select a placement</div>
+            <h3 style="margin-top: 10px">The host is the composition root.</h3>
+            <p style="color: var(--muted)">BB gives each runtime the smallest useful vocabulary for its job. A plugin can cross the boundary through typed contracts, but it does not blur the boundary.</p>
+            <div class="note">Design heuristic: if your new capability needs a database, an interactive surface, and a third-party API, that is three placements joined by one contract—not one giant plugin function.</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="seams">
+      <div class="wrap">
+        <div class="eyebrow">02 · choose the seam</div>
+        <h2>Can you place the need?</h2>
+        <p class="section-intro">Try these as architecture-review prompts. A wrong answer is useful: read the explanation, then use the rule on your own plugin.</p>
+        <div class="seam-grid">
+          <article class="quiz" data-quiz="notebook">
+            <h3>Scenario A · a user-owned notebook</h3>
+            <p class="question">A 50 KB notebook is edited by the user, must survive reloads, and appears in a panel. What is the first seam?</p>
+            <div class="choices">
+              <button class="choice" type="button" data-choice="kv">JSON KV only</button>
+              <button class="choice" type="button" data-choice="sqlite">Server SQLite + RPC</button>
+              <button class="choice" type="button" data-choice="realtime">Realtime channel</button>
+              <button class="choice" type="button" data-choice="host">Host worker</button>
+            </div>
+            <p class="feedback" aria-live="polite"></p>
+          </article>
+          <article class="quiz" data-quiz="composer">
+            <h3>Scenario B · a new composer affordance</h3>
+            <p class="question">A plugin wants an @-mention picker that inserts text into the existing composer. Where should it start?</p>
+            <div class="choices">
+              <button class="choice" type="button" data-choice="http">HTTP route</button>
+              <button class="choice" type="button" data-choice="slot">App composer slot</button>
+              <button class="choice" type="button" data-choice="event">Lifecycle event</button>
+              <button class="choice" type="button" data-choice="db">Database migration</button>
+            </div>
+            <p class="feedback" aria-live="polite"></p>
+          </article>
+          <article class="quiz" data-quiz="poller">
+            <h3>Scenario C · an external poller</h3>
+            <p class="question">A plugin polls a vendor API, should restart after a crash, and must not block a request. Which composition fits?</p>
+            <div class="choices">
+              <button class="choice" type="button" data-choice="handler">RPC handler doing the loop</button>
+              <button class="choice" type="button" data-choice="host">Supervised host worker + contract</button>
+              <button class="choice" type="button" data-choice="signal">Realtime only</button>
+              <button class="choice" type="button" data-choice="mention">Mention resolver</button>
+            </div>
+            <p class="feedback" aria-live="polite"></p>
+          </article>
+          <article class="quiz" data-quiz="signal">
+            <h3>Scenario D · two open tabs</h3>
+            <p class="question">A save in tab A should make tab B refresh its panel. What is the right signal?</p>
+            <div class="choices">
+              <button class="choice" type="button" data-choice="db">Have the app read the DB directly</button>
+              <button class="choice" type="button" data-choice="realtime">Realtime invalidation + RPC refetch</button>
+              <button class="choice" type="button" data-choice="event">Vetoable lifecycle event</button>
+              <button class="choice" type="button" data-choice="cli">Plugin CLI command</button>
+            </div>
+            <p class="feedback" aria-live="polite"></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="taxonomy">
+      <div class="wrap">
+        <div class="eyebrow">03 · the need taxonomy</div>
+        <h2>Four core needs—and one important fifth.</h2>
+        <p class="section-intro">Persistence, extension, attachment, and communication are the recurring categories. <strong>Execution</strong> is the fifth: it explains why BB separates a host worker from a server request.</p>
+        <div class="tabs" role="tablist" aria-label="Plugin need categories">
+          <button class="tab active" type="button" data-tab="persist">Persist</button>
+          <button class="tab" type="button" data-tab="extend">Extend</button>
+          <button class="tab" type="button" data-tab="attach">Attach</button>
+          <button class="tab" type="button" data-tab="communicate">Communicate</button>
+          <button class="tab" type="button" data-tab="execute">Execute</button>
+        </div>
+
+        <div class="taxonomy-panel active" data-panel="persist">
+          <article class="panel"><h3>Persist what the user can come back to.</h3><p>Use the lightest durable store that matches the data. JSON KV is namespaced and bounded; plugin SQLite handles relational or indexed records; thread storage is for user-visible files attached to a thread.</p><p>The key design move is ownership: a plugin owns its namespace and migrations. The host owns the location, permissions, lifecycle, and cleanup.</p></article>
+          <div class="panel"><div class="primitive"><span>Preferences / secrets</span><span>declarative settings</span></div><div class="primitive"><span>Small JSON state</span><span>namespaced KV</span></div><div class="primitive"><span>Indexed records</span><span>plugin SQLite</span></div><div class="primitive"><span>Thread artifact</span><span>thread storage</span></div></div>
+        </div>
+        <div class="taxonomy-panel" data-panel="extend">
+          <article class="panel"><h3>Extend through additive slots.</h3><p>Most plugin surfaces are additive: a homepage section, settings section, nav panel, thread action, composer action, message action, command palette item, file opener, or content script.</p><p>Replacement is intentionally rarer. When a plugin replaces a built-in renderer or thread list, the original is available through an explicit experimental delegation path.</p></article>
+          <div class="panel"><div class="primitive"><span>Visual product surface</span><span>app slot</span></div><div class="primitive"><span>Agent capability</span><span>tool / skill</span></div><div class="primitive"><span>Human automation</span><span>plugin CLI</span></div><div class="primitive"><span>Model provider</span><span>provider contract</span></div></div>
+        </div>
+        <div class="taxonomy-panel" data-panel="attach">
+          <article class="panel"><h3>Attach context at the moment it becomes useful.</h3><p>Mentions are a particularly revealing API: search while the user types, then resolve the selected item at send time. The plugin can attach hidden, agent-only context without changing the visible message.</p><p>Other attachment points include timeline items, composer data, navigation params, and message directives. Each keeps ownership with the plugin while the host owns the surrounding interaction.</p></article>
+          <div class="panel"><div class="primitive"><span>Visible inline reference</span><span>mention UI</span></div><div class="primitive"><span>Agent-only context</span><span>mention resolver</span></div><div class="primitive"><span>Thread-local history</span><span>timeline index</span></div><div class="primitive"><span>Cross-panel state</span><span>nav parameters</span></div></div>
+        </div>
+        <div class="taxonomy-panel" data-panel="communicate">
+          <article class="panel"><h3>Match the communication channel to its truth.</h3><p>RPC is a validated request/response boundary. Realtime is a best-effort, ephemeral signal. Lifecycle events are observation hooks, not veto points. HTTP is for outside callers and signed webhooks.</p><p>This separation prevents a common SDK failure mode: treating an event bus as a database, or treating a websocket as an API that must never lose a message.</p></article>
+          <div class="panel"><div class="primitive"><span>Need an answer</span><span>RPC</span></div><div class="primitive"><span>Need a refresh hint</span><span>realtime</span></div><div class="primitive"><span>Need to observe</span><span>lifecycle event</span></div><div class="primitive"><span>Need ingress</span><span>HTTP route</span></div></div>
+        </div>
+        <div class="taxonomy-panel" data-panel="execute">
+          <article class="panel"><h3>Put long-lived or privileged work in the right runtime.</h3><p>A host worker is optional, supervised, digest-verified, and given a typed bridge. It is the right home for provider integrations, filesystem work, local processes, and network loops that should not live inside a request handler.</p><p>Runtime identity is minted by BB, not guessed by a plugin. That keeps provider events attributable to real threads, agents, and users.</p></article>
+          <div class="panel"><div class="primitive"><span>Short server operation</span><span>RPC handler</span></div><div class="primitive"><span>Restartable service</span><span>background supervisor</span></div><div class="primitive"><span>External / local I/O</span><span>host worker</span></div><div class="primitive"><span>Scheduled work</span><span>durable cron row</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="leverage">
+      <div class="wrap">
+        <div class="eyebrow">04 · highest-leverage choices</div>
+        <h2>The SDK’s philosophy is encoded in the constraints.</h2>
+        <p class="section-intro">The most important choices are not the number of methods. They are the handful of boundaries that make composition legible, failures local, and upgrades survivable.</p>
+        <div class="card-grid">
+          <article class="choice-card"><div class="icon">01</div><h3>Plain-data descriptors</h3><p>Settings and registration metadata can be rendered by the host, exposed in CLI, and inspected without executing plugin code. A descriptor is an integration surface, not decoration.</p></article>
+          <article class="choice-card"><div class="icon">02</div><h3>Schema at every RPC edge</h3><p>Standard Schema-compatible inputs and outputs turn runtime boundaries into contracts. Invalid input, handler failure, non-JSON output, and unknown method have stable meanings.</p></article>
+          <article class="choice-card"><div class="icon">03</div><h3>Observe, don’t intercept</h3><p>Lifecycle events are fire-and-forget and cannot veto core actions. Plugins can react to thread changes without becoming hidden middleware in BB’s critical path.</p></article>
+          <article class="choice-card"><div class="icon">04</div><h3>Durable vs ephemeral</h3><p>KV, SQLite, and thread files persist. Realtime does not. The API makes the developer decide whether a client should refetch or reconstruct.</p></article>
+          <article class="choice-card"><div class="icon">05</div><h3>Wholesale registration</h3><p>Reload registers a candidate as a unit. If it fails, the old plugin stays live; if it succeeds, services stop, disposers run in reverse order, and stale handles become invalid.</p></article>
+          <article class="choice-card"><div class="icon">06</div><h3>One capability, many doors</h3><p>A search function can feed a tool, a CLI command, a mention resolver, and a KV cache. The SDK makes these doors explicit without forcing one UX on every plugin.</p></article>
+        </div>
+        <div class="flow" aria-label="Save and refresh sequence">
+          <div class="flow-step"><div class="num">01 · App</div><p>User clicks Save; app sends a typed RPC request.</p></div>
+          <div class="flow-step"><div class="num">02 · Server</div><p>Host validates input; plugin writes owned durable state.</p></div>
+          <div class="flow-step"><div class="num">03 · Signal</div><p>Plugin publishes a small realtime invalidation.</p></div>
+          <div class="flow-step"><div class="num">04 · App</div><p>Every open client refetches through the same RPC.</p></div>
+        </div>
+        <div class="note">Notice what is absent: the realtime payload is not the record. It is a hint that the record may have changed.</div>
+      </div>
+    </section>
+
+    <section id="examples">
+      <div class="wrap">
+        <div class="eyebrow">05 · concrete compositions</div>
+        <h2>Read the plugin as a small system.</h2>
+        <p class="section-intro">These are compact shapes from the BB examples and Phosphor plugins. The point is not memorizing APIs; it is seeing how one responsibility crosses several explicit seams.</p>
+
+        <details open>
+          <summary>Example 1 · one search function, four agent-facing doors</summary>
+          <p>In <code>examples/plugins/agent-enrichment/server.ts</code>, search is a capability. The plugin reuses it for a CLI command, an agent tool, a mention resolver, and a KV-backed enrichment path. Configure the tool and skill only when the relevant setting is enabled.</p>
+          <div class="code-card">
+            <div class="code-head"><span>illustrative shape · capability fan-out</span><button class="copy-button" type="button" data-copy="code-fanout">Copy</button></div>
+            <pre id="code-fanout"><span class="kw">const</span> search = <span class="kw">async</span> (query: <span class="fn">string</span>) =&gt; index.lookup(query);
+
+api.cli.register({ name: <span class="str">"search"</span>, run: ({ args }) =&gt; search(args.query) });
+api.agents.registerTool({ name: <span class="str">"search_context"</span>, input: querySchema, execute: search });
+api.agents.registerMention({ name: <span class="str">"doc"</span>, search, resolve: attachAgentContext });
+api.storage.kv.set(<span class="str">"last-search"</span>, { query, resultCount });</pre>
+          </div>
+        </details>
+        <details>
+          <summary>Example 2 · Thread Links: durable index + RPC + invalidation</summary>
+          <p><code>plugins/thread-links/server.ts</code> creates an owned SQLite index, exposes list/create/delete RPC methods, and publishes a realtime change. Its app counterpart adds a thread-header action, then refetches on realtime and reconnect.</p>
+          <div class="code-card">
+            <div class="code-head"><span>illustrative shape · durable feature</span><button class="copy-button" type="button" data-copy="code-links">Copy</button></div>
+            <pre id="code-links"><span class="kw">await</span> db.migrate();
+api.rpc.register(<span class="str">"links.list"</span>, listInput, listOutput, <span class="kw">async</span> ({ input }) =&gt; db.list(input.threadId));
+api.rpc.register(<span class="str">"links.create"</span>, createInput, linkOutput, <span class="kw">async</span> ({ input }) =&gt; {
+  <span class="kw">const</span> link = <span class="kw">await</span> db.create(input);
+  api.realtime.publish({ channel: <span class="str">"links.changed"</span>, payload: { threadId: input.threadId } });
+  <span class="kw">return</span> link;
+});</pre>
+          </div>
+        </details>
+        <details>
+          <summary>Example 3 · Slack bot: signed ingress + mapping + thread lifecycle</summary>
+          <p><code>examples/plugins/slack-bot/server.ts</code> combines declarative settings, a signed HTTP webhook, namespaced KV for Slack-to-BB mapping, thread spawn/send, and an idle reply. The request handler is small because the durable mapping and thread system carry the state.</p>
+          <div class="code-card">
+            <div class="code-head"><span>illustrative shape · outside communication</span><button class="copy-button" type="button" data-copy="code-slack">Copy</button></div>
+            <pre id="code-slack">api.http.route({ method: <span class="str">"POST"</span>, path: <span class="str">"/events"</span>, auth: <span class="str">"none"</span> }, <span class="kw">async</span> (request) =&gt; {
+  <span class="kw">if</span> (!verifySlackSignature(request)) <span class="kw">return</span> unauthorized();
+  <span class="kw">const</span> bbThread = <span class="kw">await</span> findOrSpawnThread(api.storage.kv, event.channel);
+  <span class="kw">await</span> api.threads.send(bbThread.id, renderInboundMessage(event));
+  <span class="kw">return</span> ok();
+});</pre>
+          </div>
+        </details>
+        <details>
+          <summary>Example 4 · composer customization: additive UI, host-owned send</summary>
+          <p><code>examples/plugins/composer-customization/app.tsx</code> adds an action, plus-menu item, banner, rich-text effect, and draft observer. It can shape the composer without reimplementing thread loading, streaming, permissions, queueing, or send/stop behavior owned by <code>ThreadChat</code>.</p>
+          <div class="code-card">
+            <div class="code-head"><span>illustrative shape · additive app surface</span><button class="copy-button" type="button" data-copy="code-composer">Copy</button></div>
+            <pre id="code-composer">api.ui.composer.register({
+  action: ({ composer }) =&gt; composer.insertText(<span class="str">"/summarize "</span>),
+  plusMenu: { label: <span class="str">"Insert template"</span>, onSelect: insertTemplate },
+  banner: ({ thread }) =&gt; thread ? <span class="str">"Plugin context active"</span> : <span class="kw">null</span>,
+  onDraftChange: draft =&gt; api.storage.kv.set(<span class="str">"draft-length"</span>, draft.length)
+});</pre>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="lab">
+      <div class="wrap">
+        <div class="eyebrow">06 · boundary lab</div>
+        <h2>Feel the RPC / realtime distinction.</h2>
+        <p class="section-intro">Enter a request and inspect the contract. Then switch to a realtime signal: it carries a small hint, not the source of truth.</p>
+        <div class="lab">
+          <div class="lab-controls">
+            <label for="rpc-input">JSON payload</label>
+            <input id="rpc-input" value='{"threadId":"t_demo","limit":10}' spellcheck="false" autocomplete="off">
+            <div class="mode-row"><button class="button primary" type="button" id="run-rpc">Validate RPC</button><button class="button" type="button" id="run-signal">Emit signal</button></div>
+            <div class="note">Host behavior: validate input before the handler, then validate output before strict JSON serialization. A realtime message is transient; reconnect means refetch.</div>
+          </div>
+          <div class="lab-output" aria-live="polite"><div class="status" id="lab-status">Waiting for input</div><pre id="lab-result">Choose “Validate RPC” to see a typed request envelope.</pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="recipes">
+      <div class="wrap">
+        <div class="eyebrow">07 · architecture recipes</div>
+        <h2>Three recipes worth carrying into design review.</h2>
+        <div class="card-grid">
+          <article class="choice-card"><div class="icon">A</div><h3>Durable collaborative feature</h3><p><code>SQLite → RPC → app slot → realtime invalidation</code>. Add reconnect refetch and thread-deletion cleanup. Keep the payload small and the record durable.</p></article>
+          <article class="choice-card"><div class="icon">B</div><h3>External integration</h3><p><code>settings → signed HTTP / host worker → mapping KV → threads API</code>. Add a background outbox when delivery must retry, and surface configuration errors explicitly.</p></article>
+          <article class="choice-card"><div class="icon">C</div><h3>Agent-native capability</h3><p><code>tool + skill + mention resolver + CLI</code>. Reuse one domain function; make context selection static where possible and dynamic only where necessary.</p></article>
+        </div>
+        <div class="panel" style="margin-top: 18px">
+          <details open><summary>What does the plugin SDK refuse to hide?</summary><p>It makes auth mode, input/output schemas, settings shape, storage ownership, lifecycle cleanup, realtime ephemerality, and reload behavior explicit. These are exactly the places where an extension platform otherwise accumulates accidental policy.</p></details>
+          <details><summary>Why only a few host-owned React components?</summary><p>BB owns the high-value orchestration component—<code>ThreadChat</code>—and the Markdown contract. Plugins bring their own UI primitives. That keeps the host/plugin boundary stable while letting plugin experiences evolve independently.</p></details>
+          <details><summary>How do I know whether I need a host worker?</summary><p>If the work is request-shaped and fast, keep it server-side. If it is long-lived, provider-facing, filesystem-bound, or needs supervised restart behavior, put it in the optional host runtime and expose a typed contract back to the server.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section id="checklist">
+      <div class="wrap">
+        <div class="eyebrow">08 · close the loop</div>
+        <h2>Use this before you add an API.</h2>
+        <p class="section-intro">Check the questions that your design can already answer. Your progress is kept locally in this browser.</p>
+        <div class="checklist">
+          <label class="check"><input type="checkbox" data-check="owner"><span>What does the plugin own, and what does the BB host own?</span></label>
+          <label class="check"><input type="checkbox" data-check="truth"><span>Which values are durable truth, and which are ephemeral invalidation signals?</span></label>
+          <label class="check"><input type="checkbox" data-check="schema"><span>Are input, output, settings, and external ingress contracts plain-data and validated?</span></label>
+          <label class="check"><input type="checkbox" data-check="surface"><span>Which existing additive slot gives the user a native place to discover the capability?</span></label>
+          <label class="check"><input type="checkbox" data-check="reload"><span>What happens on reload, reconnect, thread deletion, configuration loss, and worker restart?</span></label>
+          <label class="check"><input type="checkbox" data-check="reuse"><span>Can the core capability power more than one door—UI, agent, CLI, mention, or automation?</span></label>
+        </div>
+        <div class="note" style="margin-top: 18px"><strong>Takeaway:</strong> BB is extensible because it does not pretend all extension needs are the same. It gives each need a narrow, typed, observable seam—and lets plugins compose those seams into a product.</div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="wrap">
+        <div class="eyebrow">Source trail</div>
+        <h2>Where to read the design in the repo.</h2>
+        <p class="section-intro">The explainer is a guided interpretation of these files. Paths are intentionally included so you can jump from concept to implementation.</p>
+        <ul class="sources">
+          <li><code>fork/upstream/docs/VISION.md</code> — product philosophy</li>
+          <li><code>fork/upstream/packages/plugin-sdk/src/backend-contract.ts</code> — server API</li>
+          <li><code>fork/upstream/packages/plugin-sdk/src/app-contract.ts</code> — app slots and host-owned UI</li>
+          <li><code>fork/upstream/packages/plugin-sdk/src/rpc-contract.ts</code> — schemas and stable errors</li>
+          <li><code>fork/upstream/examples/plugins/agent-enrichment/server.ts</code> — capability fan-out</li>
+          <li><code>fork/upstream/examples/plugins/echo-provider/host.ts</code> — provider bridge</li>
+          <li><code>fork/upstream/examples/plugins/slack-bot/server.ts</code> — signed ingress and threads</li>
+          <li><code>fork/upstream/examples/plugins/composer-customization/app.tsx</code> — additive composer UI</li>
+          <li><code>plugins/plugins/thread-links/server.ts</code> — durable index and sync</li>
+          <li><code>plugins/plugins/snippets/app.tsx</code> — mention and composer insertion</li>
+          <li><code>plugins/plugins/sticky-notes/server.ts</code> — DB, realtime, outbox, identity</li>
+          <li><code>plugins/plugins/background-jobs/server.ts</code> — CLI, tools, supervisor, events</li>
+        </ul>
+        <p class="tiny">Built as one self-contained HTML file for this lesson. No analytics, no external JavaScript, no framework required.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="wrap">BB plugin field guide · designed to be read linearly or explored by seam.</div></footer>
+
+  <script>
+    (() => {
+      const archDetails = {
+        server: { title: "Server · durable capability", text: "The server factory receives the full backend API. It is where a plugin owns settings, namespaced KV, SQLite migrations, RPC methods, HTTP routes, lifecycle observation, background services, and realtime publication.", list: ["Host validates the boundary before your handler runs.", "The plugin owns its data namespace; BB owns placement and lifecycle.", "Use RPC for answers; publish realtime only as an invalidation hint."] },
+        app: { title: "App · native product surface", text: "The app entry is a React plugin that registers into host-owned slots. It can add navigation, composer actions, thread actions, panels, message actions, and content scripts while ThreadChat retains the hard interaction semantics.", list: ["Additive registration is the default; replacement is explicit.", "Call the server through the generated/useRpc boundary.", "Handle reconnect by refetching durable state, not replaying signals."] },
+        host: { title: "Host worker · supervised execution", text: "An optional host entry is the right place for long-lived provider integrations, local processes, filesystem work, or network loops. BB supervises it and shares a typed server/host contract.", list: ["The worker is enrolled and digest-verified.", "Crash/restart behavior belongs to the supervisor.", "BB mints runtime identity so external events remain attributable."] },
+        agent: { title: "Agent surface · capability and context", text: "Plugins can register tools, static skills, dynamic instructions, mention search/resolve behavior, and one top-level CLI command. The same domain capability can serve several of these doors.", list: ["Schemas validate tool arguments before execution.", "Mention resolution happens at send time and can attach hidden agent context.", "Tool configuration changes take effect at the next session start."] }
+      };
+      const detail = document.getElementById("arch-detail");
+      document.querySelectorAll("[data-arch]").forEach((node) => node.addEventListener("click", () => {
+        const item = archDetails[node.dataset.arch];
+        detail.innerHTML = `<div class="label">${item.title}</div><h3 style="margin-top: 10px">${item.text}</h3><ul>${item.list.map((line) => `<li>${line}</li>`).join("")}</ul>`;
+      }));
+
+      const quizAnswers = {
+        notebook: { correct: "sqlite", good: "Exactly. This is durable, queryable user state: keep it in the plugin’s SQLite and expose it through RPC; the panel is an app consumer.", bad: "Try again. A realtime channel is not storage, KV is a poor fit for an indexed 50 KB document, and a worker does not make state durable." },
+        composer: { correct: "slot", good: "Yes. Use the additive composer surface; let the host continue to own draft, send, queue, and permission behavior.", bad: "Look for an additive app surface first. This need is UI composition, not ingress, observation, or persistence." },
+        poller: { correct: "host", good: "Right. A supervised host worker handles the long-lived loop; the server/worker contract keeps the rest of the plugin typed.", bad: "A request handler or signal is the wrong lifetime. Choose the supervised host runtime for restartable external I/O." },
+        signal: { correct: "realtime", good: "Correct. Publish an ephemeral invalidation and have tab B refetch the durable record through RPC.", bad: "The signal should not become a second database or a veto point. Use realtime for the hint, RPC for truth." }
+      };
+      document.querySelectorAll("[data-quiz]").forEach((quiz) => {
+        const answer = quizAnswers[quiz.dataset.quiz];
+        const feedback = quiz.querySelector(".feedback");
+        quiz.querySelectorAll("[data-choice]").forEach((choice) => choice.addEventListener("click", () => {
+          quiz.querySelectorAll("[data-choice]").forEach((other) => other.classList.remove("correct", "incorrect"));
+          const isCorrect = choice.dataset.choice === answer.correct;
+          choice.classList.add(isCorrect ? "correct" : "incorrect");
+          feedback.className = `feedback ${isCorrect ? "good" : "bad"}`;
+          feedback.textContent = isCorrect ? answer.good : answer.bad;
+        }));
+      });
+
+      document.querySelectorAll("[data-tab]").forEach((tab) => tab.addEventListener("click", () => {
+        document.querySelectorAll("[data-tab]").forEach((other) => other.classList.toggle("active", other === tab));
+        document.querySelectorAll("[data-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === tab.dataset.tab));
+      }));
+
+      document.querySelectorAll("[data-copy]").forEach((button) => button.addEventListener("click", async () => {
+        const source = document.getElementById(button.dataset.copy).innerText;
+        try { await navigator.clipboard.writeText(source); button.textContent = "Copied"; } catch { button.textContent = "Select to copy"; }
+        window.setTimeout(() => { button.textContent = "Copy"; }, 1300);
+      }));
+
+      const labStatus = document.getElementById("lab-status");
+      const labResult = document.getElementById("lab-result");
+      const input = document.getElementById("rpc-input");
+      const showLab = (kind, message, payload) => {
+        labStatus.className = `status ${kind}`;
+        labStatus.textContent = message;
+        labResult.textContent = JSON.stringify(payload, null, 2);
+      };
+      document.getElementById("run-rpc").addEventListener("click", () => {
+        let parsed;
+        try { parsed = JSON.parse(input.value); } catch { showLab("bad", "invalid_json", { error: "The envelope is not valid JSON.", next: "Fix the payload before the handler can run." }); return; }
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || typeof parsed.threadId !== "string" || ("limit" in parsed && (!Number.isInteger(parsed.limit) || parsed.limit < 1 || parsed.limit > 100))) {
+          showLab("bad", "invalid_input", { error: "Expected an object with threadId:string and optional limit:1..100.", received: parsed }); return;
+        }
+        showLab("good", "valid_input → handler → valid_output", { method: "links.list", input: parsed, output: { links: [], sourceOfTruth: "plugin SQLite" } });
+      });
+      document.getElementById("run-signal").addEventListener("click", () => {
+        let parsed;
+        try { parsed = JSON.parse(input.value); } catch { parsed = { threadId: "t_demo" }; }
+        showLab("good", "ephemeral signal emitted", { pluginId: "demo.links", channel: "links.changed", payload: { threadId: parsed && parsed.threadId ? parsed.threadId : "t_demo" }, next: "Clients refetch links.list over RPC; this signal is not persisted." });
+      });
+
+      document.querySelectorAll("[data-check]").forEach((check) => {
+        const key = `bb-explainer-${check.dataset.check}`;
+        try { check.checked = window.localStorage.getItem(key) === "1"; } catch {}
+        check.addEventListener("change", () => { try { window.localStorage.setItem(key, check.checked ? "1" : "0"); } catch {} });
+      });
+
+      const sections = [...document.querySelectorAll("main section[id]")];
+      const fill = document.getElementById("progress-fill");
+      const label = document.getElementById("progress-label");
+      const labels = { start: "Start here", model: "Mental model", seams: "Choose the seam", taxonomy: "Need taxonomy", leverage: "SDK choices", examples: "Examples", lab: "Boundary lab", recipes: "Recipes", checklist: "Checklist", sources: "Source trail" };
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        const index = sections.indexOf(visible.target);
+        fill.style.width = `${Math.round(((index + 1) / sections.length) * 100)}%`;
+        label.textContent = labels[visible.target.id] || "Exploring";
+      }, { rootMargin: "-18% 0px -68% 0px", threshold: [0, .25, .6] });
+      sections.forEach((section) => observer.observe(section));
+    })();
+  </script>
+</body>
+</html>
