@@ -1,17 +1,25 @@
 {
   "artifact": {
-    "file": "get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
-    "sha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599",
-    "bytes": 545305
+    "file": "get-bb-plugin-sdk-0.4.54+phosphor.68c40905367a.sdk.0344205facae.tgz",
+    "sha256": "182f1feb1ca7fe7d295f32c962daf5abd0948b07c911560b3115c9ec31e44db7",
+    "bytes": 577808
   },
-  "sourceReceipt": "c30b12255a7f9f098e7bf9b6d1999410e7956785",
+  "sourceReceipt": "68c40905367a1a04acd6899d2fa1e9433a4b27dd",
+  "finalReplayTree": "eaa48b5f7a7ff7bbf9737d2d75372d91528829af",
+  "finalReplaySdkTree": "942037898083cf199d74e02af19d8772514e6155",
   "checks": {
     "turboBuildTypes": "pass",
     "turboBuildRuntime": "pass",
+    "artifactVerifyExisting": "pass",
     "coldInstall": "pass",
     "publicEntryResolution": "15/15 pass",
     "rootAndAppImport": "pass",
-    "deterministicRepackSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599",
-    "experimentalStatusLabels": "absent from source and packed declarations"
+    "deterministicRepackSha256": "182f1feb1ca7fe7d295f32c962daf5abd0948b07c911560b3115c9ec31e44db7",
+    "finalReplayTree": "eaa48b5f7a7ff7bbf9737d2d75372d91528829af",
+    "finalReplaySdkTree": "942037898083cf199d74e02af19d8772514e6155",
+    "organizationConsumers": "frozen install, sync, references, sdk resolution, typecheck, tests and build pass",
+    "communityConsumers": "unchanged intentional registry targets; npm ci, tests, typecheck and build pass",
+    "pluginHttpAuthMode": "local | token | none; capability absent",
+    "producerRenderingHook": "optional public declaration present"
   }
 }

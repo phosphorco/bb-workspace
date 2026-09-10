@@ -20,15 +20,19 @@ package resolution. Do not copy `bundled-types` into individual plugins.
 
 The selected package is:
 
-- File: `get-bb-plugin-sdk-0.4.47+phosphor.7dfc119a823d.sdk.e28ae9391d36.tgz`
-- SHA-256: `8323228ece4f6a73b611c1dd8d489a79f391f7420a909c6ec6d487516ca3da9c`
+- File: `get-bb-plugin-sdk-0.4.54+phosphor.68c40905367a.sdk.0344205facae.tgz`
+- SHA-256: `182f1feb1ca7fe7d295f32c962daf5abd0948b07c911560b3115c9ec31e44db7`
 - Name: `@get-bb/plugin-sdk`
-- Version: `0.4.47+phosphor.7dfc119a823d.sdk.e28ae9391d36`
-- Selected source receipt: `7dfc119a823d90927f202815d1222916d2d0f4e9`
+- Version: `0.4.54+phosphor.68c40905367a.sdk.0344205facae`
+- Selected source receipt: `68c40905367a1a04acd6899d2fa1e9433a4b27dd`
+
+The final fork replay tree `eaa48b5f7a7ff7bbf9737d2d75372d91528829af`
+retains the identical plugin SDK subtree `942037898083cf199d74e02af19d8772514e6155`,
+so this already-verified artifact remains the selected package without repacking.
 
 The version suffix identifies the fork and packaged input. Semver compatibility
 alone is not provenance: the archive hash and adjacent `.provenance.json` receipt
-identify the exact bytes. Upstream `0.4.47` does not include all fork contracts.
+identify the exact bytes. Upstream `0.4.54` does not include all fork contracts.
 The source package version and the running server were not changed for packing.
 
 ## Install the selected composition
@@ -64,7 +68,7 @@ Then, from the workspace root, pack into a fresh output directory:
 ```sh
 node sdk-artifacts/prepare-plugin-sdk.mjs \
   --source fork/build/bb \
-  --source-receipt 7dfc119a823d90927f202815d1222916d2d0f4e9 \
+  --source-receipt 68c40905367a1a04acd6899d2fa1e9433a4b27dd \
   --output /tmp/bb-sdk-reproduction
 ```
 
