@@ -1,0 +1,39 @@
+{
+  "status": "delivered",
+  "runtimeBefore": "0ba993279b93dc90c52ef33a4b8ff848ee2917c3",
+  "runtimeCandidate": "fc11803cce70f44a0099c03b10a214eafd296651",
+  "runtimeTree": "116370cf44d556e53c346340bfe473eab47eddc3",
+  "patchCountBefore": 16,
+  "patchCountAfter": 15,
+  "retiredPatch": "0004-feat-plugins-add-capability-authenticated-routes.patch",
+  "agentConnectFix": "918554dbbf2033734d99535920a538dcbb339948",
+  "sdkFile": "get-bb-plugin-sdk-0.4.47+phosphor.7dfc119a823d.sdk.e28ae9391d36.tgz",
+  "sdkSha256": "8323228ece4f6a73b611c1dd8d489a79f391f7420a909c6ec6d487516ca3da9c",
+  "sdkSourceTree": "7dfc119a823d90927f202815d1222916d2d0f4e9",
+  "sdkFinalTreeDifference": "Only plugin authoring guide terminology changed after SDK packing; packages/plugin-sdk source diff is empty.",
+  "review": "thr_nhwhd8jd4z",
+  "activationScript": "/tmp/bb-remove-capability-activate.sh",
+  "replay": "Disposable authoring replay; final source is materialized at fork/build/bb and identified by runtimeActive/runtimeTree.",
+  "verification": {
+    "patchReplay": "pass",
+    "forkTypecheck": "88/88",
+    "forkBuild": "13/13",
+    "forkTests": "85/85 pass",
+    "pluginRequiredChecks": "pass",
+    "testEnvironment": "Initial /tmp run exhausted tmpfs inodes. A temporary directory inside a Git checkout affected non-Git fixtures. Final clean-environment rerun passed with TMPDIR=/var/tmp/bb-remove-capability-tests; source/tests unchanged.",
+    "canonicalInstall": "pass",
+    "canonicalTypecheck": "pass",
+    "canonicalBuild": "pass",
+    "canonicalFocusedTests": "45/45 pass",
+    "liveAgentConnect": {
+      "source": "/home/ubuntu/bb/plugins/plugins/agent-connect",
+      "options": 204,
+      "missingToken": 401,
+      "invalidToken": 401
+    }
+  },
+  "remaining": [],
+  "forkCommit": "2c6b274530c8473aea4b992e063d6e98ac2b75e9",
+  "pluginCommit": "c8ace12c72497002da2caf5c157ba5402e9a9181",
+  "runtimeActive": "fc11803cce70f44a0099c03b10a214eafd296651"
+}
