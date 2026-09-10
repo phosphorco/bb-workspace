@@ -57,6 +57,7 @@ consistency failure; history preservation is product behavior, not tamper proof.
 - Use the package controller and binding for identity-scoped synchronization.
   Do not add a parallel load/save effect, polling feed, or per-feature controller.
 - Persist immutable operations and reconcile the same operation after uncertainty.
+- Choose external prompt rendering at binding construction: the default `host` mode adds one sender envelope, while a producer that already owns an envelope and `<attached>` context must use `bindBbIdentity(bb, { externalMessageRendering: 'producer' })`. Never infer ownership by text sniffing or add per-send author metadata; both modes retain structured external provenance.
   A lost response, expired lookup, or observer timeout does not authorize resend.
 - Explicit owners manage connection, view, subscription and draft lifetimes.
   Separate bundled plugins do not share a hidden module singleton.

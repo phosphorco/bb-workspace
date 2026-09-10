@@ -1,0 +1,11 @@
+{
+  "sourceRepository": "plugins",
+  "sourceCommit": "e24684c10033cf36aea105874fda5d6a2857cc94",
+  "sourcePackageTree": "f51bff177d4068a9479ee7698db15d98fc2bf04a",
+  "sourceHasUncommittedPackageChanges": true,
+  "packagePath": "packages/bb-identity",
+  "sha256": "359fb8ce162482a449365713b782f05de365ee18501eee709faefbb72f6b5be0",
+  "archive": "phosphorco-bb-identity-0.1.0.359fb8ce1624.tgz",
+  "scope": "canonical BB workspace dependency; not npm publication",
+  "recipe": "bun pm pack --ignore-scripts; built public entries; catalog dependencies resolved by Bun"
+}

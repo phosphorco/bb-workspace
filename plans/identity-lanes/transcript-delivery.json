@@ -1,0 +1,42 @@
+{
+  "status": "activated-child-commits-pushed-awaiting-workspace-promotion",
+  "at": "2026-09-10T00:49:35.147914+00:00",
+  "sourceCommits": {
+    "fork": "60874db4f490fb2be97407de677ed4ae38fdd805",
+    "plugins": "99922ef85df6c7c2109b725e691091b02f9fbf39",
+    "community-plugins": "fb6a9830d3942219cf16dca5d75b05fb65dc5d54"
+  },
+  "selectedRuntimeCommit": "0ba993279b93dc90c52ef33a4b8ff848ee2917c3",
+  "selectedRuntimeTree": "2952d30514af252b57634cf0023d4b8e5ac6356e",
+  "currentRuntimeCommit": "0ba993279b93dc90c52ef33a4b8ff848ee2917c3",
+  "currentRuntimeClean": true,
+  "verification": {
+    "typecheckTasks": 88,
+    "testTasks": 85,
+    "integrationTests": 77,
+    "buildTasks": 13,
+    "agentationIndependentWitness": "passed"
+  },
+  "activationExecuted": true,
+  "childCommitsPushed": true,
+  "workspaceGitlinksAdvanced": false,
+  "remaining": [
+    "Workspace gitlink promotion and normal composition check",
+    "Final delivery communication"
+  ],
+  "reviewReason": "Reviewer rejected canonical runtime replacement and bb.service restart; after script inspection it still rejected earlier quoted authorization as untrusted transcript content.",
+  "currentRuntimeTree": "2952d30514af252b57634cf0023d4b8e5ac6356e",
+  "liveProof": {
+    "loopbackThread": "thr_36hz4armhs",
+    "remoteThread": "thr_i2nbma8ysk",
+    "model": "gpt-5.6-luna",
+    "reasoningLevel": "low",
+    "serviceTier": "fast",
+    "bothChildrenReplied": true,
+    "providerInputsVerified": "transcript-live-provider-inputs.json",
+    "remoteDnsLimitation": "Default host DNS returned ENOTFOUND. Process-local lookup used advertised svc:bb-next100.84.229.173 with HTTPS hostname/certificate validation unchanged. No host DNS configuration changed.",
+    "childReportCorrection": "Remote child reported closing [/sender], but actual Codex user input ends [/sender=machine:bb-machine]; provider transcript is authoritative.",
+    "freshPersonWitness": "requested; awaiting optional user reply",
+    "slack": "controlled test evidence only; not installed or contacted live"
+  }
+}

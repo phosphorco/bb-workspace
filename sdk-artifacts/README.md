@@ -1,14 +1,16 @@
 # Shared fork plugin SDK
 
 The workspace also supplies
-`phosphorco-bb-identity-0.1.0.11b0f79122ef.tgz` for community consumers of the
+`phosphorco-bb-identity-0.1.0.e9433450fa93.tgz` for community consumers of the
 shared identity package. Its SHA-256 is
-`11b0f79122ef7881057fefc93f4797b919f81627272a510860cab88baab6b2ac`;
+`e9433450fa93639641e2a3596f9b3fcebc2b980b5dc6f0bf644636f960edd8f4`;
 the adjacent provenance receipt identifies the exact organization package tree
 and packing baseline. All nine public entry points were checked through the installed
 consumer package. This archive is a workspace dependency, not a registry release.
-See [the port receipt](../preview/unpublished-port/README.md) for selected changes
-and validation.
+The transcript binding adds explicit host/producer rendering ownership; see
+[the delivery plan](../plans/message-transcripts.plan.pkl) for verification.
+Earlier artifacts and [port receipts](../preview/unpublished-port/README.md) remain
+historical evidence.
 
 This directory holds the SDK package selected by the canonical BB workspace.
 Earlier preview artifacts remain retained for receipts and historical pins.

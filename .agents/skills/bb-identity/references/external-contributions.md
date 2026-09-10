@@ -14,8 +14,19 @@ requests share reservation/finality; changed payload rejects. Preserve legacy
 callers when migrating an API, with explicitly weaker one-shot retry guarantees
 if they lack a key. Add retry-safe inputs/outputs without removing old workflows.
 
-Use `binding.server.sendExternal` and `lookupOperation`. Submitted/rejected are
-final; pending remains pending; unknown/expired/unsupported is uncertainty.
+Use `binding.server.sendExternal` and `lookupOperation`. Select external prompt
+rendering once when constructing the binding: `host` (the default) adds one sender
+envelope, while `producer` preserves a producer-owned envelope and `<attached>`
+context. The binding does not sniff text for existing frames; the external
+subject remains structured provenance, and producer mode still registers it.
+On enhanced hosts, producer mode also enables the optional plugin-scoped SDK
+rendering hook so ordinary sends and explicit queued messages keep producer-owned
+frames. Older enhanced hosts without that capability report incompatibility;
+plain upstream remains supported. The transport hint is presentation metadata,
+not a credential. Preserve explicit queue semantics and test the actual SDK HTTP
+path, including SDK references obtained before binding initialization.
+Submitted/rejected are final; pending remains pending; unknown/expired/unsupported
+is uncertainty.
 Only an authoritative absent-final result can allow retry of the same operation
 under current authority and matching immutable input. A host queue must retain
 that same operation as pending until acceptance or terminal cancellation; queued

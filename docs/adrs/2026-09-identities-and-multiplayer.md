@@ -75,34 +75,106 @@ identity keys. A machine actor must be distinguishable from a person even if a
 legacy implementation represents both through a common user abstraction. It
 must not silently become the operator or the most recent browser user.
 
-### Keep transcript sender wrapping minimal
+### Describe messages with context, sender, content, and optional attachments
 
-Wrap the original message content with only a readable sender label:
+Amended 2026-09-10 by Cole: this format supersedes the earlier `[from=…]`
+wrapper. Describe the communication itself: where the message was posted, who
+sent it, their original words, and any attached material. Do not classify Slack
+messages as “untrusted” merely because they arrived through an integration.
+
+For a Slack message posted to a thread:
 
 ```text
-[from=cole@phosphor.co]
-{Original content}
-[/from=cole@phosphor.co]
+[message posted to thread]
+[sender=slack:@Cole <@U123>]
+{Original Content}
+<attached>
+{Attachment/link enrichment etc}
+</attached>
+[/sender=slack:@Cole]
 ```
 
-For people, use the handle when available and otherwise the display name. For
-machine attribution, use a clearly machine-qualified readable label, such as
-`machine:rosetta`. These labels are presentation, not stable identity keys or
-authorization evidence. Escape delimiter characters and line breaks in labels
-so they cannot alter the wrapper structure.
+The opening sender line may include a source-native reference, such as Slack's
+`<@U123>`, to make the person recognizable and referable. The closing line repeats
+only the readable sender label (`slack:@Cole`), without that optional reference.
+This deliberate asymmetry is part of the format. Source-native references are
+useful presentation; internal identity keys and verification machinery remain
+structured metadata outside the model text.
 
-Do not inject actor JSON, identity keys, issuer/subject fields, evidence labels,
-avatar URLs, “BB verified sender” prose, or instructions about interpreting
-profile fields. Keep that metadata in structured attribution and history.
-The wrapper answers who the message is from without making the agent process
-the identity machinery.
+Use the same shape for the initial request and every subsequent message. Each
+message has its own sender and optional attachment block; a batch must not make
+one sender the author of everyone else's words. If there is no attached content,
+omit the entire `<attached>…</attached>` block, including empty placeholders:
 
-Preserve the original content and wrap each attributed message group separately.
-Messages without known attribution remain unwrapped; standalone built-in
-compact and clear commands retain their native dispatch behavior. Preserve
-original authors and later editors separately in storage. The wrapper uses the
-original author when known, falling back to the editor only when the original
-author is unknown; it does not add an editor metadata block.
+```text
+[message posted to thread]
+[sender=slack:@Cole <@U123>]
+The latest change addresses this. Thanks!
+[/sender=slack:@Cole]
+```
+
+The pattern applies beyond Slack. For example:
+
+```text
+[comment posted to pull request #142]
+[sender=github:@maya]
+Could we handle an empty response here?
+<attached>
+File: src/client.ts, line 87
+
+const result = response.items[0];
+
+Comment link: https://github.com/acme/app/pull/142#discussion_r123
+</attached>
+[/sender=github:@maya]
+```
+
+Use a short factual context line when its destination or event adds useful
+information. Do not invent destinations when none are known. Direct native BB
+messages use `[sender=cole@phosphor.co]` and `[/sender=cole@phosphor.co]` around
+their content; machine messages use a readable label such as `machine:rosetta`.
+For people, prefer the source handle, otherwise the display name; do not slugify
+away useful spelling or case. Retain a known source-native reference when no
+profile label is available, without making profile lookup a prerequisite to send.
+
+Preserve the message's original textual content. Keep derived link previews,
+file descriptions, retrieved excerpts, and useful source coordinates inside
+`<attached>`, separate from the person's words. Preserve actual image/file inputs
+as native multimodal attachments rather than replacing them with prose; their
+associated textual enrichment follows the same attachment convention. Preserve
+typed attachment inputs through transcript assembly, within each provider
+adapter's existing capabilities. This amendment does not add native multimodal
+support to an adapter that already converts files or images to text markers. A
+retrieved message that is attached as context retains its own sender and source;
+it must not silently become a new direct message from the requester.
+
+Do not prepend identity verification prose, actor JSON, issuer/subject fields,
+or blanket “UNTRUSTED” banners to these messages. Do not insert instructions
+about whether the sender has authority into the message envelope. Necessary
+agent-role and tool-use instructions belong in their existing instruction layer,
+not repeated around each person's message. The format describes communication;
+it neither adds security guarantees nor changes independent integration
+credentials or the operation's actual delivery semantics.
+
+Escape delimiters and line breaks in generated labels and source references so
+they cannot break the envelope. This is formatting correctness, not an
+anti-forgery guarantee; do not rewrite the original body or add an authorization
+parser. Keep identities, evidence, revision IDs, and delivery bookkeeping in
+structured storage. Include only useful source context in attachments, not a
+dump of internal records.
+
+Keep one envelope per message, without an additional machine/integration wrapper
+around the whole batch. A producer may retain the captured message authors in its
+own structured records; the host need not invent an additional machine author
+for that already-attributed batch. This does not remove known native authors or
+change attribution on ordinary native requests. Preserve original authors and
+later editors separately;
+use the original author when known, otherwise the editor. Describe edits and
+deletions as factual events without pretending a tombstone is the person's
+original text. Historical unknown authors remain unknown; do not fabricate a
+sender to make a wrapper. Standalone compact/clear commands retain native
+behavior. Old transcript text remains historical evidence and need not be
+rewritten; new deliveries and re-rendered messages follow this decision.
 
 ### Make machine fallback stable and honest
 
@@ -203,8 +275,12 @@ We reject requiring verified proxy evidence on every request, mapping unknown
 work to the operator, and making scoped agent authorization a prerequisite for
 fixing this failure. None fits the collaboration purpose of this deployment.
 
-Implementation tasks and verification gates are tracked in the
-[Pkl delivery plan](../../plans/identities-and-multiplayer.plan.pkl).
+The original fallback deployment is recorded in the
+[identity delivery plan](../../plans/identities-and-multiplayer.plan.pkl).
+The 2026-09-10 transcript amendment and remaining producer gaps are tracked in
+the [transcript delivery plan](../../plans/message-transcripts.plan.pkl). Its
+[gap assessment](../../plans/identity-lanes/transcript-gaps.md) distinguishes
+existing behavior from planned work.
 
 ## Implementation consequences
 
