@@ -161,16 +161,28 @@ cat /proc/pressure/io
 
 #### Go build cache
 
-The Go build cache has repeatedly reached 25–39 GB.
+Preserve the shared cache for ongoing builds. Cole explicitly requested a
+longer-term solution on 2026-09-08: repeated full cache clearing makes the next
+build pay the same compilation cost and does not stop abandoned private caches
+from accumulating. Distinguish the active `go env GOCACHE` from harness-specific
+cache roots in `/tmp` and workspaces.
 
-Validate the target, then use Go's own command:
+Inspect the selected cache first:
 
 ```sh
 go env GOCACHE
-go clean -cache
 ```
 
-Do not assume `~/.cache/go-build` without checking `go env GOCACHE`.
+The Go build cache has repeatedly reached 25–39 GB. Its size alone is not a
+reason to empty it. Prefer retiring abandoned scratch data and applying Go's
+native unused-entry expiration to verified old private caches. Full
+`go clean -cache` is an emergency measure or an explicit cold-build request,
+not routine retention. Do not assume `~/.cache/go-build` without checking
+`go env GOCACHE`.
+
+For Go-related pressure, read [Go cache reuse and retirement](references/go-cache-reuse.md)
+before selecting targets. It describes the verified native age-trimming
+operation, preservation of recent entries, and producer cleanup expectations.
 
 #### Trash
 
@@ -402,7 +414,8 @@ cgroup/service owner first.
 3. Identify the newest verified BB backup and its checksum before deleting BB
    migration, deployment, or recovery state.
 4. Check deleted-open files and orphan observability processes.
-5. Restore immediate headroom with Trash and verified regenerable caches.
+5. Restore immediate headroom with verified expendable caches; preserve warm
+   build caches during routine work. Inspect Trash provenance before emptying it.
 6. Apply the approved `/tmp` retention rule with system/active exclusions.
 7. Inventory `~/.bb` and `~/phosphor` with one physical-allocation scan per
    parent.
@@ -424,6 +437,8 @@ Implement these controls:
 - automated `/tmp` cleanup with protected-path and active-reference exclusions;
 - maximum byte or inode budgets for BB provider/test scratch roots;
 - producer-owned cleanup in success, failure, timeout, and cancellation paths;
+- shared Go build/module caches for ordinary builds; isolated caches only when
+  the verification requires them, with explicit run-end retirement;
 - retention limits for archived BB thread storage;
 - BB environment retirement that also removes Git worktree administration;
 - periodic pruning of package caches, old tool versions, and unused container

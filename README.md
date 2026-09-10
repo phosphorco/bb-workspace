@@ -32,7 +32,7 @@ once `fork/build/bb` has been materialized to verify the visible runtime path.
 ├── AGENTS.md
 ├── bin/
 ├── docs/                 cross-repository programs and operating records
-├── .codex/skills/        workspace-specific reusable agent guidance
+├── .agents/skills/       workspace-specific reusable agent guidance
 ├── fork/                 phosphorco/bb-fork
 │   ├── upstream/         fork's pinned upstream submodule
 │   └── build/bb/         visible runnable materialization
@@ -61,3 +61,12 @@ For a promotion:
 
 Read `AGENTS.md` before operating across repositories. Launch repository-aware
 agents from this root so the cross-repository constraints are in scope.
+
+## Plugin authoring guidance
+
+The [bb-identity skill](.agents/skills/bb-identity/SKILL.md) is the entry point for
+portable request identity, personal state, view-as, providers and external
+contributions. Its short task map loads only the relevant reference; package
+[STATUS](plugins/packages/bb-identity/STATUS.md) separates implemented interfaces
+from remaining feature and host proof. Other shared guidance lives under
+`.agents/skills/`.

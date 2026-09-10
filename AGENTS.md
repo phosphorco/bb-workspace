@@ -41,6 +41,17 @@ the `ubuntu` user). The default BB service and CLI run from
 
 ## Staging and normal roles
 
+### Temporary same-machine fork proof (Cole, 2026-09-05)
+
+Cole explicitly selected Rosetta on separate ports for the new fork's temporary
+proof. For this task only, `fork/build/proof-bb` is an authorized visible candidate
+worktree alongside the existing normal `fork/build/bb`. Use server/daemon/dev-UI
+ports 39886/39887/39888 and separate proof state; follow
+`fork/plans/bb-fork-local-proof.md`. This scoped exception permits candidate edits,
+builds and proof runs there without moving the dirty normal or upstream trees.
+It does not select another default runtime, change machine roles, or authorize
+normal-host promotion. The remaining preservation and promotion rules still apply.
+
 `bb-machine` is the staging workspace. Its three top-level child repositories
 are ordinary editable checkouts, normally on `main`; dirty changes and feature
 branches are allowed and must remain visible in `bin/status`. Build and reload
@@ -66,6 +77,26 @@ Git root may omit this parent contract.
 Before changing anything, run `./bin/status`. Keep a cross-repository task in
 one workspace and identify which child repositories it touches. Do not use
 unrelated worktrees as runtime or plugin sources.
+
+Shared repository skills live under `.agents/skills/<name>/SKILL.md` so Codex
+and other skill-aware agents discover the same guidance. Reserve provider-
+specific directories such as `.codex/` for guidance that cannot be shared.
+
+For identity-aware plugin work, start with the progressive
+[bb-identity skill](.agents/skills/bb-identity/SKILL.md). It routes to public
+package contracts, task-specific recipes and current verification limits. Use
+the shared package for identity/synchronization; keep product schemas and storage
+with the feature.
+
+## Build caches and temporary verification
+
+Keep Go's shared build and module caches warm for ordinary builds. A different
+worktree or thread does not by itself require a private `GOCACHE` or `GOMODCACHE`.
+If a test needs cache isolation, keep its source and proof logs separately and
+retire the exact generated cache directories when the harness finishes, including
+failure and cancellation paths. Do not use repeated shared-cache clearing as
+routine disk maintenance. The disk-usage skill covers native expiration and
+safe scratch retirement.
 
 ## Verification
 

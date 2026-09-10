@@ -100,6 +100,38 @@ member only when evidence requires it; BB experimental APIs must follow the
 repository's naming, audit documentation, SDK generation, and fork-before-
 plugin integration rules.
 
+## Plugin RPCs, polling, and supervisors
+
+An active request lineage is evidence that work was waiting during a stall,
+not proof that it blocked the event loop. Correlate lineages with synchronous
+query timings, `lastWork`/`slowestWork`, handler self-time when available, and
+a fixed control/candidate run. Cumulative plugin handler duration can mostly be
+queue time when plugins call back into a congested BB server.
+
+Treat a timer in a mounted plugin surface as per-client work. Before polling:
+
+- key a bounded server cache by the smallest stable identity and coalesce
+  concurrent loads with single-flight;
+- make invalidation generation-safe so old work cannot repopulate new state;
+- when a refresh waits for obsolete in-flight work, retry the current
+  generation after either fulfillment or rejection;
+- guard every async UI result by the thread/host/session identity that started
+  it, use non-overlapping recursive polls, pause while hidden, refresh promptly
+  after reconnect, and dispose timers and owned remote resources on unmount;
+- invalidate at both sides of a mutation when partial failure can change the
+  observed external state.
+
+Client identity guards are not authorization or ownership checks. RPCs that
+read, write, or close terminals must validate caller inputs against
+server-owned session records before acting.
+
+Background supervisors must turn permanent delivery failures into durable
+state transitions. An overdue row left enabled after a terminal error becomes
+a hot loop even when each sweep is bounded. Classify only exact structured
+status/code/details combinations, let structured fields outrank message
+fallbacks, preserve transient retry behavior, and test lifecycle-event misses
+as well as the normal event path.
+
 ## Overlays and populated timelines
 
 For message or row actions:

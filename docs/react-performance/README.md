@@ -17,7 +17,7 @@ Supporting investigations:
 - [Adversarial review and corrected verdict](react-performance-review.md)
 
 The reusable implementation and review guidance lives in the project skill at
-[`.codex/skills/bb-performant-react/SKILL.md`](../../.codex/skills/bb-performant-react/SKILL.md).
+[`.agents/skills/bb-performant-react/SKILL.md`](../../.agents/skills/bb-performant-react/SKILL.md).
 
 The historical React Scan numbers prioritize reproduction; they are not an
 auditable baseline because the original raw exports and manifests were not

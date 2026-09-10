@@ -20,6 +20,17 @@ done
 
 grep -Fq 'MACHINE_BB_WORKSPACE_REV' README.md
 grep -Fq 'Never automatically stash' AGENTS.md
+grep -Fq '.agents/skills/<name>/SKILL.md' AGENTS.md
+
+if find .agents/skills -mindepth 1 -maxdepth 1 -type f -print -quit | grep -q .; then
+  printf 'loose files under .agents/skills are not discoverable skills\n' >&2
+  exit 1
+fi
+
+for skill_dir in .agents/skills/*; do
+  [[ -d "$skill_dir" ]] || continue
+  [[ -f "$skill_dir/SKILL.md" ]]
+done
 
 for script in bin/check bin/setup-role bin/status bin/test-contract; do
   bash -n "$script"
