@@ -41,3 +41,9 @@ Earlier tests exposed stale attachment counts and a resolver spy; both were corr
 - The dormant captured-author resolver had no preceding toolbar emitter. Historical authorIdentityId values remain unresolved. The [host queue preflight](transcript-queue-preflight.json) found no queued rows/pending external operations; that is host-specific evidence.
 - Generic external operations reserved before a rendering upgrade have no cross-version rendering marker; existing idempotency/conflict behavior remains.
 - The SDK timeout helper's existing handling of a signal supplied only through Request was not changed. This transcript amendment does not claim complete Fetch compatibility.
+
+## Delivered runtime
+
+Canonical runtime now runs the selected `0ba993279` replay; in-place frozen install, 88 typecheck tasks, 85 test tasks and 13 build tasks passed. The host resumed this thread after restart. Actual loopback and Tailnet HTTPS children used Codex `gpt-5.6-luna` / low / fast and replied. Their exact [provider inputs](transcript-live-provider-inputs.json) confirm the new bookends. Remote DNS required a process-local lookup to the advertised service address; TLS verification remained enabled. No global DNS changes were made.
+
+All selected child commits and workspace promotion `5bcf81e` are pushed. The normal runtime composition check passed. [Delivery receipt](transcript-delivery.json) records revisions, witnesses and limitations. Fresh live person input was requested but not received by this receipt; person behavior has native HTTP coverage. Slack and Agentation evidence remains controlled.

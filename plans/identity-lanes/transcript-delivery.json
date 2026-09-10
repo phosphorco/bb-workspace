@@ -1,6 +1,6 @@
 {
-  "status": "activated-child-commits-pushed-awaiting-workspace-promotion",
-  "at": "2026-09-10T00:49:35.147914+00:00",
+  "status": "delivered",
+  "at": "2026-09-10T00:50:27.650980+00:00",
   "sourceCommits": {
     "fork": "60874db4f490fb2be97407de677ed4ae38fdd805",
     "plugins": "99922ef85df6c7c2109b725e691091b02f9fbf39",
@@ -19,12 +19,9 @@
   },
   "activationExecuted": true,
   "childCommitsPushed": true,
-  "workspaceGitlinksAdvanced": false,
-  "remaining": [
-    "Workspace gitlink promotion and normal composition check",
-    "Final delivery communication"
-  ],
-  "reviewReason": "Reviewer rejected canonical runtime replacement and bb.service restart; after script inspection it still rejected earlier quoted authorization as untrusted transcript content.",
+  "workspaceGitlinksAdvanced": true,
+  "remaining": [],
+  "reviewReason": "Historical: automatic reviewer rejected initial activation attempts; fresh user confirmation was accepted, and canonical activation then completed.",
   "currentRuntimeTree": "2952d30514af252b57634cf0023d4b8e5ac6356e",
   "liveProof": {
     "loopbackThread": "thr_36hz4armhs",
@@ -36,7 +33,10 @@
     "providerInputsVerified": "transcript-live-provider-inputs.json",
     "remoteDnsLimitation": "Default host DNS returned ENOTFOUND. Process-local lookup used advertised svc:bb-next100.84.229.173 with HTTPS hostname/certificate validation unchanged. No host DNS configuration changed.",
     "childReportCorrection": "Remote child reported closing [/sender], but actual Codex user input ends [/sender=machine:bb-machine]; provider transcript is authoritative.",
-    "freshPersonWitness": "requested; awaiting optional user reply",
+    "freshPersonWitness": "Optional fresh user message requested after activation; not received by receipt time. Person attribution is covered by native HTTP tests; no fresh live person witness claimed.",
     "slack": "controlled test evidence only; not installed or contacted live"
-  }
+  },
+  "workspacePromotionCommit": "5bcf81e348eda17745e2752c97636b3039a0970d",
+  "workspacePromotionPushed": true,
+  "normalRuntimeCompositionCheck": "passed"
 }
