@@ -60,6 +60,17 @@ Incomplete propagation uses the machine fallback.
 
 ## Design philosophy and constraints
 
+### Prefer upstream plugin transport modes
+
+Clarified 2026-09-10: do not add fork-specific authorization modes for plugin
+routes when upstream already expresses the needed behavior. A route that
+validates its own connection token can use `auth: "none"` and keep that check in
+the plugin handler. Agent Connect uses this pattern. Its token validation does
+not require a separate host `auth: "capability"` mode, additional SDK types, or
+a downstream patch. Remove that duplicate mechanism rather than maintaining it
+as an alias. This decision does not remove the plugin's connection-token checks
+or change attribution into an access guarantee.
+
 ### Be useful without overstating what we know
 
 Keep actor identity, evidence, execution origin, and initiating person distinct.

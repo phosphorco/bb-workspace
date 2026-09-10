@@ -20,11 +20,11 @@ package resolution. Do not copy `bundled-types` into individual plugins.
 
 The selected package is:
 
-- File: `get-bb-plugin-sdk-0.4.47+phosphor.3881eefb2ece.sdk.263608e91421.tgz`
-- SHA-256: `ea4fade90af485fda52943b30d62e8a7b8ad8aa1383b95b7fc04490c1c4d943b`
+- File: `get-bb-plugin-sdk-0.4.47+phosphor.7dfc119a823d.sdk.e28ae9391d36.tgz`
+- SHA-256: `8323228ece4f6a73b611c1dd8d489a79f391f7420a909c6ec6d487516ca3da9c`
 - Name: `@get-bb/plugin-sdk`
-- Version: `0.4.47+phosphor.3881eefb2ece.sdk.263608e91421`
-- Selected source receipt: `3881eefb2ece57fe20af647ed94b0addb98e0b57`
+- Version: `0.4.47+phosphor.7dfc119a823d.sdk.e28ae9391d36`
+- Selected source receipt: `7dfc119a823d90927f202815d1222916d2d0f4e9`
 
 The version suffix identifies the fork and packaged input. Semver compatibility
 alone is not provenance: the archive hash and adjacent `.provenance.json` receipt
@@ -64,7 +64,7 @@ Then, from the workspace root, pack into a fresh output directory:
 ```sh
 node sdk-artifacts/prepare-plugin-sdk.mjs \
   --source fork/build/bb \
-  --source-receipt 3881eefb2ece57fe20af647ed94b0addb98e0b57 \
+  --source-receipt 7dfc119a823d90927f202815d1222916d2d0f4e9 \
   --output /tmp/bb-sdk-reproduction
 ```
 
@@ -77,3 +77,7 @@ For a deliberate upgrade, use the new source receipt, preserve the old archive,
 update the generator's exact file pin and checksum, and regenerate dependency
 locks. Verify both package resolution and consumer behavior before removing any
 old artifact that a lock still references. Publication is a separate action.
+
+The selected SDK restores upstream `PluginHttpAuthMode`: `local`, `token`, and
+`none`. The redundant fork-only `capability` mode and patch 4 were removed.
+Agent Connect validates its connection token inside its `auth: "none"` handler.
