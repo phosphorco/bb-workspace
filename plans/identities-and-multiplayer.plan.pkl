@@ -1,0 +1,300 @@
+amends "workbench:plan"
+
+meta {
+  title = "Deliver the approved identities and multiplayer posture"
+  goal = "Keep trusted BB collaboration available with best-effort attribution, simplify the fork, and demonstrate BB child creation with codex gpt-5.6-luna low fast."
+}
+
+// Policy: docs/adrs/2026-09-identities-and-multiplayer.md (Approved).
+// This Pkl definition owns intended work; its sibling ledger owns progress/evidence.
+// Root coordinates and alone seals artifacts, restarts services and promotes gitlinks.
+// Node grants describe file ownership, not authorization or a security boundary.
+// Temporary source paths are the existing authoring/verification materialization only.
+// Runtime stays /home/ubuntu/bb/fork/build/bb; never deploy from the temporary tree.
+// Use at most three workers plus root, exact node IDs and exclusive file ownership.
+// Workers: codex gpt-5.6-luna xhigh fast in BB; authorized native fallback cannot select fast.
+// Review: codex gpt-6-astra high. Final live proof: Luna low fast, not xhigh.
+// Workers report by message; never bb wait. No worker-owned promotion or service restart.
+
+local T0 = new Action {
+  id = "T0"
+  owner = "root"
+  outcome = "Approve the attribution posture and align active documentation with the ADR, retaining historical receipts as historical evidence."
+  grant {
+    "docs/adrs/2026-09-identities-and-multiplayer.md"
+    ".agents/skills/bb-identity/**"
+    "plans/identity-experience/**"
+    "fork/plans/**"
+    "preview/**"
+    "auth-boundary-check-receipt.md"
+  }
+  oracle = module.adjudicated("ADR status is Approved and records Cole's explicit rejection of identity forgery resistance and tamper-proof history. Ordinary operations do not require fresh person evidence. Active guidance points to this Pkl plan; historical rejection receipts do not override the ADR. No duplicate Markdown delivery plan remains.", "root")
+}
+
+local T1 = new Action {
+  id = "T1"
+  owner = "root"
+  outcome = "Settle the shared actor, evidence, lifecycle and personal-state contract, with a retain/delete/simplify inventory."
+  needs { module.produced(T0); module.verified(T0) }
+  grant {
+    "plans/identity-lanes/evidence/implementation-checkpoint.json"
+  }
+  oracle = module.adjudicated("Use a verified request person when available, applicable accepted/request/execution context next, and a stable machine otherwise. Machine keys are p6r-machine:v1:<encoded instance>:server or :host:<encoded host>; names are presentation. Preserve person encodings, unknown history, captured authors/editors, senderThreadId/parent/execution links. No new inherited-identity DTO, agent credential, daemon version or DB column is required. Delete signing/expiry/issuance-only permission machinery; retain concrete cancellation, disposal, owner consistency, transactions, deduplication and independent credentials. Never treat parent ownership as proof of the current human sender.", "root")
+}
+
+local T2 = new Action {
+  id = "T2"
+  owner = "N/root"
+  outcome = "Implement native fallback and durable acceptance with fewer identity-only gates."
+  needs { module.produced(T1); module.verified(T1) }
+  grant {
+    "/tmp/bb-identity-patch-verification/apps/server/src/services/p6r/**"
+    "/tmp/bb-identity-patch-verification/apps/server/src/services/plugins/**"
+    "/tmp/bb-identity-patch-verification/packages/config/**"
+    "/tmp/bb-identity-patch-verification/packages/domain/**"
+    "/tmp/bb-identity-patch-verification/packages/db/**"
+    "/tmp/bb-identity-patch-verification/packages/server-contract/**"
+    "/tmp/bb-identity-patch-verification/packages/plugin-sdk/**"
+  }
+  oracle = module.adjudicated("G2: create, fork, send, edit, queue, retry, compact and clear accept machine attribution when person enrichment is absent, rejected, unavailable, timed out or inapplicable. Provider replacement cannot reuse a stale resolved person; actual request cancellation still stops work. Remove native person admission, signed browser lineage, invocation expiresAt, provider validUntil and mandatory maxSessionAgeMs; tolerate legacy configuration fields. Resolver timeout remains. Tests preserve accepted original authors, later editors, retries, mixed groups, native commands and receipt replay.", "root")
+}
+
+local T3 = new Action {
+  id = "T3"
+  owner = "A/root"
+  outcome = "Use existing request and execution facts for ambient attribution without adding a delegation protocol."
+  needs { module.produced(T2); module.verified(T2) }
+  grant {
+    "/tmp/bb-identity-patch-verification/apps/server/src/server.ts"
+    "/tmp/bb-identity-patch-verification/apps/cli/src/client.ts"
+    "/tmp/bb-identity-patch-verification/apps/host-daemon/**"
+  }
+  oracle = module.adjudicated("G3: existing source-machine facts select a uniquely matched live BB host; unknown, ambiguous or bare origins use the receiving server. Do not infer origin from a target environment or Unix account. Existing accepted snapshots and execution/parent links remain scoped across concurrent work; missing propagation permits machine fallback. No process-global current person or new login/header/grant ceremony. Live transport coverage is separately required by V-remote and T6.", "root")
+}
+
+local T4 = new Action {
+  id = "T4"
+  owner = "P/A"
+  outcome = "Adapt the shared identity package for explicit machine actors and lifecycle-only invocation scopes."
+  needs { module.produced(T1); module.verified(T1) }
+  grant {
+    "plugins/packages/bb-identity/**"
+  }
+  oracle = module.adjudicated("G4 package: machine actors round-trip through models, host/server/client/state/testing and upstream background fallback. Pending person-owned writes retain their original owner and conflict semantics; fresh machine-owned writes work. Remove expiry shape checks and private target issuance membership. Equivalent copied targets succeed; frozen snapshots, namespace/address/actor/session/subject checks and actual abort remain effective. Provider refresh reaches feature bindings and older asynchronous responses cannot replace newer state. Package typecheck, 144 runtime tests, portable cases, optional provider examples, packed public exports and real browser/IndexedDB behavior pass.", "root")
+}
+
+local T5 = new Action {
+  id = "T5"
+  owner = "U/root"
+  outcome = "Present honest actor labels and the exact minimal native transcript wrapper."
+  needs { module.produced(T2); module.verified(T2) }
+  grant {
+    "/tmp/bb-identity-patch-verification/apps/app/**"
+    "/tmp/bb-identity-patch-verification/packages/thread-view/**"
+    "/tmp/bb-identity-patch-verification/apps/cli/src/commands/**"
+  }
+  oracle = module.adjudicated("G5: person/machine/unknown and original-author/editor presentation remains correct without per-row identity fetches. Model text is exactly a readable [from=label] wrapper around original content, with closing [/from=label]. Person handle else display name; machine-qualified label; escaped delimiters and line breaks. Each group is wrapped separately; unknown stays unwrapped; original author precedes editor fallback. No injected actor JSON, identity keys, issuer/subject fields, avatars, evidence labels or verification prose. Standalone compact/clear retain native dispatch.", "root")
+}
+
+local P_patches = new Action {
+  id = "P-patches"
+  owner = "root"
+  outcome = "Seal and replay the simplified implementation through the existing fork patch queue."
+  needs { module.produced(T2); module.verified(T2); module.produced(T3); module.verified(T3); module.produced(T5); module.verified(T5) }
+  grant {
+    "fork/patches/**"
+    "fork/result-tree.lock"
+    "fork/README.md"
+    "fork/DOWNSTREAM.md"
+    "plans/identity-lanes/evidence/consolidation-candidate.json"
+  }
+  oracle = module.adjudicated("Exact replay, namespace and source whitespace checks pass. Update/consolidate existing patches rather than append equivalent permission machinery. Preserve the previously authored simple-wrapper patch in the checkpoint and final source. Compare final core modules, call sites, lifecycle concepts, wire/schema churn and patch count to the prior 23-patch tree; line count is supporting evidence only. Temporary materializations are verification inputs, never deployment or plugin sources.", "root")
+}
+
+local A_artifacts = new Action {
+  id = "A-artifacts"
+  owner = "root"
+  outcome = "Pack and select exact shared SDK and identity-library artifacts through the existing dependency generators."
+  needs { module.produced(P_patches); module.verified(P_patches); module.produced(T4); module.verified(T4) }
+  grant {
+    "sdk-artifacts/**"
+    "plugins/tools/workspaces-sync/definition.ts"
+    "plugins/bun.lock"
+    "plugins/plugins/*/package.json"
+    "plugins/packages/bb-identity/type-tests/browser/package.json"
+  }
+  oracle = module.adjudicated("Archive bytes, source tree and public declarations/runtime are identified by receipts. Keep prior archives while referenced. Organization manifests come from workspaces-sync and normal package-manager locks; no copied SDK declarations or path-alias substitutes. Installed SDK type checks and packed library public exports pass. Community installs the library archive through ordinary npm. This is dependency packaging, not registry publication.", "root")
+}
+
+local C_org = new Action {
+  id = "C-org"
+  owner = "C/root"
+  outcome = "Adapt organization consumers and their model-facing wrappers to the shared contract."
+  needs { module.produced(A_artifacts); module.verified(A_artifacts) }
+  grant {
+    "plugins/plugins/identity-boundaries/lib/provider.ts"
+    "plugins/plugins/identity-boundaries/test/**"
+    "plugins/plugins/identity-boundaries/README.md"
+    "plugins/plugins/thread-progress/lib/thread-sections-draft-storage.ts"
+    "plugins/plugins/thread-progress/test/thread-sections-draft-storage.browser.test.ts"
+    "plugins/plugins/sticky-notes/test/human-context-authority.test.ts"
+    "plugins/plugins/rosetta-slack/slack.ts"
+    "plugins/plugins/rosetta-slack/test/slack.test.ts"
+  }
+  oracle = module.adjudicated("Actual consumers accept the shared machine contract without Tailnet-specific fallbacks. Thread Sections IndexedDB preserves machine editor metadata and pending draft ownership. Sticky Notes cancellation during lookup prevents mutation using a real abort, not an evidence-expiry flag. Tailnet provider no longer outputs obsolete host leases. Slack-to-thread wrappers match the ADR. Required frozen install, sync/references/SDK checks, typecheck, tests and builds pass; preserve unrelated Diffs and subscription-router authored work.", "root")
+}
+
+local C_community = new Action {
+  id = "C-community"
+  owner = "C-community"
+  outcome = "Update Agentation Mentions and affected community guidance to consume machine attribution and minimal wrappers."
+  needs { module.produced(A_artifacts); module.verified(A_artifacts) }
+  grant {
+    "community-plugins/plugins/agentation-mentions/**"
+    "community-plugins/package-lock.json"
+    "community-plugins/plugins/analytics/docs/execution-contract.md"
+  }
+  oracle = module.adjudicated("Machine identity/evidence survives annotation persistence and captured-author round-trip while existing people/external/history remain readable. Feedback text uses the ADR minimal escaped sender wrapper, unknown authors stay unwrapped, and mention expansion adds no verification prose or actor JSON. Structured captured-author metadata remains separate. Analytics retains record/schema/namespace validation without person-verification admission. npm ci, test, typecheck and build pass against the selected actual archive.", "root")
+}
+
+local G_source = new Guard {
+  id = "G-source"
+  owner = "root"
+  outcome = "Verify the exact integrated source composition before runtime activation."
+  needs { module.produced(P_patches); module.verified(P_patches); module.produced(A_artifacts); module.verified(A_artifacts); module.produced(C_org); module.verified(C_org); module.produced(C_community); module.verified(C_community) }
+  observes {
+    "fork"
+    "plugins"
+    "community-plugins"
+    "sdk-artifacts"
+    "plans/identity-lanes/evidence/**"
+  }
+  oracle = module.adjudicated("Review exact source-tree/artifact receipts, full BB install/typecheck/tests/build and all changed child checks. Test subprocesses must not inherit live BB connection settings or operator CODEX_HOME when fixtures expect isolation. Distinguish setup failures and superseded runs from passing current evidence. Inspect dirty children and HEADs; preserve authored work. Pre-existing workspace gitlink mismatch is recorded and can close only in T7, not hidden here.", "root")
+}
+
+local R_ADR = new Guard {
+  id = "R-ADR"
+  owner = "astra-review/root"
+  outcome = "Review the final implementation for ADR faithfulness and easier fork maintenance."
+  needs { module.produced(P_patches); module.verified(P_patches); module.produced(C_org); module.verified(C_org); module.produced(C_community); module.verified(C_community) }
+  observes {
+    "docs/adrs/2026-09-identities-and-multiplayer.md"
+    "fork/patches/**"
+    "plugins/packages/bb-identity/**"
+    "plugins/plugins/rosetta-slack/**"
+    "community-plugins/plugins/agentation-mentions/**"
+  }
+  oracle = module.adjudicated("Astra supplies an independent source review; root reconciles findings with the approved ADR. Every retained identity check names a concrete attribution/lifecycle/data/owner failure, not resistance to fabrication by trusted processes. Optional provider credential verification may enrich labels but cannot gate ordinary work. Verify exact wrappers across native and plugin producers, complete provider refresh fan-out, no obsolete mandatory setup fields, and an actual reduction in fork maintenance burden. No unresolved in-scope finding is hidden by green unit tests.", "root")
+}
+
+local D_activate = new Action {
+  id = "D-activate"
+  owner = "root"
+  outcome = "Activate the verified replay in the existing canonical runtime and restart the BB user service."
+  needs { module.verified(G_source); module.verified(R_ADR) }
+  grant {
+    "fork/build/bb/**"
+    "plans/identity-lanes/evidence/live-activation.json"
+  }
+  oracle = module.adjudicated("On bb-machine, record clean runtime HEAD/tree, stop systemctl --user bb.service, recheck cleanliness, and use ordinary detached checkout --no-overwrite-ignore to the verified replay commit in place. No reset, clean, replacement checkout or alternate runtime/plugin root. Run canonical frozen install, typecheck, tests and full build; start the service at its existing ports and resume this thread by message. Restarts are explicitly authorized. After machine data is persisted, rollback must retain machine-capable readers; do not rewrite history to fit old readers.", "root")
+}
+
+local V_loopback = new Guard {
+  id = "V-loopback"
+  owner = "root"
+  outcome = "Demonstrate successful local BB child creation with codex Luna low fast and child-to-parent message passing."
+  needs { module.produced(D_activate); module.verified(D_activate) }
+  observes {
+    "plans/identity-lanes/evidence/live-child.json"
+    "plans/identity-lanes/evidence/live-activation.json"
+  }
+  oracle = module.adjudicated("Use bb thread spawn with explicit project proj_t8x9yhwnvc, environment env_tqsfutmr8b, parent thr_kmhguukhgy, provider codex, model gpt-5.6-luna, reasoning low and service tier fast. Inspect accepted child ID, stored execution selection and machine authorship, then receive an actual bb thread tell reply. Check the model-facing wrapper. Never use bb wait. Also exercise a bare request without a known source machine; report the actual receiving-machine fallback, never a guessed human.", "root")
+}
+
+local V_remote = new Guard {
+  id = "V-remote"
+  owner = "root"
+  outcome = "Prove tagged Rosetta CLI requests can create children in existing and new environments."
+  needs { module.produced(D_activate); module.verified(D_activate) }
+  observes {
+    "plans/identity-lanes/evidence/live-remote.json"
+  }
+  oracle = module.adjudicated("Use actual tagged-host transport, not forged test headers. Existing-environment and new-environment creation succeed without person setup; preserve parent/execution links and inspect source attribution. Use known source host only where the existing integration identifies it, otherwise honest server fallback. Replies use bb thread tell, never bb wait. Runtime/plugin sources remain canonical; any new child worktree is agent work only. Connectivity or creation failures remain unproven until resolved.", "root")
+}
+
+local V_history = new Guard {
+  id = "V-history"
+  owner = "root"
+  outcome = "Verify real accepted human authorship survives restart and machine operations retain correct history."
+  needs { module.produced(D_activate); module.verified(D_activate) }
+  observes {
+    "plans/identity-lanes/evidence/live-authorship-before.json"
+    "plans/identity-lanes/evidence/live-authorship-after.json"
+    "plans/identity-lanes/evidence/live-child.json"
+  }
+  oracle = module.adjudicated("Compare bounded before/after structured authors and event hashes for actual end-user messages without rewriting them. Also require a fresh post-activation human submission through the existing end-user transport and inspect its accepted author and model-facing wrapper; pre-existing rows or manually supplied person headers do not prove this path. Combine live evidence with controlled concurrent-person A/B, queue/retry/edit/group/restart, unknown-history, machine rename, owner-transition and cancellation tests. Original author/editor remain separate; no retroactive machine guesses or operator preference overwrite. An automated header fixture is not a real end-user transport witness.", "root")
+}
+
+local T6 = new Guard {
+  id = "T6"
+  owner = "root"
+  outcome = "Close the complete acceptance matrix on the exact composed runtime."
+  needs { module.verified(G_source); module.verified(R_ADR); module.verified(V_loopback); module.verified(V_remote); module.verified(V_history) }
+  observes {
+    "plans/identity-lanes/evidence/**"
+  }
+  oracle = module.adjudicated("G6 covers: concurrent people remain distinct; tagged remote existing/new children; loopback/bare fallback; missing/rejected/timed-out/unavailable/replaced provider; agent/internal/background context with and without initiator; queue/retry/edit/group/restart durability; pending person write versus fresh machine owner; stable rename keys and unknown history; plugin binding/Analytics references; malformed operations, independent credentials, duplicate requests and cancellation. Separate controlled and live evidence. Any unresolved in-scope obligation blocks acceptance rather than becoming a waived checkbox.", "root")
+}
+
+local T7 = new Action {
+  id = "T7"
+  owner = "root"
+  outcome = "Commit and push selected child changes, then promote the tested workspace composition and final receipts."
+  needs { module.verified(T6) }
+  grant {
+    "fork/**"
+    "plugins/**"
+    "community-plugins/**"
+    "docs/adrs/2026-09-identities-and-multiplayer.md"
+    "plans/identity-lanes/evidence/**"
+    "sdk-artifacts/**"
+    ".gitmodules"
+  }
+  oracle = module.adjudicated("G7: preserve unrelated dirty work; commit/push the selected changes in each child first and record exact commit/tree/artifact IDs. Only then advance the three workspace gitlinks and push the workspace receipt after combined runtime exercise. Run ./bin/check --role normal, retaining visible dirty warnings. Do not switch branches, move child HEADs without inspection, create another deployment source or modify operator credentials. Record data rollback limits and shipped behavior; no unpushed child references.", "root")
+}
+
+local G_complete = new Guard {
+  id = "G-complete"
+  owner = "root"
+  outcome = "Confirm the whole authorized outcome is delivered and this Pkl graph/ledger is the sole coordination source."
+  needs { module.produced(T7); module.verified(T7) }
+  observes {
+    "plans/identities-and-multiplayer.plan.pkl"
+    "plans/identities-and-multiplayer.ledger.jsonl"
+    "docs/adrs/2026-09-identities-and-multiplayer.md"
+    "plans/identity-lanes/evidence/**"
+  }
+  oracle = module.adjudicated("Check all acceptance obligations and ledger notes, actual Luna low fast child/reply evidence, source/loaded-artifact receipts, ADR faithfulness and simpler fork footprint. No remaining Markdown plan or alternate status model. Historical evidence can remain, but readiness and progress come from workbench plan tick/recall. Close the goal only after actual runtime and promotion gates pass.", "root")
+}
+
+nodes {
+  T0
+  T1
+  T2
+  T3
+  T4
+  T5
+  P_patches
+  A_artifacts
+  C_org
+  C_community
+  G_source
+  R_ADR
+  D_activate
+  V_loopback
+  V_remote
+  V_history
+  T6
+  T7
+  G_complete
+}

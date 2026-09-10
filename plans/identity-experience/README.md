@@ -1,8 +1,18 @@
-> Frozen campaign snapshot. Continue from [the authoritative bb-service plan](/home/ubuntu/bb-service/plans/identity-experience/README.md); do not append to this old ledger.
-
 # Complete the identity experience
 
-This campaign turns the governing [master plan](../../fork/plans/bb-fork-master-plan.md) and Cole's subsequent decisions into executable obligations. It is not another implementation-status checklist: intended work lives in [identity-experience.plan.pkl](../identity-experience.plan.pkl), and observations/rulings live in its sibling ledger. Run `workbench plan recall plans/identity-experience.plan.pkl` to resume, or `tick` for the current frontier.
+> Policy update — 2026-09-09: the approved [Identities and multiplayer ADR](../../docs/adrs/2026-09-identities-and-multiplayer.md)
+> governs this trusted shared deployment. Use verified people when available,
+> applicable carried attribution next, and a stable machine actor otherwise;
+> missing or failed person verification must not block ordinary operations.
+> Never relabel fallback as a verified person or redirect pending personal-state
+> writes to another owner. Independent access checks and data validation remain.
+> Earlier rejection requirements below are superseded; versioned API descriptions
+> and test receipts remain historical evidence, not proof of ADR implementation.
+
+
+The current identities and multiplayer delivery is coordinated from [identities-and-multiplayer.plan.pkl](../identities-and-multiplayer.plan.pkl) and its sibling evidence ledger. Run `workbench plan recall plans/identities-and-multiplayer.plan.pkl` to resume, or `tick` for the current frontier.
+
+This earlier campaign translated the governing [master plan](../../fork/plans/bb-fork-master-plan.md) into executable obligations. Its [identity-experience.plan.pkl](../identity-experience.plan.pkl) and ledger remain historical campaign records; they do not track the current delivery.
 
 ## Destination
 
@@ -12,7 +22,7 @@ Two authenticated people can use shared BB without confusing sender, editor, vie
 
 - Identity is provider-neutral. Tailnet remains an optional provider plugin, with provider-specific configuration and health. Preserve its plugin ID and stored configuration when changing its human-facing name to Tailnet Identity.
 - Personal palette/favicon overrides inherit from the shared default and have explicit reset. Shared Appearance editing permissions are unchanged. No new palette authoring system or roster of other people's preferences is implied.
-- The selected rewrite has no claimed-identity fallback. The older [IA proposal](../../docs/identity-settings-information-architecture.md) assumes old routes/storage and claimed identities; its ownership/navigation intent is useful, but those assumptions are superseded. Verify selected source before reusing implementation details.
+- The selected rewrite has machine fallback, never a fabricated verified person. The older IA proposal (retained as uncommitted historical material in the older workspace) assumes old routes/storage and claimed identities; its ownership/navigation intent is useful, but those assumptions are superseded. Verify selected source before reusing implementation details.
 - All admitted collaborators have equal information access. Explicit self-only versus collaborator-target policies prevent accidental owner changes; view-as is not authentication. This is not private tenancy or a plugin sandbox.
 - Unknown historical authors stay unknown. Do not derive identities from handles, mentions, transcript text, local operator credentials or obsolete key encodings. Provider-issued alias evidence is required for legacy identity recovery.
 - Keep native command parsing and grouped-message edit restrictions. Source-level plumbing alone is not a live two-person acceptance witness.
@@ -36,7 +46,7 @@ All are on `bb/sdk-sharing-preview-thr_csw7br3yff`. Inspect `preview/unpublished
 
 Cole selected `/home/ubuntu/bb-service` as the implementation home for this campaign. Its existing fork, organization plugins, community plugins and separate preview runtime are the target; `bb-machine` SSH access is not an implementation prerequisite. The local source preflight still checks actual revisions, dirty ownership, toolchain and loaded artifacts, and reconciles stale composition receipts before claiming a tested combination. Later deployment to another host remains a separate handoff.
 
-The root `/home/ubuntu/bb` still has authored dirty work and is preserved. The plan and ledger currently live there; before worker dispatch, transfer this campaign's complete plan, ledger and supporting directory together to bb-service and designate that copy authoritative. Do not run two ledgers. Exact commits are evidence anchors; they are not permanent deployment version policy.
+The root `/home/ubuntu/bb` still has authored dirty work and is preserved. This campaign and its ledger now live in /home/ubuntu/bb-service/plans and are authoritative. The earlier /home/ubuntu/bb/plans copy is frozen historical evidence; do not write that ledger. Exact commits are evidence anchors; they are not permanent deployment version policy.
 
 ## Coordination
 

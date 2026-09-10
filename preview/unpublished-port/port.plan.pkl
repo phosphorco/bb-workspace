@@ -1,0 +1,30 @@
+amends "workbench:plan"
+
+meta {
+  title = "Commit portable unpublished plugin work"
+  goal = "Port the remaining authored features into bb-service's current packages, validate them, and commit reviewable child changes while preserving the original checkout."
+}
+
+local organization = new Action {
+  id = "organization"
+  owner = "codex"
+  outcome = "Port organization plugin feature changes using the current generated SDK package contracts."
+  grant { "plugins/" }
+  oracle = module.mechanical("python3 preview/unpublished-port/validate.py plugins")
+}
+local community = new Action {
+  id = "community"
+  owner = "codex"
+  outcome = "Port community plugin features and package/release wiring, including Analytics and Cross References."
+  grant { "community-plugins/" }
+  oracle = module.mechanical("python3 preview/unpublished-port/validate.py community-plugins")
+}
+local review = new Guard {
+  id = "review"
+  owner = "codex"
+  outcome = "Account for all original changes, verify the old checkout was preserved, and commit portable changes with limitations documented."
+  observes { "plugins/"; "community-plugins/"; "preview/unpublished-port/" }
+  needs { module.produced(organization); module.verified(organization); module.produced(community); module.verified(community) }
+  oracle = module.adjudicated("All original feature changes are ported or explicitly accounted for; package checks pass; child changes are committed; no normal runtime or credentials were modified.", "codex")
+}
+nodes { organization; community; review }

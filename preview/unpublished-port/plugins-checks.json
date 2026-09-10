@@ -1,0 +1,65 @@
+[
+  {
+    "command": [
+      "bun",
+      "install",
+      "--frozen-lockfile"
+    ],
+    "exitCode": 0,
+    "log": "plugins-0.log"
+  },
+  {
+    "command": [
+      "bun",
+      "run",
+      "sync:check"
+    ],
+    "exitCode": 0,
+    "log": "plugins-1.log"
+  },
+  {
+    "command": [
+      "bun",
+      "run",
+      "references:check"
+    ],
+    "exitCode": 0,
+    "log": "plugins-2.log"
+  },
+  {
+    "command": [
+      "bun",
+      "run",
+      "sdk-types:check"
+    ],
+    "exitCode": 0,
+    "log": "plugins-3.log"
+  },
+  {
+    "command": [
+      "bun",
+      "run",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "log": "plugins-4.log"
+  },
+  {
+    "command": [
+      "bun",
+      "run",
+      "test"
+    ],
+    "exitCode": 0,
+    "log": "plugins-5.log"
+  },
+  {
+    "command": [
+      "bun",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "log": "plugins-6.log"
+  }
+]

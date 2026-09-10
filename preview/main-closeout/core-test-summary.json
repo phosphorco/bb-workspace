@@ -1,0 +1,18 @@
+{
+  "packages": {
+    "@bb/domain": 199,
+    "@bb/db": 451,
+    "@bb/server-contract": 64,
+    "@bb/thread-view": 379,
+    "@bb/sdk": 100,
+    "@bb/cli": 532,
+    "@get-bb/plugin-sdk": 235,
+    "@bb/host-daemon": 571,
+    "@bb/app": 3925,
+    "@bb/server": 2316
+  },
+  "passed": 8772,
+  "skipped": 6,
+  "sourceTree": "af159af6746af0c4b3073b25a08ba1792bfa6a4c",
+  "allCommandsPassed": true
+}

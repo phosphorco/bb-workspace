@@ -1,5 +1,15 @@
 # Identity authority boundary assessment
 
+> Policy update — 2026-09-09: the approved [Identities and multiplayer ADR](../../../docs/adrs/2026-09-identities-and-multiplayer.md)
+> governs this trusted shared deployment. Use verified people when available,
+> applicable carried attribution next, and a stable machine actor otherwise;
+> missing or failed person verification must not block ordinary operations.
+> Never relabel fallback as a verified person or redirect pending personal-state
+> writes to another owner. Independent access checks and data validation remain.
+> Earlier rejection requirements below are superseded; versioned API descriptions
+> and test receipts remain historical evidence, not proof of ADR implementation.
+
+
 Node `authority-assessment`; author `thr_wmg2gi249v`; root `thr_csw7br3yff` adjudicates this document. Cole owns `containment-scope`. **No containment ruling, implementation grant, or live security acceptance is recorded here.** This contract describes inspected mechanisms, required consumer behavior, and concrete choices for a separate or expanded security effort.
 
 ## Evidence and threat model
@@ -26,11 +36,11 @@ Browser input, names, copied identity keys, caller-authored headers and external
 
 ## Revocation, accepted jobs and independent work
 
-For **new** acceptance, expiry, abort, retired plugin/provider generation and relevant invalidation must prevent a late write. The invocation registry checks the current deadline on use, so an expired scope must not become valid merely because an asynchronous operation ignored cancellation. Provider registry resolution additionally checks its active epoch after awaiting the verifier. The selected [tests](/home/ubuntu/bb-service/fork/build/bb/apps/server/test/services/p6r/provider-registry.test.ts:97) describe late ignored-cancellation rejection; they were inspected, not executed in this turn.
+For **new** acceptance, expired or invalidated person evidence must not be reused as verified identity. Resolve applicable carried or machine attribution instead. Preserve explicit operation cancellation and reject stale owner-specific mutations rather than silently retargeting them. The following registry behavior describes the inspected implementation: The invocation registry checks the current deadline on use, so an expired scope must not become valid merely because an asynchronous operation ignored cancellation. Provider registry resolution additionally checks its active epoch after awaiting the verifier. The selected [tests](/home/ubuntu/bb-service/fork/build/bb/apps/server/test/services/p6r/provider-registry.test.ts:97) describe late ignored-cancellation rejection; they were inspected, not executed in this turn.
 
 For **already accepted** work, durable authorship and immutable operation outcome remain facts after the originating request ends. The [native contract](/home/ubuntu/bb-service/fork/plans/native-identity-settings-and-authorship.md:33) explicitly permits accepted queue snapshots to drain. Request expiry/revocation does not by itself cancel accepted jobs, recall an external send or rewrite authorship. Cancellation is a separate feature operation with its own accepted/too-late outcome. A policy that revocation also cancels queued or executing jobs must name which work, the enforcement point, race semantics and recovery behavior before implementation.
 
-Independent background work uses explicit non-person/system or integration-origin behavior. Capturing a prior request's actor snapshot provides provenance only; it cannot authorize a fresh operation. Longer-lived on-behalf-of execution would require a separate grant contract, as [master §5.2](../../../fork/plans/bb-fork-master-plan.md:247) states.
+Independent background work uses explicit non-person/system or integration-origin behavior. Capturing a prior request's actor snapshot provides provenance only; it cannot authorize a fresh operation. Ordinary background work may carry that provenance without a delegation grant and otherwise uses a machine actor. Stronger authorization protocols remain optional future scope, not a prerequisite for this deployment.
 
 ## Requirements if Cole selects stronger scope
 

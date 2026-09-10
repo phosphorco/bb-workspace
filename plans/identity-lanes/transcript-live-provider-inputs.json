@@ -1,0 +1,28 @@
+[
+  {
+    "threadId": "thr_36hz4armhs",
+    "providerThreadId": "01a088c8-a68a-7750-9ec2-89259e5d187f",
+    "transcriptPath": "/home/ubuntu/.codex-subscription-router/accounts/20260909-3aef3d/codex-home/sessions/2026/09/10/rollout-2026-09-10T02-47-26-01a088c8-a68a-7750-9ec2-89259e5d187f.jsonl",
+    "actualUserInput": "[sender=machine:bb-machine]\n\nBounded live transcript proof (loopback). Do not edit files or create children. Report your actual BB_THREAD_ID and the exact outer sender opening and closing wrappers you received, plus sentinel TRANSCRIPT-DELIVERY-2026-09-10. Send the report to parent thr_kmhguukhgy using bb thread tell with explicit --model gpt-6-astra --reasoning-level high --service-tier fast, then finish. Never bb wait. Report observed wrappers, not an invented expected format.\n\n[/sender=machine:bb-machine]",
+    "execution": {
+      "model": "gpt-5.6-luna",
+      "serviceTier": "fast",
+      "reasoningLevel": "low",
+      "permissionMode": "auto",
+      "source": "client/turn/requested"
+    }
+  },
+  {
+    "threadId": "thr_i2nbma8ysk",
+    "providerThreadId": "01a088c9-4a43-7191-8fba-ac5a58968c3f",
+    "transcriptPath": "/home/ubuntu/.codex-subscription-router/accounts/20260909-3aef3d/codex-home/sessions/2026/09/10/rollout-2026-09-10T02-48-08-01a088c9-4a43-7191-8fba-ac5a58968c3f.jsonl",
+    "actualUserInput": "[sender=machine:bb-machine]\n\nBounded live transcript proof over remote Tailnet HTTPS. Do not edit files or create children. Report your actual BB_THREAD_ID and exact sender opening/closing wrappers received plus TRANSCRIPT-DELIVERY-2026-09-10 to parent thr_kmhguukhgy using bb thread tell --model gpt-6-astra --reasoning-level high --service-tier fast, then finish. Never bb wait.\n\n[/sender=machine:bb-machine]",
+    "execution": {
+      "model": "gpt-5.6-luna",
+      "serviceTier": "fast",
+      "reasoningLevel": "low",
+      "permissionMode": "auto",
+      "source": "client/turn/requested"
+    }
+  }
+]

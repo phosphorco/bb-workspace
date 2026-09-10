@@ -1,0 +1,11 @@
+*.log
+*.lock
+preview-plugins-*.json
+browser-results.json
+screenshots/
+!closeout.json
+!source-inventory.json
+!plugins-checks.json
+!community-plugins-checks.json
+!analytics-runtime-acceptance.json
+!preview-reloads.json

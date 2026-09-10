@@ -1,0 +1,49 @@
+{
+  "at": "2026-09-10T00:48:05.330821+00:00",
+  "children": [
+    {
+      "transport": "loopback",
+      "threadId": "thr_36hz4armhs",
+      "model": "gpt-5.6-luna",
+      "reasoningLevel": "low",
+      "serviceTier": "fast"
+    },
+    {
+      "transport": "Tailnet HTTPS",
+      "receipt": {
+        "id": "thr_i2nbma8ysk",
+        "projectId": "proj_t8x9yhwnvc",
+        "environmentId": "env_tqsfutmr8b",
+        "providerId": "codex",
+        "title": "Transcript live proof: remote",
+        "titleFallback": "Bounded live transcript proof over remote Tailnet HTTPS. Do not edit files or...",
+        "sectionId": null,
+        "status": "starting",
+        "parentThreadId": "thr_kmhguukhgy",
+        "sourceThreadId": null,
+        "originKind": null,
+        "originPluginId": null,
+        "visibility": "visible",
+        "archivedAt": null,
+        "pinnedAt": null,
+        "deletedAt": null,
+        "lastReadAt": 1789001285310,
+        "latestAttentionAt": 1789001285261,
+        "createdAt": 1789001285261,
+        "updatedAt": 1789001285310,
+        "runtime": {
+          "displayStatus": "starting",
+          "hostReconnectGraceExpiresAt": null
+        },
+        "activeBackgroundAgentCount": 0,
+        "canSpawnChild": true,
+        "queuedMessageCount": 0
+      },
+      "model": "gpt-5.6-luna",
+      "reasoningLevel": "low",
+      "serviceTier": "fast",
+      "serverUrl": "https://bb-next.banjo-tint.ts.net",
+      "dnsOverride": "Process-local lookup to advertised svc:bb-next 100.84.229.173; default lookup returned ENOTFOUND. HTTPS hostname and certificate verification unchanged."
+    }
+  ]
+}

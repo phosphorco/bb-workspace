@@ -1,0 +1,16 @@
+{
+  "baseTree": "f86f35facc35d97ab3096a42b745fc970f75c6d0",
+  "resultTree": "cc3ac67e757f61b333282166942fe9f3f5609f69",
+  "patch": "0017-fix-p6r-directory-refresh-authority.patch",
+  "patchSha256": "292da9c54d4cdd7c09e7a54f705028d4d03c7a9e318ea68e18c0e4343180ea05",
+  "paths": [
+    "apps/server/src/services/p6r/provider-admission.ts",
+    "apps/server/test/services/p6r/provider-admission.test.ts",
+    "apps/server/test/services/p6r/provider-registry.test.ts"
+  ],
+  "sourceSha256": {
+    "apps/server/src/services/p6r/provider-admission.ts": "d31edf9b1c2940a33fedc434d53814ce00c635daefebbb23d9d9c9d01b49ad4b",
+    "apps/server/test/services/p6r/provider-admission.test.ts": "73d643cd8a4386f39c680a33f159fbb1df5773fa1a86c6f6e2750531fd50dd26",
+    "apps/server/test/services/p6r/provider-registry.test.ts": "e0a21445b4d69db066ce6dd2fb8af0b479ae7f148f038cae9f8de2e3b47d51cd"
+  }
+}

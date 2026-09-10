@@ -1,0 +1,51 @@
+{
+  "kind": "agent-connect-finite-call-closeout",
+  "coreTree": "064f32c8b630bad312c57eab1bdb4bc2f48f4153",
+  "forkCommit": "1f64dc7a4687449ecdc6eb62be79d6ec60017408",
+  "changes": [
+    "Keep intact accepted operation history pending until exact request-to-turn linkage",
+    "Release call leases on execution/response completion, cancellation, and failure, including omitted events",
+    "Evaluate validated stream conditions without coercing cross-bundle GraphQL directive objects"
+  ],
+  "checks": {
+    "pluginTests": 57,
+    "aggregate": [
+      "sync:check",
+      "references:check",
+      "sdk-types:check",
+      "typecheck",
+      "test",
+      "build",
+      "post-build sdk-types:check",
+      "git diff --check"
+    ],
+    "aggregateLogSha256": "618ecd90c56f13d453f33bc79b2c06c3e27be7aab25a05224d922d192993a92f",
+    "coreFocusedTests": 38,
+    "coreTypecheck": "pass",
+    "coreBuild": "pass",
+    "exactCoreReplay": "pass",
+    "finalDocumentationBuildReload": "pass; running"
+  },
+  "live": {
+    "helperStream": "STARTED, TEXT_DELTA, MESSAGE, COMPLETED",
+    "nonstream": "completed",
+    "exactRetry": "same accepted operation and canonical MESSAGE/COMPLETED sequences; no additional dispatch",
+    "changedStreamAndNonstreamPayload": "INVALID_OPERATION",
+    "variableFalse": "HTTP200 application/graphql-response+json",
+    "omittedNullableStreamVariable": "HTTP200 multipart/mixed",
+    "followingCast": "HTTP200; no stale call lease",
+    "linkedReceipts": 5,
+    "linkedAttempts": 5,
+    "cleanup": "Disposable capability revoked; fixture project/thread and temporary files removed",
+    "redactedReceiptSha256": "506618f3ec92896ed9ee7e8c87213bc985a55b208ffaffd44887c72af0e173fd"
+  },
+  "limits": [
+    "Native completed-item delta pruning can change transient replay chunk counts; MESSAGE is canonical. Final text hashes were not retained.",
+    "Full server suite is not green: baseline context-clear timeout, timestamp expectation, and missing fixture input remain separately recorded.",
+    "Browser header click-through, live multi-page chat and live pending-operation restart/lost-response recovery were not exercised in this lane."
+  ],
+  "normalRuntimeChanged": false,
+  "publication": false,
+  "diagnosticRemoved": true,
+  "pluginCommit": "59d1a29a9524039f1515760c9a137e9963b66b49"
+}

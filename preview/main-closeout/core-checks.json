@@ -1,0 +1,87 @@
+{
+  "sourceTree": "af159af6746af0c4b3073b25a08ba1792bfa6a4c",
+  "node": "v22.21.1",
+  "packages": [
+    "@bb/server",
+    "@bb/app",
+    "@bb/cli",
+    "@bb/db",
+    "@bb/domain",
+    "@bb/thread-view",
+    "@bb/server-contract",
+    "@bb/sdk",
+    "@get-bb/plugin-sdk",
+    "@bb/host-daemon"
+  ],
+  "threadManagerFixture": "plugins/plugins/thread-manager",
+  "testEnvironment": "Turbo loose mode preserves the explicit fixture root; private TMPDIR under /var/tmp avoids unrelated /tmp/.git ancestry",
+  "checks": [
+    {
+      "command": [
+        "pnpm",
+        "install",
+        "--frozen-lockfile"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.92,
+      "log": "core-0.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "typecheck",
+        "--filter=@bb/server",
+        "--filter=@bb/app",
+        "--filter=@bb/cli",
+        "--filter=@bb/db",
+        "--filter=@bb/domain",
+        "--filter=@bb/thread-view",
+        "--filter=@bb/server-contract",
+        "--filter=@bb/sdk",
+        "--filter=@get-bb/plugin-sdk",
+        "--filter=@bb/host-daemon",
+        "--continue=always"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.3,
+      "log": "core-1.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "test",
+        "--filter=@bb/server",
+        "--filter=@bb/app",
+        "--filter=@bb/cli",
+        "--filter=@bb/db",
+        "--filter=@bb/domain",
+        "--filter=@bb/thread-view",
+        "--filter=@bb/server-contract",
+        "--filter=@bb/sdk",
+        "--filter=@get-bb/plugin-sdk",
+        "--filter=@bb/host-daemon",
+        "--concurrency=2",
+        "--continue=always",
+        "--env-mode=loose"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 175.07,
+      "log": "core-2.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 43.86,
+      "log": "core-3.log"
+    }
+  ]
+}

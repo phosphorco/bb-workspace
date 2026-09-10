@@ -1,0 +1,37 @@
+[
+  {
+    "command": [
+      "npm",
+      "ci"
+    ],
+    "exitCode": 0,
+    "log": "community-plugins-0.log"
+  },
+  {
+    "command": [
+      "npm",
+      "run",
+      "test"
+    ],
+    "exitCode": 0,
+    "log": "community-plugins-1.log"
+  },
+  {
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "log": "community-plugins-2.log"
+  },
+  {
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "log": "community-plugins-3.log"
+  }
+]

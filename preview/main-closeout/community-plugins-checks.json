@@ -1,0 +1,26 @@
+{
+  "repository": "community-plugins",
+  "head": "31498646dbd7d6ce08ce6fabe0488a444cbc589d",
+  "node": "v22.21.1",
+  "checks": [
+    {
+      "command": [
+        "npm",
+        "ci"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 16.15,
+      "log": "community-plugins-0.log"
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 17.64,
+      "log": "community-plugins-1.log"
+    }
+  ]
+}

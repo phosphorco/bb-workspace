@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BB preview workflow checks</title>
+<style>:root{color-scheme:light dark;font:16px/1.5 system-ui,sans-serif}body{max-width:850px;margin:24px auto;padding:16px}button,a{font:inherit}button{padding:10px 16px;cursor:pointer}nav{display:flex;gap:12px;flex-wrap:wrap}iframe{display:block;width:100%;height:65vh;border:1px solid GrayText;margin:18px 0}li{margin:8px 0;overflow-wrap:anywhere}small{opacity:.75}pre{white-space:pre-wrap;overflow-wrap:anywhere}h1{font-size:1.5rem}</style>
+<h1>BB preview checks</h1>
+<p>Run these checks from your Tailnet device. They open BB and plugin pages using your existing connection. They do not submit prompts, send notifications, change settings, or edit your threads.</p>
+<p><strong>Coverage:</strong> real-user identity, sidebar startup, installed plugin settings and visible navigation panels. This is a page-render smoke test, not proof of every plugin workflow. Keep this tab in front while it runs (a few minutes).</p>
+<nav><button id="run">Run checks</button><button id="stop" disabled>Stop</button><button id="download" disabled>Download report</button><a href="/">Open BB</a></nav>
+<p id="status" role="status">Ready.</p><iframe id="frame" title="BB page under test" src="about:blank"></iframe><ol id="results"></ol>
+<script>
+const $=id=>document.getElementById(id);let stopped=false,report=null;
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function add(name,status,detail){const row={name,status,detail};report.checks.push(row);const li=document.createElement('li');li.textContent=name+': '+status+(detail?' — '+detail:'');$('results').append(li);return row;}
+async function json(url,init){const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...init});const body=await r.json();if(!r.ok)throw new Error(body.message||body.error?.message||'HTTP '+r.status);return body;}
+function visible(el,win){const r=el.getBoundingClientRect(),s=win.getComputedStyle(el);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'&&r.right>0&&r.left<win.innerWidth&&r.bottom>0&&r.top<win.innerHeight;}
+async function visit(path,label){
+ if(stopped)return;
+ $('status').textContent='Checking '+label+'…';
+ const frame=$('frame');
+ try{
+  await new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(new Error('Navigation timed out')),15000);frame.onload=()=>{clearTimeout(t);resolve()};frame.src=path;});
+  const end=Date.now()+15000;let doc;
+  do{await pause(300);doc=frame.contentDocument;if(doc?.querySelector('main'))break;}while(Date.now()<end&&!stopped);
+  if(!doc?.querySelector('main'))throw new Error('App content did not render');
+  await pause(1700);
+  const win=frame.contentWindow;
+  const failures=Array.from(doc.querySelectorAll('p,[role="alert"]')).filter(el=>visible(el,win)).map(el=>el.textContent.trim()).filter(t=>/^(Failed to load projects\.|Threads unavailable|Something went wrong\.?|This panel view is unavailable\.)$/.test(t));
+  const placeholders=Array.from(doc.querySelectorAll('main')).some(el=>visible(el,win)&&el.innerText.trim().length>0);
+  if(failures.length)throw new Error(failures.join('; '));
+  if(!placeholders)throw new Error('Main view rendered no text');
+  const row=add(label,'rendered',path);row.scope='Page rendered only; review frame for loading/setup errors';
+ }catch(e){add(label,'failed',e.message);}
+}
+$('stop').onclick=()=>{stopped=true;$('status').textContent='Stopping after current page…';};
+$('run').onclick=async()=>{
+ stopped=false;report={version:1,startedAt:new Date().toISOString(),origin:location.origin,checks:[],limits:['No model execution or external delivery tested','No screenshots or request identity headers captured','Page rendering is distinct from data/edit/retry correctness']};$('results').replaceChildren();$('run').disabled=true;$('stop').disabled=false;$('download').disabled=true;
+ try{
+  const self=await json('/api/v1/plugins/identity-boundaries/rpc/getCurrentProfile',{method:'POST',headers:{'content-type':'application/json'},body:'null'});
+  if(!self.ok||self.result?.profile?.assurance!=='trusted-provider')throw new Error('No verified human identity. Open from your own Tailnet device; no fallback identity is used.');
+  add('Tailnet identity','verified','A trusted person resolved; personal fields omitted from report.');
+  const bootstrap=await json('/api/v1/sidebar-bootstrap');if(!bootstrap.personalProject)throw new Error('Sidebar response has no personal project');add('Sidebar startup','passed');
+  const {plugins}=await json('/api/v1/plugins');
+  report.plugins=plugins.map(p=>({id:p.id,enabled:p.enabled,status:p.status}));
+  for(const p of plugins.filter(p=>p.enabled&&p.status!=='running'))add(p.name,'needs setup',p.statusDetail||p.status);
+  await visit('/','Home');
+  const doc=$('frame').contentDocument;
+  const panelNames=Array.from(doc.querySelectorAll('nav[aria-label="Sidebar navigation"] button')).map(e=>e.textContent.trim()).filter(t=>t&&!['New thread','Extensions','More'].includes(t));
+  for(const route of ['/extensions/plugins','/extensions/skills','/settings']){if(stopped)break;await visit(route,route);}
+  for(const p of plugins.filter(p=>p.enabled&&p.status==='running')){if(stopped)break;await visit('/settings/plugins/'+encodeURIComponent(p.id),p.name+' settings');}
+  for(const name of [...new Set(panelNames)]){
+   if(stopped)break;
+   await visit('/','Return home for '+name);
+   const f=$('frame'),button=Array.from(f.contentDocument.querySelectorAll('nav[aria-label="Sidebar navigation"] button')).find(e=>e.textContent.trim()===name);
+   if(!button){add(name,'not covered','Navigation button not found');continue;}
+   button.click();await pause(300);
+   const pathname=f.contentWindow.location.pathname;
+   if(!pathname.startsWith('/plugins/')){add(name,'not covered','No plugin route selected');continue;}
+   await visit(pathname,name+' panel');
+  }
+ }catch(e){add('Run','blocked',e.message);}
+ finally{
+  report.finishedAt=new Date().toISOString();report.stopped=stopped;
+  const bad=report.checks.filter(c=>['failed','blocked'].includes(c.status)).length;
+  $('status').textContent=(stopped?'Stopped. ':'Finished. ')+report.checks.length+' checks, '+bad+' failures/blocks. Download the report to share findings.';
+  $('run').disabled=false;$('stop').disabled=true;$('download').disabled=false;$('frame').src='about:blank';
+ }
+};
+$('download').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='bb-preview-checks.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+</script></html>

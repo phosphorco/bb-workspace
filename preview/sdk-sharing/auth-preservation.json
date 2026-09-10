@@ -1,0 +1,30 @@
+[
+  {
+    "path": "apps/server/src/routes/plugins.ts",
+    "unchanged": true
+  },
+  {
+    "path": "apps/server/src/server.ts",
+    "unchanged": true
+  },
+  {
+    "path": "apps/server/src/services/p6r/identity-protocol.ts",
+    "unchanged": true
+  },
+  {
+    "path": "apps/server/src/services/plugins/plugin-service.ts",
+    "unchanged": true
+  },
+  {
+    "path": "packages/plugin-sdk/src/rpc-contract.ts",
+    "unchanged": true
+  },
+  {
+    "path": "apps/server/test/services/p6r/identity-protocol.test.ts",
+    "unchanged": true
+  },
+  {
+    "path": "apps/server/test/services/plugins/plugin-p6r-admission-boundary.test.ts",
+    "unchanged": true
+  }
+]

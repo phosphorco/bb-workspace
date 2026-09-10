@@ -1,0 +1,114 @@
+{
+  "forkCommit": "dabaea42ed1a186606c41ef1fbda2d9a4a3e24c6",
+  "resultTree": "4ea02a056a1a461ac1a56154b356f0ae8cd7f31e",
+  "checks": [
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "test",
+        "--filter=@bb/app",
+        "--",
+        "P6rIdentitySettingsSection.test.tsx"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "typecheck",
+        "--filter=@bb/app"
+      ],
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "build",
+        "--filter=@bb/app"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "browser": [
+    {
+      "width": 390,
+      "colorScheme": "light",
+      "controlledFixture": true,
+      "providerAvatarLoaded": true,
+      "missingAndFailedFallback": true,
+      "stableAvatarSize": true,
+      "identitySwitchAndFailureClear": true,
+      "noOverflow": true,
+      "pageErrors": []
+    },
+    {
+      "width": 390,
+      "colorScheme": "dark",
+      "controlledFixture": true,
+      "providerAvatarLoaded": true,
+      "missingAndFailedFallback": true,
+      "stableAvatarSize": true,
+      "identitySwitchAndFailureClear": true,
+      "noOverflow": true,
+      "pageErrors": []
+    },
+    {
+      "width": 1280,
+      "colorScheme": "light",
+      "controlledFixture": true,
+      "providerAvatarLoaded": true,
+      "missingAndFailedFallback": true,
+      "stableAvatarSize": true,
+      "identitySwitchAndFailureClear": true,
+      "noOverflow": true,
+      "pageErrors": []
+    },
+    {
+      "width": 1280,
+      "colorScheme": "dark",
+      "controlledFixture": true,
+      "providerAvatarLoaded": true,
+      "missingAndFailedFallback": true,
+      "stableAvatarSize": true,
+      "identitySwitchAndFailureClear": true,
+      "noOverflow": true,
+      "pageErrors": []
+    }
+  ],
+  "runtime": {
+    "checkedAt": "2026-09-09T03:59:25.890948+00:00",
+    "workspace": "a5258e997221200f3d55180c94276c010c85bb30",
+    "previewPidBefore": "3528958",
+    "previewPidAfter": "4118289",
+    "normalPidUnchanged": "606208",
+    "enabledPluginsRunning": 47,
+    "http": [
+      {
+        "path": "/health",
+        "status": 200
+      },
+      {
+        "path": "/",
+        "status": 200
+      },
+      {
+        "path": "/settings/p6rIdentity",
+        "status": 200
+      },
+      {
+        "path": "/api/v1/system/p6rIdentity",
+        "status": 200
+      }
+    ]
+  },
+  "limits": "Browser identity responses and image are controlled fixtures, not authenticated provider admission. Runtime reload used the exact materialization before the workspace receipt commit."
+}

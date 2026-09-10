@@ -1,0 +1,37 @@
+{
+  "verifiedAt": "2026-09-09T02:07:21.510018+00:00",
+  "scope": "Selected source reconciliation plus original-author/latest-editor and directory-refresh authority repairs. Larger identity-experience campaign remains separate.",
+  "repos": {
+    "fork": "ef387cd8ad60abd386db38d13f4ca46d543c3969",
+    "plugins": "81157cc34fb6d6f39687b399e6574fa7391607c8",
+    "community-plugins": "31498646dbd7d6ce08ce6fabe0488a444cbc589d"
+  },
+  "remoteBranch": "main",
+  "sourceTree": "af159af6746af0c4b3073b25a08ba1792bfa6a4c",
+  "patchCount": 21,
+  "sourceReplay": "scripts/verify passed; whole materialization equals result-tree.lock",
+  "coreChecks": "core-checks.json",
+  "coreTests": "core-test-summary.json",
+  "organizationChecks": "plugins-checks.json",
+  "communityChecks": [
+    "community-plugins-checks.json",
+    "community-plugins-retry.json"
+  ],
+  "runtime": "runtime-after.json",
+  "browser": "../native-identity/browser-results.json",
+  "enabledPlugins": 47,
+  "normalRuntimeChanged": false,
+  "observations": [
+    "Initial SDK/contract/palette expectations and CLI skill index corrected; production tests retain strict boundaries.",
+    "Initial parallel community timing failure passed unchanged without competing aggregate.",
+    "Explicit test environment preserves the Thread Manager fixture path and avoids unrelated /tmp/.git ancestry.",
+    "Plugin readiness is asynchronous after HTTP health; bounded readiness check passed for all 47."
+  ],
+  "limits": [
+    "Browser ready-person presentation is a controlled UI fixture; live automated connection remains unauthenticated.",
+    "Native A/B edit regressions use controlled provider admission; no claim of two-human live acceptance.",
+    "New queue attribution reader accepts old author arrays; old runtimes cannot read new envelopes without a downgrade procedure.",
+    "No deployment to bb-machine or normal Rosetta runtime was performed.",
+    "Personal theme overrides, presence and stronger OS/service containment remain campaign work."
+  ]
+}

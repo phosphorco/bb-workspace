@@ -1,0 +1,26 @@
+[
+  {
+    "width": 390,
+    "case": "live settings",
+    "status": "unauthenticated",
+    "pageErrors": []
+  },
+  {
+    "width": 390,
+    "case": "controlled ready-state UI (not live admission)",
+    "overflow": false,
+    "pageErrors": []
+  },
+  {
+    "width": 1280,
+    "case": "live settings",
+    "status": "unauthenticated",
+    "pageErrors": []
+  },
+  {
+    "width": 1280,
+    "case": "controlled ready-state UI (not live admission)",
+    "overflow": false,
+    "pageErrors": []
+  }
+]

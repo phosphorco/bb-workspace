@@ -1,0 +1,16 @@
+# Generated test captures and local preservation evidence; keep source harnesses.
+node_modules/
+runs/
+picker-browser/
+*.log
+*.txt
+*.png
+*.jpg
+*.webp
+*.tar.gz
+*.patch
+*.index
+*.json
+!package.json
+!package-lock.json
+# Curated JSON verification receipts are added explicitly.

@@ -1,0 +1,211 @@
+{
+  "checkedAt": "2026-09-09T19:16:43Z",
+  "scope": "Real SDK 0.4.47 preview load/reload and readiness; no Slack credentials or sends.",
+  "normalPidUnchanged": "606208",
+  "reloaded": true,
+  "enabledRunningPlugins": 48,
+  "source": "/home/ubuntu/bb-service/plugins/plugins/rosetta-slack",
+  "appSdkVersion": "0.4.47",
+  "healthBefore": {
+    "httpStatus": 503,
+    "status": "unavailable",
+    "checkedAt": 1788981401874,
+    "reasons": [
+      "Slack transport is unconfigured."
+    ],
+    "queued": 0,
+    "coalescedInputs": 0,
+    "silentCompletions": 0,
+    "oldestQueuedAt": null,
+    "retrying": 0,
+    "failedDispatches": 0,
+    "unresolvedWorkers": 0,
+    "pendingDeliveries": 0,
+    "oldestDeliveryAt": null,
+    "deadLetters": 0,
+    "lastDispatchAt": null,
+    "lanes": [
+      {
+        "name": "agent-status",
+        "started_at": 1788981400972,
+        "finished_at": 1788981400973,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "delivery",
+        "started_at": 1788981400970,
+        "finished_at": 1788981400970,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "dispatch",
+        "started_at": 1788981400961,
+        "finished_at": 1788981400962,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "dispatch-recovery",
+        "started_at": 1788981401713,
+        "finished_at": 1788981401713,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "events",
+        "started_at": 1788981401691,
+        "finished_at": 1788981401691,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "inbound",
+        "started_at": 1788981401690,
+        "finished_at": 1788981401691,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "proactive-delivery",
+        "started_at": 1788981400970,
+        "finished_at": 1788981400970,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "questions",
+        "started_at": 1788981401709,
+        "finished_at": 1788981401709,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "turn-recovery",
+        "started_at": 1788981401732,
+        "finished_at": 1788981401733,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      }
+    ],
+    "workProblems": []
+  },
+  "healthAfter": {
+    "httpStatus": 503,
+    "status": "unavailable",
+    "checkedAt": 1788981402769,
+    "reasons": [
+      "Slack transport is unconfigured."
+    ],
+    "incidents": [],
+    "eventInbox": {
+      "pending": 0,
+      "processing": 0,
+      "retrying": 0,
+      "oldestReceivedAt": null,
+      "deadLetters": 0
+    },
+    "queued": 0,
+    "coalescedInputs": 0,
+    "silentCompletions": 0,
+    "oldestQueuedAt": null,
+    "retrying": 0,
+    "failedDispatches": 0,
+    "unresolvedWorkers": 0,
+    "pendingDeliveries": 0,
+    "oldestDeliveryAt": null,
+    "deadLetters": 0,
+    "lastDispatchAt": null,
+    "lanes": [
+      {
+        "name": "agent-status",
+        "started_at": 1788981402474,
+        "finished_at": 1788981402475,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "delivery",
+        "started_at": 1788981402473,
+        "finished_at": 1788981402474,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "dispatch",
+        "started_at": 1788981402473,
+        "finished_at": 1788981402474,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "dispatch-recovery",
+        "started_at": 1788981402473,
+        "finished_at": 1788981402474,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "events",
+        "started_at": 1788981402472,
+        "finished_at": 1788981402474,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "inbound",
+        "started_at": 1788981402472,
+        "finished_at": 1788981402474,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "proactive-delivery",
+        "started_at": 1788981402474,
+        "finished_at": 1788981402475,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "questions",
+        "started_at": 1788981402473,
+        "finished_at": 1788981402474,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      },
+      {
+        "name": "turn-recovery",
+        "started_at": 1788981402473,
+        "finished_at": 1788981402474,
+        "progressed_at": null,
+        "error_at": null,
+        "last_error": null
+      }
+    ],
+    "workProblems": []
+  },
+  "cliHealthExitCode": 1,
+  "artifactSha256": {
+    "server.js": "961adaa6f94f427d0bc266ca880909e6c88f36f00c3bdd255b6880d19e7043b8",
+    "app.js": "c3f5c9698ea81443ca12d3921289b168518da2eaccfe4bbc7021185eec0b94c6",
+    "app.css": "39cdfc8e980cdeeb1f9d2d1e2bdf67d3451af2783bddac559f46fc2ebb35240b"
+  }
+}

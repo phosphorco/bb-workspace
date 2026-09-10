@@ -1,4 +1,3 @@
 .DS_Store
 # Workbench owns transient writer locks; definitions and ledgers remain source.
-plans/**/*.ledger.jsonl.lock
-plans/*.ledger.jsonl.lock
+*.ledger.jsonl.lock

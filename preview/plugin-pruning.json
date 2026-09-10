@@ -1,0 +1,23 @@
+{
+  "removed": [
+    "learning",
+    "chronoscope"
+  ],
+  "scope": "isolated preview installation and organization plugin source",
+  "preserved": "community bb-ui-reference",
+  "sourceDirectoriesDeleted": true,
+  "runtimeUninstalled": true,
+  "runningPlugins": 45,
+  "normalChanged": false,
+  "verification": {
+    "frozenInstall": "passed",
+    "sync": "passed",
+    "references": "passed",
+    "sdkTypes": "passed after build",
+    "typecheck": "passed",
+    "test": "passed",
+    "build": "passed,26 remaining organization plugins",
+    "sourceReferences": "no remaining active references to removed plugin paths"
+  },
+  "pluginCommit": "c5c37ce622fabf8ebe942b238f334497db43c6e3"
+}

@@ -1,0 +1,119 @@
+{
+  "kind": "restart-resume-live-closeout",
+  "scope": "isolated bb-service preview only",
+  "plugin": {
+    "id": "restart-resume",
+    "source": "community-plugins/plugins/restart-resume",
+    "state": "enabled, automatic true",
+    "productionSourceChangesRequired": false
+  },
+  "composition": {
+    "fork": "1f64dc7a4687449ecdc6eb62be79d6ec60017408",
+    "plugins": "59d1a29a9524039f1515760c9a137e9963b66b49",
+    "community-plugins": "ff4f24d25ff94b63d2140f1066c84592ab1110da"
+  },
+  "coreTree": "064f32c8b630bad312c57eab1bdb4bc2f48f4153",
+  "trials": {
+    "graceful": {
+      "threads": 1,
+      "daemonSignal": "SIGTERM",
+      "automaticRecoveryRequests": 1,
+      "continuationRequestDelaySeconds": 2.303,
+      "resumedTurnDelaySeconds": 5.434,
+      "independentChecksPassed": 7,
+      "agentTestsPassed": 9,
+      "completed": true
+    },
+    "concurrentHardCrashes": {
+      "threads": 2,
+      "daemonSignal": "SIGKILL",
+      "crashes": 2,
+      "successfulRecoveryClaims": 4,
+      "attemptsPerClaim": 1,
+      "manualFollowups": 0,
+      "subjects": {
+        "alpha": {
+          "continuationRequestDelaysSeconds": [
+            5.415,
+            8.36
+          ],
+          "checks": {
+            "reportCorrect": true,
+            "all180RowsOnce": true,
+            "checkpointPreservedAcrossBothCrashes": true,
+            "exactlyTwoRecoveryPrompts": true,
+            "twoSingleSuccessfulClaims": true,
+            "threeWorkersOneFinalCompletion": true,
+            "noWorkerStillAlive": true,
+            "processorUnmodified": true,
+            "inputUnmodified": true,
+            "verificationWritten": true,
+            "threadCompleted": true
+          },
+          "resultRows": 180,
+          "resultSum": 1960230
+        },
+        "beta": {
+          "continuationRequestDelaysSeconds": [
+            5.4,
+            8.35
+          ],
+          "checks": {
+            "reportCorrect": true,
+            "all180RowsOnce": true,
+            "checkpointPreservedAcrossBothCrashes": true,
+            "exactlyTwoRecoveryPrompts": true,
+            "twoSingleSuccessfulClaims": true,
+            "threeWorkersOneFinalCompletion": true,
+            "noWorkerStillAlive": true,
+            "processorUnmodified": true,
+            "inputUnmodified": true,
+            "verificationWritten": true,
+            "threadCompleted": true
+          },
+          "resultRows": 180,
+          "resultSum": 214540230
+        }
+      },
+      "oldWorkersAbsentWithinObservedSeconds": 2,
+      "passed": true
+    }
+  },
+  "verification": {
+    "pluginExistingUnitTestsPassed": 13,
+    "allTaskWorkersExited": true,
+    "normalServerPidUnchanged": 606208,
+    "previewServerPidUnchanged": 696621,
+    "productionSourceRepairs": "none required by these trials"
+  },
+  "localEvidence": {
+    "runs/first/result.json": "1105fe0a2318c1fc9be9aafc99027c42d3b51e5d63b6e70dfd3a44a0cacc942d",
+    "runs/first/events.json": "96f130cf4119fd861b9449bbf08d3f3d682693bcdcb38d94a444817acaca6042",
+    "runs/first/plugin-unit-tests.log": "04fe33cd32664a36428214e2e9caee2bacac2b4c259227666e366183ab42f2e3",
+    "runs/dual-crash/result.json": "cf80ce840c562bb31147522081e9f9a006740796af6b7266d6f152b78a03dd79",
+    "runs/dual-crash/alpha-events.json": "3d6ad4394dcf476a3e470020f659a2aa44ee715331360ac56db61d360de7f496",
+    "runs/dual-crash/beta-events.json": "18f5554bd888135dec1b52e4f8b120afdc342239c3cba6a51122e870733d4dbe",
+    "runs/dual-crash/processor-template.py": "0759efaa1f3b09b895e203db244ff631a9ab5a2a00149e58d4ab3a9552979d6c",
+    "runs/dual-crash/verify.py": "afd32eb2eb20fe6223d1242610d867b36a4c2c9c3e2616df6d64c89473ff44e2"
+  },
+  "pluginSourceSha256": {
+    "server.ts": "73985ea8d3f71044ae32fddf979d1239d7bc74eee900292577ff5abd7e2ec01b",
+    "recovery.ts": "54d94a15f51180b3e4a7e9676672723cf7ff5ca9801d5e4d0d80b4345b015dc6",
+    "store.ts": "8f4951cf58fa72469ccb0431cb69b08a8cbccabeff7dfb5966b45e75cd5aa569",
+    "package.json": "d782deb25e281e60321c5560c9012cd67e7fc11117c75428031113150fa93de9"
+  },
+  "retention": {
+    "gracefulFixture": "project/thread deleted; result retained locally",
+    "concurrentFixtures": "completed project and two threads retained for Cole; no active workers",
+    "rawEvidence": "ignored local runs/; not committed",
+    "runtimeState": "operator-owned; not committed"
+  },
+  "limits": [
+    "Checkpointed local fixture uses SQLite and a single-instance lock; no claim of exactly-once arbitrary external effects.",
+    "Daemon crash with preview server surviving; machine reboot and full server restart not tested.",
+    "Controlled recovery mechanism test, not naive usability or UI recovery validation.",
+    "Automatic background-job notifications are separate from restart-resume prompts."
+  ],
+  "normalRuntimeChanged": false,
+  "normalPromotion": false
+}

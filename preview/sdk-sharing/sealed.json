@@ -1,0 +1,20 @@
+{
+  "plugins": {
+    "baseTree": "18f38a13aa94df49075c57430035db1ae96df2c9",
+    "resultTree": "da24b80925bc053eeec211f4b6dc4e3a614c8545",
+    "replayTree": "da24b80925bc053eeec211f4b6dc4e3a614c8545",
+    "patch": "plugins-sdk-sharing.patch",
+    "sha256": "0d7914ce3b15fd68ebb84aa4fc1e3cc4564202ec3892721a5195ace8fd9a9f9e",
+    "pathCount": 235,
+    "sharedIndexChanged": false
+  },
+  "community-plugins": {
+    "baseTree": "076abc34aa37a8266f832b58a82dd6b84059325a",
+    "resultTree": "1ebcd417dba33dea7798a591cba1d3652810142c",
+    "replayTree": "1ebcd417dba33dea7798a591cba1d3652810142c",
+    "patch": "community-plugins-sdk-sharing.patch",
+    "sha256": "625a551463e7fea7b4fda6253e4278a186af362803be01676e125aca897a8868",
+    "pathCount": 45,
+    "sharedIndexChanged": false
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "scope": "Durable conversation request ownership, explicit input snapshots, and silent completion",
+  "pluginCommit": "788eeeb793346de6c2e02743e9d5473ce761219c",
+  "checks": [
+    {
+      "check": "install",
+      "exitCode": 0
+    },
+    {
+      "check": "sync:check",
+      "exitCode": 0
+    },
+    {
+      "check": "references:check",
+      "exitCode": 0
+    },
+    {
+      "check": "sdk-types:check",
+      "exitCode": 0
+    },
+    {
+      "check": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "check": "test",
+      "exitCode": 0
+    },
+    {
+      "check": "build",
+      "exitCode": 0
+    }
+  ],
+  "rosettaTests": {
+    "passed": 171,
+    "failed": 0
+  },
+  "coveredBehaviors": [
+    "same-sender burst grouped under one request",
+    "different sender retains own attribution",
+    "rendered context is not an input receipt",
+    "frozen batch survives reload and later edits",
+    "acceptance recovery uses original frozen source revision",
+    "silent completion is idempotent without an outbox write",
+    "self replies and nested bot edits ignored at ingress",
+    "real queue sends grouped request inputs independently of newer fetched bot context"
+  ],
+  "runtimeReceipt": "runtime.json",
+  "normalServicePidUnchanged": "606208",
+  "liveContainment": {
+    "threadId": "thr_k2ya8ic3p7",
+    "queuedDuplicateInputsCancelled": 5,
+    "remainingQueuedOrActiveInputs": 0,
+    "remainingPendingReplies": 0,
+    "sourceFixLoadedOnNormal": false
+  },
+  "limits": [
+    "Preview has no Slack credentials",
+    "No production source reload",
+    "Real agent response selection for silent versus public completion awaits cutover verification"
+  ]
+}

@@ -1,4 +1,4 @@
 interface:
   display_name: "BB Identity"
   short_description: "Build portable plugin identity, state, and provenance"
-  default_prompt: "Use $bb-identity to implement this plugin workflow through the shared public package, preserve existing features, and verify its authority and recovery boundaries."
+  default_prompt: "Use $bb-identity to implement this plugin workflow through the shared public package, preserve existing features, and verify attribution, ownership consistency, lifecycle, and recovery."

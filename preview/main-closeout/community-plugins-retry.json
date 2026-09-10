@@ -1,0 +1,37 @@
+{
+  "repository": "community-plugins",
+  "head": "31498646dbd7d6ce08ce6fabe0488a444cbc589d",
+  "node": "v22.21.1",
+  "checks": [
+    {
+      "command": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 9.08,
+      "log": "community-plugins-retry-1.log"
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 9.8,
+      "log": "community-plugins-retry-2.log"
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.69,
+      "log": "community-plugins-retry-3.log"
+    }
+  ]
+}

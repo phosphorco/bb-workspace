@@ -14,8 +14,19 @@ requests share reservation/finality; changed payload rejects. Preserve legacy
 callers when migrating an API, with explicitly weaker one-shot retry guarantees
 if they lack a key. Add retry-safe inputs/outputs without removing old workflows.
 
-Use `binding.server.sendExternal` and `lookupOperation`. Submitted/rejected are
-final; pending remains pending; unknown/expired/unsupported is uncertainty.
+Use `binding.server.sendExternal` and `lookupOperation`. Select external prompt
+rendering once when constructing the binding: `host` (the default) adds one sender
+envelope, while `producer` preserves a producer-owned envelope and `<attached>`
+context. The binding does not sniff text for existing frames; the external
+subject remains structured provenance, and producer mode still registers it.
+On enhanced hosts, producer mode also enables the optional plugin-scoped SDK
+rendering hook so ordinary sends and explicit queued messages keep producer-owned
+frames. Older enhanced hosts without that capability report incompatibility;
+plain upstream remains supported. The transport hint is presentation metadata,
+not a credential. Preserve explicit queue semantics and test the actual SDK HTTP
+path, including SDK references obtained before binding initialization.
+Submitted/rejected are final; pending remains pending; unknown/expired/unsupported
+is uncertainty.
 Only an authoritative absent-final result can allow retry of the same operation
 under current authority and matching immutable input. A host queue must retain
 that same operation as pending until acceptance or terminal cancellation; queued
@@ -69,3 +80,25 @@ first page. Apply cancellation/deadlines during a pending history read as well
 as between polls. One correlated turn does not establish exclusive authorship:
 grouped original/generated inputs can share that turn. Preserve unknown scope
 unless the evidence positively establishes stronger ownership.
+
+For core queue integration, exercise the real active-thread dispatcher and normal
+queue drain. A low-level send function may reject a mode that the dispatch
+checkpoint supports by retaining a queued row. Keep queue reservation and final
+receipt promotion in their native transactions. Fast drain paths must preserve
+those callbacks for every reserved row, including an external row after an
+ordinary lead. Retain each row's actual input-group position and frozen author
+when promoting a mixed batch; commit participant projection with promotion.
+
+An accepted request can precede its exact native turn link. After validating the
+history query/cursor, expose pending while retained, otherwise-intact operation
+evidence is awaiting that link. Do not classify missing contributions, empty
+attempts, generated context without causal mapping, or ambiguous accepted-input
+events as pending. Verify the transition using the matching native request ID,
+then observe its exact turn; do not substitute the latest turn or message text.
+
+A finite-call lease also belongs to the request/response lifecycle. Release it
+when execution omits the event field, fails before observation, or completes or
+cancels its response. A lazy stream iterator may never start, so its finally
+block alone cannot own cleanup. Use execution and response completion signals,
+not a next-tick timeout. Test the served helper against the installed plugin
+bundle as well as the source factory; bundled dependency copies can differ.

@@ -1,0 +1,391 @@
+{
+  "sourceTree": "af159af6746af0c4b3073b25a08ba1792bfa6a4c",
+  "normalPidUnchanged": "606208",
+  "previewPid": "3187707",
+  "http": [
+    {
+      "path": "/health",
+      "status": 200
+    },
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/settings/p6rIdentity",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/system/p6rIdentity",
+      "status": 200,
+      "identityStatus": "unauthenticated"
+    }
+  ],
+  "enabledPlugins": 47,
+  "plugins": [
+    {
+      "id": "account-pool",
+      "status": "disabled",
+      "enabled": false,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/account-pool",
+      "version": "0.1.0"
+    },
+    {
+      "id": "agent-connect",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/agent-connect",
+      "version": "0.1.0"
+    },
+    {
+      "id": "agentation",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/agentation",
+      "version": "0.1.0"
+    },
+    {
+      "id": "analytics",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/community-plugins/plugins/analytics",
+      "version": "0.1.0"
+    },
+    {
+      "id": "ask-user-question",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/ask-user-question",
+      "version": "0.1.0"
+    },
+    {
+      "id": "automations",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/automations",
+      "version": "0.1.0"
+    },
+    {
+      "id": "background-jobs",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/background-jobs",
+      "version": "0.1.0"
+    },
+    {
+      "id": "bb-bug-reporter",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/bb-bug-reporter",
+      "version": "0.1.0"
+    },
+    {
+      "id": "bb-ui-reference",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/community-plugins/plugins/bb-ui-reference",
+      "version": "0.1.1"
+    },
+    {
+      "id": "btw",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/btw",
+      "version": "0.1.0"
+    },
+    {
+      "id": "concurrency-limit",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/concurrency-limit",
+      "version": "0.1.0"
+    },
+    {
+      "id": "connect",
+      "status": "disabled",
+      "enabled": false,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/connect",
+      "version": "0.1.0"
+    },
+    {
+      "id": "custom-instructions",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/custom-instructions",
+      "version": "0.1.0"
+    },
+    {
+      "id": "diffs",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/diffs",
+      "version": "0.1.0"
+    },
+    {
+      "id": "espresso-theme",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/espresso-theme",
+      "version": "0.1.0"
+    },
+    {
+      "id": "future-threads",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/future-threads",
+      "version": "0.1.0"
+    },
+    {
+      "id": "github",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/github",
+      "version": "0.2.1"
+    },
+    {
+      "id": "identity-boundaries",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/identity-boundaries",
+      "version": "0.1.0"
+    },
+    {
+      "id": "inline-vis",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/inline-vis",
+      "version": "0.1.0"
+    },
+    {
+      "id": "keep-awake",
+      "status": "disabled",
+      "enabled": false,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/keep-awake",
+      "version": "0.1.0"
+    },
+    {
+      "id": "machine-monitor",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/community-plugins/plugins/machine-monitor",
+      "version": "0.1.0"
+    },
+    {
+      "id": "memory",
+      "status": "disabled",
+      "enabled": false,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/memory",
+      "version": "0.2.0"
+    },
+    {
+      "id": "monaco-editor",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/monaco-editor",
+      "version": "0.1.0"
+    },
+    {
+      "id": "notifications",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/notifications",
+      "version": "0.1.0"
+    },
+    {
+      "id": "pdf-preview",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/pdf-preview",
+      "version": "0.1.0"
+    },
+    {
+      "id": "perspectives",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/community-plugins/plugins/perspectives",
+      "version": "0.2.1"
+    },
+    {
+      "id": "plan-graph",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/plan-graph",
+      "version": "0.1.0"
+    },
+    {
+      "id": "plan-portfolio",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/plan-portfolio",
+      "version": "0.1.0"
+    },
+    {
+      "id": "plugin-api-docs",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/plugin-api-docs",
+      "version": "0.1.0"
+    },
+    {
+      "id": "plugin-api-tester",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/plugin-api-tester",
+      "version": "0.1.0"
+    },
+    {
+      "id": "provider-acp",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/provider-acp",
+      "version": "0.1.0"
+    },
+    {
+      "id": "provider-claude-code",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/provider-claude-code",
+      "version": "0.1.0"
+    },
+    {
+      "id": "provider-codex",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/provider-codex",
+      "version": "0.1.0"
+    },
+    {
+      "id": "provider-pi",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/provider-pi",
+      "version": "0.1.0"
+    },
+    {
+      "id": "provider-retry",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/provider-retry",
+      "version": "0.1.0"
+    },
+    {
+      "id": "provider-usage",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/provider-usage",
+      "version": "0.1.0"
+    },
+    {
+      "id": "push-notifications",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/push-notifications",
+      "version": "0.1.0"
+    },
+    {
+      "id": "restart-resume",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/community-plugins/plugins/restart-resume",
+      "version": "0.1.0"
+    },
+    {
+      "id": "scheduled-send",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/scheduled-send",
+      "version": "0.1.0"
+    },
+    {
+      "id": "secrets",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/secrets",
+      "version": "0.1.0"
+    },
+    {
+      "id": "side-chat",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/side-chat",
+      "version": "0.1.0"
+    },
+    {
+      "id": "simple-notes",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/docs",
+      "version": "0.2.2"
+    },
+    {
+      "id": "sticky-notes",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/sticky-notes",
+      "version": "0.1.0"
+    },
+    {
+      "id": "subscription-router",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/subscription-router",
+      "version": "0.1.0"
+    },
+    {
+      "id": "tasks",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/tasks",
+      "version": "0.1.2"
+    },
+    {
+      "id": "theme-preview",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/theme-preview",
+      "version": "0.1.0"
+    },
+    {
+      "id": "thread-links",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/thread-links",
+      "version": "0.1.0"
+    },
+    {
+      "id": "thread-manager",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/thread-manager",
+      "version": "0.1.0"
+    },
+    {
+      "id": "thread-peek",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/thread-peek",
+      "version": "0.1.0"
+    },
+    {
+      "id": "thread-progress",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/plugins/plugins/thread-progress",
+      "version": "0.1.0"
+    },
+    {
+      "id": "workflows",
+      "status": "running",
+      "enabled": true,
+      "rootDir": "/home/ubuntu/bb-service/fork/build/bb/apps/server/dist/builtin-plugins/workflows",
+      "version": "0.1.0"
+    }
+  ],
+  "artifactSha256": {
+    "apps/server/dist/start-server.js": "fa128021af59e790c8d3622c3f19e8e118ec541c7ae55d7ac7be0517c6234ec5",
+    "apps/app/dist/index.html": "72fc5ea5035e5ecd5873275310d499ef62748ef364f0a694fc75c4d96c051840",
+    "apps/host-daemon/dist/index.js": "e6eda05e1d6cff16be30a627545c208e07404c2f1c89b2b143f658816dfd2c96",
+    "apps/cli/dist/index.js": "34e51ab009de27bc031ceb8d22d527131b44d7bbf6828ce5e3e467050e356471"
+  },
+  "scope": "Local preview runtime and enabled-plugin readiness; identity status is observed, not fabricated human admission."
+}

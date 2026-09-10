@@ -1,0 +1,14 @@
+{
+  "baseTree": "8984712c0bc8b00422d489eb57c6d0a3128cf98d",
+  "resultTree": "46f03446a9ad7ec54926371e57cb4c00ae5a4cfc",
+  "patch": "0020-docs-p6r-identity-cli-discovery.patch",
+  "patchSha256": "202bf4d269bc38d71bce9e98ea36614080c35330964918390067b78af8161dd3",
+  "paths": [
+    "apps/server/src/services/skills/builtin-skills/bb-cli/references/command-index.md",
+    "apps/server/src/services/skills/builtin-skills/bb-cli/references/configuration.md"
+  ],
+  "sourceSha256": {
+    "apps/server/src/services/skills/builtin-skills/bb-cli/references/command-index.md": "29cb749bdc399e39fe5f275ce3d4cbeeecc04cc838f13bef7f06a42f526b6c3d",
+    "apps/server/src/services/skills/builtin-skills/bb-cli/references/configuration.md": "6cdcd1bcf17394117cebaa21bc4d9b2311fc60c0150e07ef41e14683602440bd"
+  }
+}

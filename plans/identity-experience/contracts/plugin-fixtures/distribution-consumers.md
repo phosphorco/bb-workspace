@@ -1,5 +1,15 @@
 # Public distribution and consumer fixture contract
 
+> Policy update — 2026-09-09: the approved [Identities and multiplayer ADR](../../../../docs/adrs/2026-09-identities-and-multiplayer.md)
+> governs this trusted shared deployment. Use verified people when available,
+> applicable carried attribution next, and a stable machine actor otherwise;
+> missing or failed person verification must not block ordinary operations.
+> Never relabel fallback as a verified person or redirect pending personal-state
+> writes to another owner. Independent access checks and data validation remain.
+> Earlier rejection requirements below are superseded; versioned API descriptions
+> and test receipts remain historical evidence, not proof of ADR implementation.
+
+
 Scope: the selected organization source is
 `plugins@862aee51269d87ebcc307ecd7c69a002c0fd8d6a` (whose identity-package
 source remains at parent `4ecd8b0bddc248cfd19ab94362cbba8937ba375b`); selected
@@ -65,8 +75,10 @@ policy, supplied explicitly; `collaborators` is selected only for an explicit sh
 feature policy. View selection is data, not authority.
 
 Capability absence on ordinary upstream uses the stable default user; a
-configured enhanced identity failure returns failure and must block identity-
-scoped mutation rather than redirect it to that user (`bb.d.ts@4ecd8b0:L140-L146`).
+configured enhanced identity failure must use the shared host
+machine actor for new intent, without redirecting a pending person-owned write
+to another subject. The older blocking declaration (`bb.d.ts@4ecd8b0:L140-L146`)
+is an implementation gap, not the acceptance target.
 Provider credentials, ingress configuration, directory naming and health remain
 with Identity Boundaries. The Tailnet provider explicitly reports missing owned
 host, expired evidence, wrong authority and stale directory as non-success
@@ -137,7 +149,7 @@ the actual loaded paths/hashes.
 | --- | --- | --- |
 | Ordinary baseline | Install the packed plugin; default-user personal feature read/write succeeds under its documented singleton convention. | No identity boundary/provider is configured; no consumer import or host probe crashes. |
 | Enhanced valid provider | Same bytes resolve a host-issued person, run self-only mutation, and show provider presentation from the public session. | A foreign self-only target/write is denied; a copied target cannot validate at commit. |
-| Enhanced configured outage | Same bytes retain ordinary non-identity UI and any recoverable draft. | Missing provider/owned host, malformed extension, stale evidence or expired session yields blocked/unavailable—not a default-user record and not a substituted actor. |
+| Enhanced configured outage | Same bytes retain ordinary non-identity UI and any recoverable draft. | Provider resolution failure yields carried or machine attribution and ordinary work continues. Malformed protocol data is still validated. Pending person-owned writes retain their target and conflict semantics; new machine intent uses an explicit machine subject. |
 | Agent Connect | Same immutable operation becomes accepted or explicitly indeterminate, then reconciliation reads the same operation/history. | Lost response/observer cannot trigger a second external send or text-derived author. |
 | Agentation | Authenticated person A captures feedback; reload/delivery keeps A's immutable source label. | Person B cannot replace A; an unavailable identity stores explicit unavailable provenance, never B/default-user. |
 | Community package delivery | Fresh install resolves all declared public entries and builds Agentation from the distribution artifact. | A clean consumer without the preview sibling archive must fail the pre-release portability gate rather than silently source-link or publish a broken `file:` dependency. |

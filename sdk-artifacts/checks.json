@@ -1,0 +1,17 @@
+{
+  "artifact": {
+    "file": "get-bb-plugin-sdk-0.4.47+phosphor.c30b12255a7f.sdk.a4652a585b5c.tgz",
+    "sha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599",
+    "bytes": 545305
+  },
+  "sourceReceipt": "c30b12255a7f9f098e7bf9b6d1999410e7956785",
+  "checks": {
+    "turboBuildTypes": "pass",
+    "turboBuildRuntime": "pass",
+    "coldInstall": "pass",
+    "publicEntryResolution": "15/15 pass",
+    "rootAndAppImport": "pass",
+    "deterministicRepackSha256": "79ef00173ebb3ffa1c7f9bd9a4e20eeae3f00915aa0b645db8ea328e6b988599",
+    "experimentalStatusLabels": "absent from source and packed declarations"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "sourceTree": "8b7b8f22cf42a166d1cf3c95605feb78ae6362c9",
+  "node": "v22.21.1",
+  "packages": [
+    "@bb/server",
+    "@bb/app",
+    "@bb/cli",
+    "@bb/db",
+    "@bb/domain",
+    "@bb/thread-view",
+    "@bb/server-contract",
+    "@bb/sdk",
+    "@get-bb/plugin-sdk",
+    "@bb/host-daemon"
+  ],
+  "threadManagerFixture": "plugins/plugins/thread-manager",
+  "checks": [
+    {
+      "command": [
+        "pnpm",
+        "install",
+        "--frozen-lockfile"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.99,
+      "log": "initial-core-0.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "typecheck",
+        "--filter=@bb/server",
+        "--filter=@bb/app",
+        "--filter=@bb/cli",
+        "--filter=@bb/db",
+        "--filter=@bb/domain",
+        "--filter=@bb/thread-view",
+        "--filter=@bb/server-contract",
+        "--filter=@bb/sdk",
+        "--filter=@get-bb/plugin-sdk",
+        "--filter=@bb/host-daemon"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 8.96,
+      "log": "initial-core-1.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "exec",
+        "turbo",
+        "run",
+        "test",
+        "--filter=@bb/server",
+        "--filter=@bb/app",
+        "--filter=@bb/cli",
+        "--filter=@bb/db",
+        "--filter=@bb/domain",
+        "--filter=@bb/thread-view",
+        "--filter=@bb/server-contract",
+        "--filter=@bb/sdk",
+        "--filter=@get-bb/plugin-sdk",
+        "--filter=@bb/host-daemon",
+        "--concurrency=2"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 20.12,
+      "log": "initial-core-2.log"
+    },
+    {
+      "command": [
+        "pnpm",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 59.16,
+      "log": "initial-core-3.log"
+    }
+  ],
+  "disposition": "Production build passed. SDK method snapshot omitted existing p6rIdentity; contract allowlist omitted author/editor optional fields. Corrected by test-only patch0019; remaining suites rerun because Turbo cancelled them."
+}

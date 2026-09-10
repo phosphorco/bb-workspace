@@ -1,5 +1,15 @@
 # Plugin contract
 
+> Policy update — 2026-09-09: the approved [Identities and multiplayer ADR](../../../docs/adrs/2026-09-identities-and-multiplayer.md)
+> governs this trusted shared deployment. Use verified people when available,
+> applicable carried attribution next, and a stable machine actor otherwise;
+> missing or failed person verification must not block ordinary operations.
+> Never relabel fallback as a verified person or redirect pending personal-state
+> writes to another owner. Independent access checks and data validation remain.
+> Earlier rejection requirements below are superseded; versioned API descriptions
+> and test receipts remain historical evidence, not proof of ADR implementation.
+
+
 Node `plugin-contract`, reviewed against the current [crosswalk](../crosswalk.md) and Pkl adjudication oracle. This defines implementation and acceptance requirements; it is not a source/runtime grant or completion receipt. Only this document and `plugin-fixtures/**` are writable in this assignment. Root owns integration of public contracts, SDK generation, manifests and locks. Source writes remain behind `source-ready`.
 
 Source anchors: organization `862aee51269d87ebcc307ecd7c69a002c0fd8d6a`, community `31498646dbd7d6ce08ce6fabe0488a444cbc589d`, read in `/home/ubuntu/bb-service`. Reconciliation and historical receipts are linked in [lane evidence](../evidence/plugins.md). The public declarations below are in the selected organization `packages/bb-identity`. No proposed descriptor or presence interface below is represented as already callable.
@@ -8,7 +18,7 @@ Source anchors: organization `862aee51269d87ebcc307ecd7c69a002c0fd8d6a`, communi
 
 Feature factories call `bindBbIdentity(bb)` from `/bb`, handle its Result once, and register person/state/HTTP work through that binding. Public server declarations define `PersonRequest.actor`, `expected`, `target`, `callPlugin`, `signal` and disposal; `CommitValidator.validate` is a same-process synchronous authority check. Feature code does not assemble raw fork adapters, provider routes, transport headers or canonical key codecs. Feature schemas, transactional stores, delivery policy and conflict UI remain feature-owned.
 
-One factory owns its binding until plugin disposal. Interactive handlers open and dispose `invocation.person()`; background and external credentials cannot borrow a current browser person. Request-scoped nested person work uses `PersonRequest.callPlugin` and validates its output codec. Credential-only delivery endpoints verify their own route credential before effects and never manufacture a person scope. Streaming authority follows response completion/cancellation; only one layer owns release on each host. Expiry/disposal prevents new work while retaining already-dispatched durable finality.
+One factory owns its binding until plugin disposal. Interactive handlers open and dispose `invocation.person()`; background and external credentials cannot borrow a current browser person. Request-scoped nested person work uses `PersonRequest.callPlugin` and validates its output codec. Credential-only delivery endpoints verify their own route credential before effects and never manufacture a person scope. Streaming authority follows response completion/cancellation; only one layer owns release on each host. Expiry invalidates old person evidence; new ordinary work resolves carried or machine attribution. Disposal still prevents use of a retired plugin handler, and already-dispatched durable finality is retained.
 
 Native facts and personal appearance remain native-owned, with no import of this package in core. Native participant/facet keys remain in their native domain; do not migrate Thread Manager filters to identity keys or add redundant identity requests. Core authority is not a trusted-plugin sandbox: a display rename or issuer restriction does not imply process containment.
 
@@ -84,7 +94,7 @@ Real live acceptance requires admitted human sessions and explicit disposable fi
 
 ## Distribution handoff and remaining decisions
 
-Release owns `portable-artifact-proof` installation/runtime receipts; plugins supplies actual feature assertions for Thread Progress, Agent Connect and Notifications. Same bytes must resolve normally and run on baseline and fork, with default-owner behavior versus fail-closed configured failure explicitly tested. Public registry publication and supported self-contained delivery are alternative release mechanisms to adjudicate; current sibling archive alone is preview delivery. Preserve new3149864 adoption instead of scheduling another direct-provider removal.
+Release owns `portable-artifact-proof` installation/runtime receipts; plugins supplies actual feature assertions for Thread Progress, Agent Connect and Notifications. Same bytes must resolve normally and run on baseline and fork, with baseline default-owner behavior and enhanced-host machine fallback explicitly tested. Public registry publication and supported self-contained delivery are alternative release mechanisms to adjudicate; current sibling archive alone is preview delivery. Preserve new3149864 adoption instead of scheduling another direct-provider removal.
 
 The worker's [distribution and consumer contract](plugin-fixtures/distribution-consumers.md) refines public imports, artifact ordering and per-feature assertions. Coordinator reviewed the completed fixture, correcting publication wording and clarifying that self-only policy is explicitly supplied, not an implicit library default. Worker reused `thr_nj6b3bisad` with codex/gpt-5.6-terra/high/fast. Root schedules exactly one owner for package/declaration/generator/lock changes and shared SDK generation.
 

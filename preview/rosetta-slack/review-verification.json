@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "scope": "Reviewer corrections to conversation ordering, revision retention, immutable input recovery, and inbox readiness",
+  "pluginCommit": "37837bed25bfbb18a441852820219532899178ba",
+  "checks": [
+    {
+      "check": "install",
+      "exitCode": 0
+    },
+    {
+      "check": "sync:check",
+      "exitCode": 0
+    },
+    {
+      "check": "references:check",
+      "exitCode": 0
+    },
+    {
+      "check": "sdk-types:check",
+      "exitCode": 0
+    },
+    {
+      "check": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "check": "test",
+      "exitCode": 0
+    },
+    {
+      "check": "build",
+      "exitCode": 0
+    }
+  ],
+  "rosettaTests": {
+    "passed": 182,
+    "failed": 0
+  },
+  "reviewers": [
+    "correctness",
+    "complexity",
+    "test coverage"
+  ],
+  "reviewRecord": "review-followup.md",
+  "runtimeReceipt": "runtime.json",
+  "normalSourceReloaded": false,
+  "limits": [
+    "Preview has no Slack credentials",
+    "Real agent selection between useful replies and silence remains a live acceptance check",
+    "Provider authentication requires deployment acceptance; local readiness does not perform external probes"
+  ]
+}
