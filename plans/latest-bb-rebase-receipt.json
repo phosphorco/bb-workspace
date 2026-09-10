@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "activated",
+  "status": "delivered",
   "selectedUpstream": {
     "commit": "10bacbc0fb1ead6c1f1a728b395bdb1f60e52f93",
     "releaseVersion": "0.42.1"
@@ -71,6 +71,6 @@
   "promotion": {
     "forkCommit": "d4bb691c7",
     "pluginCommit": "a778f32",
-    "workspaceCommit": null
+    "workspaceCommit": "b32a970"
   }
-}\n
+}
