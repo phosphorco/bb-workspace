@@ -1,0 +1,34 @@
+amends "workbench:plan"
+
+meta {
+  title = "Reconcile BB workspace to main"
+  goal = "Preserve intended local work, integrate main using approved ADRs, verify the exact composition, and publish clean source children and workspace main."
+}
+
+local reconcile = new Action {
+  id = "reconcile-source"
+  owner = "workspace-steward"
+  grant { "fork/**"; "plugins/**"; "community-plugins/**"; ".agents/**"; "docs/**"; "plans/**"; "bin/**"; "README.md"; "AGENTS.md"; ".gitignore" }
+  outcome = "Inventory all authored work and side branches, preserve logical commits, integrate fetched main, and reconcile content against approved ADRs. Coordinate concurrent writers before touching their files. Preserve source artifacts and ignore only confirmed non-source output."
+  oracle = module.adjudicated("Every intended local delta is committed or explicitly superseded with content evidence; no authored work is silently discarded; current main commits and ADRs are integrated in every source repository.", "workspace-steward")
+}
+
+local qualify = new Guard {
+  id = "qualify-composition"
+  owner = "workspace-steward"
+  needs { module.produced(reconcile); module.verified(reconcile) }
+  observes { "fork/**"; "plugins/**"; "community-plugins/**"; "bin/**" }
+  outcome = "Run repository-prescribed checks and combined staging plugin/runtime probes against the exact selected revisions. No service restart is implied."
+  oracle = module.adjudicated("Fork replay, install, typecheck, tests and build; organization plugin sync/references/SDK/typecheck/tests/build; community install/tests/typecheck/build; and live combined staging probes all pass with recorded revision-specific evidence.", "workspace-steward")
+}
+
+local publish = new Action {
+  id = "publish-composition"
+  owner = "workspace-steward"
+  needs { module.verified(qualify) }
+  grant { "fork/.git"; "plugins/.git"; "community-plugins/.git"; ".git"; "fork"; "plugins"; "community-plugins" }
+  outcome = "Push selected child main revisions first, then commit and push the workspace gitlink receipt. Verify clean main checkouts equal freshly fetched origin/main and runtime matches selected fork receipts. Report any remaining activation gap without restarting BB."
+  oracle = module.adjudicated("All source repositories are clean on main equal to fetched main; workspace gitlinks equal pushed and tested child HEADs; pinned upstream/runtime match the selected fork. No intended source is stranded and any activation gap is explicitly reported.", "workspace-steward")
+}
+
+nodes { reconcile; qualify; publish }

@@ -1,0 +1,235 @@
+amends "workbench:plan"
+
+meta {
+  title = "Analytics follow-up: close the integrated-product gap"
+  goal = "Deliver the actual retained-facts -> shared backend execution -> dashboard/table/export -> immutable chart-to-chat workflow, then qualify its performance, recovery and existing-user compatibility. Reuse the implemented foundations without mistaking isolated passes for the complete product."
+}
+
+// Follow-up to analytics.plan.pkl; see analytics-delivery/brief.md.
+// Planning does not execute these commands, dispatch agents, or promote a host.
+// New host-execution and vertical-slice suites are explicit instruments to build.
+local p = "community-plugins/plugins/analytics"
+local t = "community-plugins/plugins/analytics/test/architecture"
+
+local baseline = new Guard {
+  id = "carry-forward-review"
+  owner = "reviewer"
+  observes { "plans/analytics.plan.pkl"; "plans/analytics.ledger.jsonl"; "plans/analytics/retained-publication-boundary.md"; "\(p)/**" }
+  outcome = "Reconcile current dirty-file identities with the historical contract/runtime/runner reviews, independent query PASS followed by formal timeout, and staging-only PASS4/4. Identify reusable artifacts and outstanding evidence without repeating feasibility or importing completion states. Establish one writer and one bounded heavy-test lane before resuming."
+  oracle = module.adjudicated("The carry-forward table in the follow-up brief matches current source and old ledger. Query remains unverified until a current mechanical pass; staging is not extraction. Existing runtime choice/contracts remain inputs unless contradicted by evidence. Disk/process state permits safe scoped work; no unrelated processes/caches/state are mutated. Every old unresolved outcome maps to a follow-up node or remains explicit in final review.", "reviewer")
+}
+
+local boundary = new Action {
+  id = "integration-boundaries"
+  owner = "implementer"
+  needs { module.verified(baseline) }
+  grant {
+    "\(p)/rpc-contract.ts"; "\(p)/execution-contract.ts"; "\(p)/docs/execution-contract.md"
+    "\(p)/docs/architecture-evidence/delivery/integration-boundaries.md"
+    "\(t)/fixtures/**"; "\(t)/acceptance.mjs"
+    "\(t)/browser/production-binding.mjs"; "\(t)/browser/acceptance-binding.mjs"
+  }
+  outcome = "Close only missing composition seams: host-resolved bundle/query and identity admission, actual retained snapshot provider, two-phase SQL admission, execution record persistence, UI subscriptions and reference creation. Give each implementation a concrete operation-level interface. Per-query execution responses pair the existing ExecutionResult with the exact immutable executionDefinition persisted for that result, allowing historical figure/menu/export context without mutable bundle lookup. Register host-execution/vertical-slice suites and a thin test-owned browser binding router with separate per-suite modules; absent modules stay blocked and import defects fail. Preserve internal execution/result schemas and runner bounds; do not invent result-report adapters."
+  oracle = module.adjudicated("A source-to-consumer map identifies ordinary concrete constructors and ownership, not hypothetical completion reports. Clients send locators/typed values, not trusted SQL/rows/scope/definitions. Success requires a definition matching result bundle/query authority, result columns and plotted extent; missing or mismatched definitions fail. The host contract returns the same definition it persists, and UI consumes its captured figures. Per-query snapshot differences are explicit, without claiming a shared dashboard snapshot or historical whole-dashboard layout. There is one active SQLite publication. Component test routing does not depend on future composition, while integrated proofs still require real composition. Existing contract/self-control evidence is rerun if affected. Missing cases are nonpassing and exact observer/runner guarantees are preserved.", "reviewer")
+}
+
+local extraction = new Action {
+  id = "retained-fact-projection"
+  owner = "implementer"
+  needs { module.verified(baseline) }
+  grant {
+    "\(p)/store.ts"; "\(p)/fact-projection.ts"; "\(p)/fact-schema.ts"; "\(p)/extraction/**"
+    "\(p)/test/store.test.ts"; "\(p)/test/fact-projection.test.ts"
+    "\(t)/suites/extraction.mjs"; "\(t)/suites/extraction/**"; "\(t)/suites/data/bindings/extraction.mjs"
+  }
+  outcome = "Finish the actual public-SDK adapter, demand-owned single-flight reconciler and atomic retained publication using the tested staging primitive. Page beyond recency limits; preserve omissions/failures; distinguish source cursor from staged-fact sequence; confirm exact thread_not_found; enforce retention and global staging cleanup bounds. Complete bounded rewrite/upgrade epochs without mixed-version publication or no-op generation churn. Preserve legacy commitSnapshot until cutover and append migrations only. Replace synthetic value-row acceptance with full typed facts from real projector/store operations."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite extraction --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local queries = new Action {
+  id = "isolated-query-service"
+  owner = "implementer"
+  needs { module.verified(baseline) }
+  grant {
+    "\(p)/query-runtime/**"; "\(p)/sql-policy.ts"; "\(p)/analytics-verifier.ts"
+    "\(t)/suites/query-runtime.mjs"; "\(t)/suites/query-runtime/**"
+    "\(p)/docs/architecture-evidence/delivery/query-verification.md"
+  }
+  outcome = "Close the formal query gate on the existing implementation. Inspect the prior timeout and host conditions, then coordinate a bounded normal run at frozen source. If it fails, localize the failing operation with bounded closed diagnostics and fix only the demonstrated cause. Preserve all eleven builtin, parser/bridge, attestation, source-locality, lifecycle, cancellation/cache/result and observer assertions. No repeat-until-green, self-test substitution, or unreviewed timeout expansion."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite query-runtime --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local browserTooling = new Action {
+  id = "browser-verification-tooling"
+  owner = "implementer"
+  needs { module.verified(baseline); module.produced(boundary); module.verified(boundary) }
+  grant {
+    "\(p)/package.json"; "community-plugins/package-lock.json"
+    "\(p)/docs/architecture-evidence/delivery/browser-tooling.md"
+    "\(t)/browser/tooling-smoke.mjs"
+  }
+  outcome = "Establish the missing reproducible Analytics-owned browser test toolchain. Select and directly pin the Playwright driver and any fixture-serving/build tools actually imported by the chosen harness, with exact registry integrity in the community lock. Record an explicit package-local Chromium install/launch policy and bounded provenance/cleanup commands. Preserve unrelated dirty dependency edits; no cross-repository node_modules import, global-driver fallback, normal service, or identity-package substitute. This node owns dependency files before shared-identity-dependency and compose-plugin."
+  oracle = module.adjudicated("A concrete source-to-tool map identifies the test-owned UI binding, actual driver and fixture-serving entrypoints, and their direct exact devDependencies. Registry package/lock identities and the selected browser revision/install location are reproducible without separate plugins/node_modules or incidental transitive tooling. Missing browser binaries stay nonpassing. Installation and any synthetic browser smoke run are separately bounded and coordinated, with observed close/exit and no live-source or normal-host use. The existing acceptance supervisor remains authoritative for later browser suites; tooling readiness is not UI, performance, packaging or host acceptance.", "reviewer")
+}
+
+local identityDependency = new Action {
+  id = "shared-identity-dependency"
+  owner = "implementer"
+  needs { module.produced(boundary); module.verified(boundary); module.produced(browserTooling); module.verified(browserTooling) }
+  grant { "\(p)/package.json"; "community-plugins/package-lock.json" }
+  outcome = "After the identity release owner makes the approved public package available, declare Analytics' exact direct bb-identity dependency and record registry URL/integrity in the community lock. Verify the selected bytes against the release receipt and public exports. Never substitute the temporary local symlink/archive, source-relative import, ambient shim, or feature-local identity adapter. Publication itself requires separate release-owner authority and is not authorized by this node."
+  oracle = module.adjudicated("The selected registry artifact has an actual release-owner approval receipt; Analytics declares it directly and its lock resolves those exact registry bytes. A bounded clean consumer resolves public /bb types and runtime without local source or temporary symlinks. Missing registry publication is nonpassing. Package/lock edits precede the later compose-plugin edits through the host dependency; no hidden overlapping writer.", "reviewer")
+}
+
+local host = new Action {
+  id = "authoritative-execution-service"
+  owner = "implementer"
+  needs { module.produced(boundary); module.verified(boundary); module.produced(identityDependency); module.verified(identityDependency) }
+  grant {
+    "\(p)/execution-service.ts"; "\(p)/execution-store.ts"; "\(p)/snapshot-provider.ts"
+    "\(p)/test/execution-service.test.ts"; "\(p)/test/execution-store.test.ts"
+    "\(t)/suites/host-execution.mjs"; "\(t)/suites/host-execution/**"
+  }
+  outcome = "Build the missing host layer over the existing runtime: resolve authoritative saved bundle/query, admit shared-host request scope, freeze retained snapshot/range, obtain actual parser attestation and construct immutable resolved input once. Persist exact bounded execution result plus historical definitions for references. UI and agents share physical work while retaining distinct execution identities. Implement expiry/disposal and failure-safe persistence, using ordinary supported storage/identity APIs."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite host-execution --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local references = new Action {
+  id = "immutable-reference-service"
+  owner = "implementer"
+  needs { module.produced(boundary); module.verified(boundary); module.produced(host) }
+  grant {
+    "\(p)/analytics-reference.ts"; "\(p)/reference-store.ts"; "\(p)/reference-service.ts"
+    "\(p)/test/analytics-reference.test.ts"; "\(t)/suites/references.mjs"
+    "\(t)/suites/references/**"; "\(t)/suites/data/bindings/references.mjs"
+  }
+  outcome = "Finish the repository/resolver on the authoritative execution store. Create references only from server-owned execution ID plus datum key; preserve exact bundle/query/visualization/coverage context across edits and restart. Implement expiration/deletion, scope rejection, copy/mention/agent resolution and legacy v1 handling. Bind the existing suite-owned parsed-record/capsule tests directly to real operations with surfaced cleanup failures."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite references --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local ui = new Action {
+  id = "execution-backed-ui"
+  owner = "implementer"
+  needs { module.produced(boundary); module.verified(boundary); module.produced(browserTooling); module.verified(browserTooling) }
+  grant {
+    "\(p)/app.tsx"; "\(p)/app.css"; "\(p)/analytics-model.ts"; "\(p)/analytics-export.ts"; "\(p)/analytics-status.ts"
+    "\(p)/echarts-figure.tsx"; "\(p)/echarts-options.ts"; "\(p)/echarts-update-policy.ts"; "\(p)/chart-environment.ts"
+    "\(t)/suites/ui.mjs"; "\(t)/browser/bindings/ui.mjs"; "\(t)/browser/ui/**"
+  }
+  outcome = "Implement the dashboard consumer of canonical backend executions with actual browser component tests. Preserve topbar/loading/ECharts/table behavior; retain prior results while refreshing; freeze menu, export and pointer/keyboard selection to their execution. Dispose subscriptions/charts/observers correctly. Component-controlled RPC fixtures prove UI behavior only; actual backend wiring is the later vertical-slice gate."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite ui --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local laneReview = new Guard {
+  id = "operation-oracle-review"
+  owner = "reviewer"
+  needs { module.produced(extraction); module.produced(queries); module.produced(host); module.produced(references); module.produced(ui) }
+  observes { "\(t)/**"; "\(p)/extraction/**"; "\(p)/query-runtime/**"; "\(p)/execution-service.ts"; "\(p)/reference-service.ts" }
+  outcome = "Review the component instruments and real binding boundaries before accepting composition. Do not require future composition/performance success to declare component instrument readiness."
+  oracle = module.adjudicated("Fixtures own expected rows/context, not product pass flags. Normal cases reach actual constructors/store/worker/browser operations, with controlled bad-value and lifecycle negatives. Exact observer required keys and bounded values remain enforced. Extraction coverage is derived from operations, not fixture labels. No missing binding, rejected import, silent failure, or self-test can pass a product obligation.", "reviewer")
+}
+
+local compose = new Action {
+  id = "compose-plugin"
+  owner = "implementer"
+  needs {
+    module.produced(extraction); module.verified(extraction); module.produced(queries); module.verified(queries)
+    module.produced(host); module.verified(host); module.produced(references); module.verified(references)
+    module.produced(ui); module.verified(ui); module.verified(laneReview)
+  }
+  grant {
+    "\(p)/server.ts"; "\(p)/rpc-contract.ts"; "\(p)/package.json"; "\(p)/THIRD_PARTY_NOTICES.md"
+    "community-plugins/package.json"; "community-plugins/package-lock.json"
+    "\(t)/suites/composition.mjs"; "\(t)/browser/bindings/composition.mjs"
+    "\(t)/suites/vertical-slice.mjs"; "\(t)/browser/bindings/vertical-slice.mjs"
+  }
+  outcome = "Wire normal plugin startup/storage/migrations, SDK source, backend service, dashboard RPC and reference resolver. Register UI and agent entrypoints using the same host execution service and supported identity admission. Produce the first real retained dashboard round trip; preserve old workflows until migrated. Build the narrow vertical-slice instrument and real-browser binding, without external messages or another runtime deployment."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite composition --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local vertical = new Guard {
+  id = "retained-dashboard-roundtrip"
+  owner = "implementer"
+  needs { module.produced(compose); module.verified(compose) }
+  observes { "\(p)/**" }
+  outcome = "FIRST PRODUCT MILESTONE: load a real builtin dashboard over the real retained pipeline using synthetic public-source input; cross the old thread/event caps, then append and omit a member. Show exact retained rows and truthful coverage through the backend. UI and agent requests share work. Capture a mark/table row, change range/refresh/edit, and prove copy, export and reference resolution still identify the captured execution after resolver/store restart. Observe zero browser fact download/DuckDB execution on this path."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite vertical-slice --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local cutover = new Action {
+  id = "complete-workflow-cutover"
+  owner = "implementer"
+  needs { module.verified(vertical) }
+  grant {
+    "\(p)/server.ts"; "\(p)/rpc-contract.ts"; "\(p)/app.tsx"; "\(p)/browser-engine.ts"
+    "\(p)/bundle-contract.ts"; "\(p)/builtin-bundles.ts"; "\(p)/test/bundle-contract.test.ts"
+    "\(p)/package.json"; "\(p)/THIRD_PARTY_NOTICES.md"
+    "\(t)/suites/end-to-end.mjs"; "\(t)/browser/bindings/end-to-end.mjs"
+  }
+  outcome = "Move every builtin and installed authored bundle, CLI/agent entry, exact table, CSV/SVG export and copy/mention workflow onto the shared execution path. Remove obsolete browser facts/engine routes only after all consumers migrate; no dual default path. Cover keyboard/pointer parity, menu races, rapid ranges, failures/retry, navigation and disposal. Keep old saved bundles/references readable via documented migration rather than deleting user artifacts."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite end-to-end --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local qualification = new Action {
+  id = "qualification-instruments"
+  owner = "implementer"
+  needs { module.verified(vertical) }
+  grant {
+    "\(t)/suites/performance.mjs"; "\(t)/suites/ui/performance-fixtures.mjs"
+    "\(t)/browser/bindings/performance.mjs"; "\(t)/suites/migration-packaging.mjs"
+    "\(t)/suites/data/migration-fixture.mjs"; "\(t)/suites/data/bindings/migration-packaging.mjs"
+    "\(t)/browser/bindings/migration-packaging.mjs"; "\(t)/qualification/**"
+  }
+  outcome = "Finish the remaining real performance/source-mutation/host-contention bindings and clean-install/migration proof. Preserve the deterministic full typed datasets and independent aggregates. Add policy-owned distributions and measured gates for every required workload. Installed worker process must establish the assets/version actually loaded; binding labels alone cannot prove provenance. Keep missing qualification explicit until measurements run."
+  oracle = module.adjudicated("Source review confirms actual configured workload execution, timing before request through useful result, independent exact-result oracles, per-sample named resource evidence, warm distributions, active host baseline comparison and source mutation/idle checks. Packaging proof uses a disposable install fixture, actual child-resolved asset provenance, pinned version, prior-schema reopen/rollback/idempotence and unchanged legacy JSON. No measured pass is inferred from this instrument review.", "reviewer")
+}
+
+local integrated = new Guard {
+  id = "integrated-regression-proof"
+  owner = "implementer"
+  needs { module.produced(cutover); module.verified(cutover) }
+  observes { "\(p)/**" }
+  outcome = "Rerun component and composition proofs at the final integrated source identities, so later store/server/UI changes cannot silently inherit earlier isolated greens. One bounded supervised batch; a timeout or missing suite remains nonpassing and is localized before any new run."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite extraction --suite query-runtime --suite host-execution --suite references --suite ui --suite composition --suite vertical-slice --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local performance = new Guard {
+  id = "performance-proof"
+  owner = "implementer"
+  needs { module.verified(integrated); module.produced(qualification); module.verified(qualification) }
+  observes { "\(p)/**" }
+  outcome = "Measure 25k/250k/1m retained facts; 1/10/30 shared visualizations and distinct queries; 1/4 viewers; 0/1/5/20/80 changed threads; cold/warm/stale and cancelled/navigation cases. Enforce accepted warm p95 and reuse/resource policies, source-mutation costs, host responsiveness and no idle extraction. Capture hardware, contention and bounded sample distributions; unsupported workload is not green."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite performance --timeout-ms 120000 --total-timeout-ms 300000")
+}
+
+local compatibility = new Guard {
+  id = "compatibility-proof"
+  owner = "implementer"
+  needs { module.verified(integrated); module.produced(qualification); module.verified(qualification) }
+  observes { "community-plugins/**"; "bin/check" }
+  outcome = "Prove prior storage/bundle/reference migration, restart and rollback; disposable clean installation with actual shipped worker/Wasm provenance; community tests/typecheck/build and staging composition. Preserve unrelated dirty work and report unrelated failures, never clear caches or alter normal-host pins to get green."
+  oracle = module.mechanical("node community-plugins/plugins/analytics/test/architecture/acceptance.mjs --suite migration-packaging --timeout-ms 120000 --total-timeout-ms 300000 && npm --prefix community-plugins ci && npm --prefix community-plugins run test && npm --prefix community-plugins run typecheck && npm --prefix community-plugins run build && ./bin/check --role staging")
+}
+
+local handoff = new Action {
+  id = "evidence-and-handoff"
+  owner = "implementer"
+  needs { module.verified(integrated); module.verified(performance); module.verified(compatibility) }
+  grant { "\(p)/README.md"; "\(p)/docs/architecture-evidence/final/**" }
+  outcome = "Deliver a reproducible real-workflow demonstration, exact tested identities, measured performance report and operating/recovery instructions. Explain retention versus freshness, observed-as-of versus completeness, scope, result/reference expiry, supported limits and migration. Reconcile every unresolved old and follow-up ledger note."
+  oracle = module.adjudicated("The report demonstrates the user's complete workflow rather than a list of component passes. Commands and exact sources reproduce evidence; limitations are explicit and not wider than measured support. No unresolved in-scope note disappears without evidence or Cole's scope decision.", "reviewer")
+}
+
+local finalReview = new Guard {
+  id = "outcome-review"
+  owner = "reviewer"
+  needs { module.produced(handoff); module.verified(handoff); module.verified(integrated); module.verified(performance); module.verified(compatibility) }
+  observes { "plans/analytics.plan.pkl"; "plans/analytics.ledger.jsonl"; "plans/analytics-delivery.plan.pkl"; "plans/analytics-delivery.ledger.jsonl"; "plans/analytics-delivery/brief.md"; "\(p)/**" }
+  outcome = "Judge that the gap is closed: the normal product uses retained facts and shared bounded backend queries, every visual/export/chat action has exact historical context, existing workflows survive, and current integration/performance/compatibility evidence passes. No package publication or normal-host promotion is implied."
+  oracle = module.adjudicated("All destination conditions in the follow-up brief are observed on the integrated product. A first dashboard slice, synthetic self-tests, source review, stale passes, or an all-green partial graph is insufficient. Both ledgers are reconciled, source drift has triggered affected reruns, and no promises were weakened without Cole's decision.", "reviewer")
+}
+
+nodes {
+  baseline; boundary; extraction; queries; browserTooling; identityDependency; host; references; ui; laneReview
+  compose; vertical; cutover; qualification; integrated; performance; compatibility; handoff; finalReview
+}

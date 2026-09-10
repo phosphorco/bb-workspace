@@ -1,0 +1,161 @@
+amends "workbench:plan"
+
+meta {
+  title = "Forward plugins to origin/main without losing identity-enabled work"
+  goal = "Integrate the current plugins worktree with origin/main, preserve or consciously supersede local behavior with bb-identity as the preferred shared boundary, verify the Usage surface, then prepare delivery and communicate the exact result."
+}
+
+local p = "plugins"
+local evidence = "plans/plugins-origin-main-forwarding"
+
+local baseline = new Guard {
+  id = "baseline-receipt"
+  owner = "execution-steward"
+  observes { "\(p)/.git"; "\(p)/**"; "\(evidence)/baseline.md" }
+  outcome = "Record the fetched origin/main commit, merge-base relationship, dirty paths, and generated-versus-handwritten delta before source integration. Preserve every pre-existing worktree change as an input rather than treating status counts as discard authority."
+  oracle = module.mechanical("test -f plans/plugins-origin-main-forwarding/baseline.md && git -C plugins merge-base HEAD origin/main >/dev/null")
+}
+
+local upstream = new Action {
+  id = "upstream-reconciliation"
+  owner = "upstream-lane"
+  needs { module.verified(baseline) }
+  grant { "\(evidence)/upstream.md" }
+  outcome = "Map the 15 origin/main commits to concrete source removals, SDK/package-generation changes, and retained plugin surfaces. Identify exact integration risks, with special attention to files jointly edited locally and upstream."
+  oracle = module.mechanical("test -s plans/plugins-origin-main-forwarding/upstream.md")
+}
+
+local identity = new Action {
+  id = "identity-continuity-review"
+  owner = "identity-lane"
+  needs { module.verified(baseline) }
+  grant { "\(evidence)/identity.md" }
+  outcome = "Trace current local and origin/main bb-identity contracts, consumers, generators, and SDK compatibility. Recommend the smallest forward integration that retains bb-identity-facilitated behavior; name any incompatibility with a source citation and a concrete test."
+  oracle = module.mechanical("test -s plans/plugins-origin-main-forwarding/identity.md")
+}
+
+local usage = new Action {
+  id = "usage-continuity-review"
+  owner = "usage-lane"
+  needs { module.verified(baseline) }
+  grant { "\(evidence)/usage.md" }
+  outcome = "Trace Subscription Router's Usage view, router lifecycle, generated-manifest requirements, and current installed source. Separate files that must survive integration from obsolete or generated files; state the focused build and live-reload proof."
+  oracle = module.mechanical("test -s plans/plugins-origin-main-forwarding/usage.md")
+}
+
+local integrationReview = new Guard {
+  id = "integration-decision-review"
+  owner = "execution-steward"
+  needs { module.produced(upstream); module.verified(upstream); module.produced(identity); module.verified(identity); module.produced(usage); module.verified(usage) }
+  observes { "\(evidence)/upstream.md"; "\(evidence)/identity.md"; "\(evidence)/usage.md"; "\(p)/**" }
+  outcome = "Choose one source-level reconciliation for every conflicting implementation. Prefer the existing shared bb-identity contract over feature-local identity copies; preserve only behavior with a current consumer and test. Independent perspectives review the proposed resolution before writes begin."
+  oracle = module.adjudicated("The decision names each material overlap, selected implementation, rationale, migration/removal consequence, and the tests that prove it. It does not claim an unrun merge or silently discard authored work. bb-identity remains the canonical identity boundary unless source evidence establishes a necessary public-contract change.", "execution-steward")
+}
+
+local integrate = new Action {
+  id = "forward-source-integration"
+  owner = "execution-steward"
+  needs { module.verified(integrationReview) }
+  grant { "\(p)/**" }
+  outcome = "Integrate origin/main into the dirty plugins worktree using the accepted decision. Retain, migrate, or deliberately remove each local behavior with reviewable evidence; regenerate workspace-owned manifests/types only through their repository scripts. Do not reset, clean, stash, or replace pre-existing authored work."
+  oracle = module.mechanical("git -C plugins diff --check && git -C plugins merge-base --is-ancestor origin/main HEAD")
+}
+
+local sdkArtifact = new Action {
+  id = "sdk-artifact-diagnosis"
+  owner = "sdk-artifact-lane"
+  needs { module.produced(integrate); module.verified(integrate) }
+  grant { "\(evidence)/sdk-artifact.md" }
+  outcome = "Locate or conclusively diagnose the exact pinned shared SDK artifact required by the selected generator. Record provenance, integrity expectations, and the safe recovery action without substituting a different SDK or changing dependency state."
+  oracle = module.mechanical("test -s plans/plugins-origin-main-forwarding/sdk-artifact.md")
+}
+
+local identityPreflight = new Action {
+  id = "identity-forward-preflight"
+  owner = "identity-lane"
+  needs { module.produced(integrate); module.verified(integrate) }
+  grant { "\(evidence)/identity-preflight.md" }
+  outcome = "Audit the integrated identity consumers for public bb-identity and public SDK import boundaries before exact-SDK compilation. Record any source defect separately from the archive blocker; do not create feature-local identity synchronization."
+  oracle = module.mechanical("test -s plans/plugins-origin-main-forwarding/identity-preflight.md")
+}
+
+local usageReadiness = new Action {
+  id = "usage-reload-readiness"
+  owner = "usage-lane"
+  needs { module.produced(integrate); module.verified(integrate) }
+  grant { "\(evidence)/usage-reload-readiness.md" }
+  outcome = "Inspect the installed Router generation and document the exact compatible-runtime build, reload, source-path, and Usage behavior probes needed after SDK qualification. This is read-only readiness work and must not reload the active Router."
+  oracle = module.mechanical("test -s plans/plugins-origin-main-forwarding/usage-reload-readiness.md")
+}
+
+local identityProof = new Guard {
+  id = "identity-forward-proof"
+  owner = "identity-lane"
+  needs { module.produced(integrate); module.verified(integrate); module.produced(sdkArtifact); module.verified(sdkArtifact); module.produced(identityPreflight); module.verified(identityPreflight) }
+  observes { "\(p)/packages/bb-identity/**"; "\(p)/plugins/**" }
+  outcome = "Prove the shared bb-identity public contract and its selected plugin consumers remain buildable after the forward integration. Fail on source-relative identity substitutes, stale generated declarations, or behavior incompatible with the adopted SDK contract."
+  oracle = module.mechanical("cd plugins && bun run sync:check && bun run sdk-types:check && bun run --filter '@phosphorco/bb-identity' typecheck")
+}
+
+local repositoryQualification = new Guard {
+  id = "repository-qualification"
+  owner = "execution-steward"
+  needs { module.verified(identityProof) }
+  observes { "\(p)/package.json"; "\(p)/bun.lock"; "\(p)/tools/**"; "\(p)/packages/**"; "\(p)/plugins/**" }
+  outcome = "Pass the organization-plugin dependency, generator, reference, exact-SDK, typecheck, test, and build gates for the selected integrated source before any Router build or reload. Record any platform-declared skipped native oracle separately from a passing suite."
+  oracle = module.mechanical("cd plugins && bun install --frozen-lockfile && bun run sync:check && bun run references:check && bun run sdk-types:check && bun run typecheck && bun run test && bun run build")
+}
+
+local usageProof = new Action {
+  id = "usage-build-and-reload"
+  owner = "usage-lane"
+  needs { module.produced(integrate); module.verified(integrate); module.produced(usageReadiness); module.verified(usageReadiness); module.verified(repositoryQualification) }
+  grant { "\(p)/plugins/subscription-router/dist/**" }
+  outcome = "Build Subscription Router from the integrated canonical source, reload the plugin only after qualification, and prove the installed Usage plugin resolves to that source and reports running without a reload error. This does not claim a running host-router generation adopted new code."
+  oracle = module.mechanical("bb plugin build ./plugins/plugins/subscription-router && bb plugin reload subscription-router && bb plugin source subscription-router")
+}
+
+local hostMaintenanceWindow = new Selector {
+  id = "host-router-maintenance-window"
+  owner = "Cole"
+  question = "Has the separate community-plugin owner confirmed a non-disruptive maintenance window for host-router activation and its process/lease checks?"
+  options { "maintenance-window-confirmed"; "defer-host-router-activation" }
+}
+
+local hostRouterAdoption = new Action {
+  id = "host-router-adoption-proof"
+  owner = "execution-steward"
+  needs { module.produced(usageProof); module.verified(usageProof); module.ruled(hostMaintenanceWindow) }
+  grant { "\(evidence)/host-router-adoption.md" }
+  outcome = "When the selected maintenance-window ruling permits it, perform the explicit Install-router/activation path and record the running process, executable, generation, lease/state, and old/new overlap evidence. A plugin reload alone is insufficient."
+  oracle = module.mechanical("test -s plans/plugins-origin-main-forwarding/host-router-adoption.md")
+}
+
+local finalReview = new Guard {
+  id = "independent-release-review"
+  owner = "execution-steward"
+  needs { module.verified(identityProof); module.produced(usageProof); module.verified(usageProof); module.produced(hostRouterAdoption); module.verified(hostRouterAdoption) }
+  observes { "\(p)/**"; "\(evidence)/**" }
+  outcome = "Run independent perspective review of the integrated diff, identity prioritization, generated artifacts, and Usage reload evidence. Resolve contradictory implementation recommendations with the stated owner decision rather than blending incompatible designs."
+  oracle = module.adjudicated("Review confirms the delivered tree is based on origin/main, no existing dirty work was silently lost, bb-identity is the single shared identity path for affected consumers, generated output is reproducible, and Subscription Router is live from the canonical source with separately proven host-router adoption. Remaining limits are explicit.", "execution-steward")
+}
+
+local delivery = new Action {
+  id = "delivery-receipt"
+  owner = "execution-steward"
+  needs { module.verified(finalReview) }
+  grant { "\(evidence)/delivery.md" }
+  outcome = "Prepare the delivery receipt: selected origin/main commit, integration decisions, changed source areas, verification evidence, running plugin source, and exact remaining promotion/commit work. Delivery is staged only; no push, workspace-gitlink advance, or normal-host promotion occurs without an explicit release instruction."
+  oracle = module.mechanical("test -s plans/plugins-origin-main-forwarding/delivery.md")
+}
+
+local communicate = new Guard {
+  id = "delivery-communication"
+  owner = "execution-steward"
+  needs { module.produced(delivery); module.verified(delivery) }
+  observes { "\(evidence)/delivery.md" }
+  outcome = "Communicate the delivered changes, live Usage-plugin status, verification results, and any intentionally deferred promotion step to Cole in a concise handoff."
+  oracle = module.adjudicated("The handoff identifies the commit basis, source of the running plugin, tests/reviews actually run, decisions made for conflicts, and any unresolved blocker without implying publication or promotion.", "execution-steward")
+}
+
+nodes { baseline; upstream; identity; usage; integrationReview; integrate; sdkArtifact; identityPreflight; usageReadiness; identityProof; repositoryQualification; usageProof; hostMaintenanceWindow; hostRouterAdoption; finalReview; delivery; communicate }
