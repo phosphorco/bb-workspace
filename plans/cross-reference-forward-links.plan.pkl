@@ -1,0 +1,117 @@
+amends "workbench:plan"
+
+meta {
+  title = "Cross References forward links from assistant-observed URLs"
+  goal = "Keep Thread Links as the owner of assistant URL observation while it durably projects every eligible assistant HTTP(S) URL as an exact forward reference into Cross References. Verified local BB-thread targets use BB identity and therefore also render as backlinks."
+}
+
+local community = "community-plugins/plugins/cross-references"
+local org = "plugins/plugins/thread-links"
+
+local baseline = new Guard {
+  id = "baseline"
+  owner = "implementer"
+  observes { "(community)/**"; "(org)/**"; "plugins/AGENTS.md"; "community-plugins/AGENTS.md" }
+  outcome = "Establish current plugin boundaries, existing public RPC contracts, source ownership, and unrelated dirty work before implementation."
+  oracle = module.mechanical("git -C community-plugins diff --check && git -C plugins diff --check")
+}
+
+local forwardContract = new Action {
+  id = "forward-contract"
+  owner = "implementer"
+  needs { module.verified(baseline) }
+  grant {
+    "(community)/model.ts"; "(community)/rpc-contract.ts"; "(community)/store.ts"; "(community)/server.ts"
+    "(community)/test/store.test.ts"; "(community)/test/server.test.ts"; "(community)/README.md"; "(community)/IMPLEMENTATION.md"; "(community)/ARCHITECTURE.md"
+  }
+  outcome = "Add a bounded, exact, cursor-safe forward-reference read to Cross References. It returns active directed edges from one source resource, including target identity, target presentation, producer, revision and position. It must use the same projection occurrence as backlinks; it must not store a reverse edge."
+  oracle = module.mechanical("npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-cross-references")
+}
+
+local threadLinksProducer = new Action {
+  id = "thread-links-producer"
+  owner = "implementer"
+  needs { module.verified(baseline) }
+  grant {
+    "(org)/server.ts"; "(org)/link-extractor.ts"; "(org)/cross-reference-projection.ts"; "(org)/cross-reference-delivery.ts"
+    "(org)/test/link-extractor.test.ts"; "(org)/test/cross-reference-projection.test.ts"; "(org)/test/cross-reference-delivery.test.ts"; "(org)/README.md"; "plugins/tools/workspaces-sync/definition.ts"; "(org)/package.json"
+  }
+  outcome = "Keep Thread Links' scanner and specialized UI. After observation changes, create a durable complete-set projection with retries only for validated same-installation BB thread URLs. External URLs, manual links, hidden links, and user-edited URLs remain Thread Links-only behavior. A valid local BB thread URL is canonicalized as the target thread resource, so the one source-to-target edge is backlink-queryable at its target. Projection failure never breaks local Thread Links behavior."
+  oracle = module.mechanical("mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run test && mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run typecheck && mise exec -C /home/ubuntu/bb/plugins -- bun run sync:check")
+}
+
+local header = new Action {
+  id = "references-header"
+  owner = "implementer"
+  needs { module.produced(forwardContract); module.verified(forwardContract) }
+  grant { "(community)/app.tsx"; "(community)/app.css"; "(community)/test/app.test.tsx" }
+  outcome = "Replace Cross References' ambiguous Links header presentation with one References surface. It shows Forward links and Backlinks in one accessible dialog, scopes realtime refreshes to the exact thread identity, paginates each direction independently, and uses native BB navigation without interfering with the retained Thread Links header."
+  oracle = module.mechanical("npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-cross-references && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-cross-references")
+}
+
+local observedUrlProjection = new Action {
+  id = "observed-url-projection"
+  owner = "implementer"
+  needs { module.produced(threadLinksProducer); module.verified(threadLinksProducer); module.produced(header); module.verified(header) }
+  grant {
+    "(org)/cross-reference-projection.ts"; "(org)/server.ts"; "(org)/README.md"; "(org)/test/cross-reference-projection.test.ts"; "(org)/test/cross-reference-delivery.test.ts"
+    "plugins/tools/workspaces-sync/definition.ts"; "(community)/README.md"; "(community)/IMPLEMENTATION.md"; "(community)/ARCHITECTURE.md"; "(community)/test/app.test.tsx"
+  }
+  outcome = "Expand the Thread Links projection from local BB-thread URLs alone to every automatic assistant HTTP(S) URL. A generic URL target has the explicit exact identity provider url and key href, retains query and fragment, strips no semantic component, and rejects URL credentials or values outside Cross References bounds. A verified local BB thread URL keeps the richer bb/project+thread identity and only it creates a native thread backlink. The existing References UI must render and navigate a generic external forward target without creating a reverse occurrence or incorporating manually added, hidden, or user-edited links."
+  oracle = module.mechanical("mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run test && mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run typecheck && npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-cross-references && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-cross-references")
+}
+
+local urlContractHardening = new Action {
+  id = "url-contract-hardening"
+  owner = "implementer"
+  needs { module.produced(observedUrlProjection); module.verified(observedUrlProjection) }
+  grant {
+    "(org)/link-extractor.ts"; "(org)/url-policy.ts"; "(org)/server.ts"; "(org)/cross-reference-projection.ts"; "(org)/cross-reference-delivery.ts"; "(org)/README.md"; "(org)/package.json"; "(org)/test/link-extractor.test.ts"; "(org)/test/cross-reference-projection.test.ts"; "(org)/test/cross-reference-delivery.test.ts"; "plugins/tools/workspaces-sync/definition.ts"
+    "(community)/canonical.ts"; "(community)/model.ts"; "(community)/rpc-contract.ts"; "(community)/store.ts"; "(community)/app.tsx"; "(community)/README.md"; "(community)/IMPLEMENTATION.md"; "(community)/ARCHITECTURE.md"; "(community)/test/canonical.test.ts"; "(community)/test/store.test.ts"; "(community)/test/server.test.ts"; "(community)/test/app.test.tsx"
+  }
+  outcome = "Enforce url/{href} at both graph boundaries: href is canonical WHATWG HTTP(S) serialization with no userinfo and one href key; authority credentials are removed before Thread Links persistence, while configured credential-bearing query/fragment fields are rejected and scrubbed from prior plugin rows. Preserve query and fragment for eligible URLs. Keep local BB thread URLs single-published only as verified BB targets. Add a durable bounded source sweep so historical rows and a reset receiver converge. Return exact total counts with both reference page types so the two header metrics never represent only the first page."
+  oracle = module.mechanical("mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run test && mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run typecheck && npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-cross-references && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-cross-references")
+}
+
+local externalDirectedEdgeProof = new Guard {
+  id = "external-directed-edge-proof"
+  owner = "implementer"
+  needs { module.produced(urlContractHardening); module.verified(urlContractHardening) }
+  observes { "(community)/**"; "(org)/**" }
+  outcome = "Prove all cross-boundary URL invariants: a canonical external URL is durably projected and rendered as a forward reference; canonicalization parity rejects userinfo, sensitive URL parameters, noncanonical URL identity, and over-limit values before graph storage; a verified local thread publishes only one BB edge; removal/hide/edit excludes the source-owned edge; page totals remain correct under pagination."
+  oracle = module.mechanical("mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run test && npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-cross-references")
+}
+
+local directedEdgeProof = new Guard {
+  id = "directed-edge-proof"
+  owner = "implementer"
+  needs {
+    module.produced(forwardContract); module.verified(forwardContract)
+    module.produced(threadLinksProducer); module.verified(threadLinksProducer)
+    module.produced(header); module.verified(header)
+    module.produced(observedUrlProjection); module.verified(observedUrlProjection)
+  }
+  observes { "(community)/**"; "(org)/**" }
+  outcome = "Prove the directed-edge contract at the public boundaries: a Thread A projection for an ordinary assistant HTTP(S) URL produces a forward reference in A only; a validated same-installation URL to Thread B produces a forward reference in A and a backlink in B; neither view stores a reverse occurrence. Projection retries and empty replacements remove stale forward/backlink results."
+  oracle = module.mechanical("npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-cross-references && mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run test")
+}
+
+local build = new Guard {
+  id = "build"
+  owner = "implementer"
+  needs { module.verified(directedEdgeProof) }
+  observes { "(community)/**"; "(org)/**" }
+  outcome = "Build both selected plugin packages from their canonical source roots and retain the independent global checks required by their repository contracts."
+  oracle = module.mechanical("mise exec -C /home/ubuntu/bb/plugins -- bun run sync:check && mise exec -C /home/ubuntu/bb/plugins -- bun run references:check && mise exec -C /home/ubuntu/bb/plugins -- bun run sdk-types:check && mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run build && npm --prefix community-plugins run build --workspace @phosphorco/bb-plugin-cross-references")
+}
+
+local externalBuild = new Guard {
+  id = "external-build"
+  owner = "implementer"
+  needs { module.verified(externalDirectedEdgeProof) }
+  observes { "(community)/**"; "(org)/**" }
+  outcome = "Build both plugin packages and run the organization repository’s generated-workspace checks after the URL-contract expansion."
+  oracle = module.mechanical("mise exec -C /home/ubuntu/bb/plugins -- bun run sync:check && mise exec -C /home/ubuntu/bb/plugins -- bun run references:check && mise exec -C /home/ubuntu/bb/plugins -- bun run sdk-types:check && mise exec -C /home/ubuntu/bb/plugins/plugins/thread-links -- bun run build && npm --prefix community-plugins run build --workspace @phosphorco/bb-plugin-cross-references")
+}
+
+nodes { baseline; forwardContract; threadLinksProducer; header; observedUrlProjection; urlContractHardening; directedEdgeProof; build; externalDirectedEdgeProof; externalBuild }
