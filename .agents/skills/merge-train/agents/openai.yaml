@@ -1,4 +1,4 @@
 interface:
   display_name: "Merge Train"
-  short_description: "Run mode-aware Phosphor PR merge trains"
-  default_prompt: "Use $merge-train to plan this stacked PR train and encode whether it must land now or land correctly."
+  short_description: "Balance speed and confidence in PR trains"
+  default_prompt: "Use $merge-train to plan this stacked PR train, make its release tradeoffs explicit, and land it with guarded remote operations."
