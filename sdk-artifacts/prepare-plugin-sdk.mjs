@@ -100,18 +100,19 @@ async function verifiedWorktreeTree() {
     const env = { ...process.env, GIT_INDEX_FILE: temporaryIndex };
     await git(["read-tree", "HEAD"], env);
     await git(["add", "-A", "--", "."], env);
-    return git(["write-tree"], env);
+    return await git(["write-tree"], env);
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   }
 }
 
-const [commit, indexTree, workingSdkDiff, workingTree] = await Promise.all([
-  git(["rev-parse", "HEAD"]),
-  git(["write-tree"]),
-  git(["diff", "--binary", "--", "packages/plugin-sdk"]),
-  verifiedWorktreeTree(),
-]);
+// `verifiedWorktreeTree` briefly owns a temporary GIT_INDEX_FILE. Keep the
+// ordinary index reads outside that lifetime; parallel process spawning can
+// otherwise race its cleanup on Node's child-process environment handling.
+const commit = await git(["rev-parse", "HEAD"]);
+const indexTree = await git(["write-tree"]);
+const workingSdkDiff = await git(["diff", "--binary", "--", "packages/plugin-sdk"]);
+const workingTree = await verifiedWorktreeTree();
 if (workingTree !== sourceReceipt) {
   throw new Error(`Declared source receipt ${sourceReceipt} does not match verified worktree tree ${workingTree}`);
 }
