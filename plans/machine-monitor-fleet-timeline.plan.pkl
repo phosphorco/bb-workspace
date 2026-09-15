@@ -1,0 +1,416 @@
+amends "workbench:plan"
+
+meta {
+  title = "Machine Monitor fleet collection and extensible machine timelines"
+  goal = "Continuously collect bounded telemetry from the BB server and every enrolled execution daemon, preserve host-keyed history centrally, and let the Machine Monitor UI switch between machine timelines with no daemon round trip and near-instant cached rendering. Establish a versioned metric/event timeline seam so later BB background-job events and other machine-correlated facts can be rendered beside spikes and navigate to exact threads without redesigning storage, RPC, or chart identity."
+}
+
+local plugin = "community-plugins/plugins/machine-monitor"
+
+local baseline = new Guard {
+  id = "baseline"
+  owner = "implementer"
+  observes {
+    "(plugin)/**"
+    "community-plugins/AGENTS.md"
+    "fork/build/bb/packages/plugin-sdk/src/host-contract.ts"
+    "fork/build/bb/packages/plugin-sdk/src/backend-contract.ts"
+    "fork/build/bb/plugins/bb-guide/skills/bb-plugin-authoring/references/backend-foundation.md"
+    "fork/build/bb/plugins/keep-awake/**"
+  }
+  outcome = "Reconfirm the current Machine Monitor behavior and tests, the exact materialized BB host-RPC/runtime contracts, ECharts 6.1.0 boundary, source repository status, and the absence of implementation changes outside the authorized plugin before delivery work begins."
+  oracle = module.mechanical("git -C community-plugins diff --check && npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local fleetContract = new Action {
+  id = "fleet-contract"
+  owner = "implementer"
+  needs { module.verified(baseline) }
+  grant {
+    "(plugin)/fleet-contract.ts"
+    "(plugin)/host-contract.ts"
+    "(plugin)/rpc-contract.ts"
+    "(plugin)/test/fleet-contract.test.ts"
+    "(plugin)/ARCHITECTURE.md"
+    "(plugin)/README.md"
+  }
+  outcome = "Define strict versioned fleet and timeline contracts. Machine identity distinguishes the local BB server source from authenticated enrolled host IDs; host responses never choose their own server-side host identity. Collection envelopes carry collector session/sequence, host observation time, server send/receive time, normalized timeline time, and uncertainty. Metrics use a trusted catalog with stable IDs, units, gauge/counter semantics, aggregation policy, availability, and closed visualization hints rather than raw ECharts options. Timeline results carry deterministic generations, range/bucket/coverage metadata, min/average/max/last/count metric buckets, gaps, and a bounded ordered event lane. Events have stable producer/event identity, interval or instant time, a closed category/status vocabulary, typed bounded provenance, and optional exact BB project/thread references. Fleet overview and per-machine timeline RPCs are separate and bounded; the latter is keyed by machine, range, and generation. Preserve the existing attachment contract as fleet-level state rather than conflating manual links with timeline-event provenance."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/fleet-contract.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local fleetStorage = new Action {
+  id = "fleet-storage"
+  owner = "implementer"
+  needs { module.produced(fleetContract); module.verified(fleetContract) }
+  grant {
+    "(plugin)/store.ts"
+    "(plugin)/fleet-store.ts"
+    "(plugin)/test/store.test.ts"
+    "(plugin)/test/fleet-store.test.ts"
+  }
+  outcome = "Add append-only SQLite migrations and a host-keyed fleet store without rewriting prior migration strings. Preserve existing local server history by migrating it into the new local-server machine identity. Store machine registry/status, collection generations, normalized sample batches, sparse catalogued metric values, directory and memory diagnostics, per-machine errors/freshness, and bounded versioned timeline events with exact indexes for machine plus time. Inserts are idempotent across retries and reject identity/time/payload violations. Retention prunes metric/event/detail rows without deleting still-visible offline machine summaries or the existing attachment outbox. Query methods keep machines isolated and preserve deterministic chronological order."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/store.test.ts community-plugins/plugins/machine-monitor/test/fleet-store.test.ts")
+}
+
+local platformCollectors = new Action {
+  id = "platform-collectors"
+  owner = "implementer"
+  needs { module.produced(fleetContract); module.verified(fleetContract) }
+  grant {
+    "(plugin)/monitor.ts"
+    "(plugin)/platform-collectors.ts"
+    "(plugin)/test/monitor.test.ts"
+    "(plugin)/test/platform-collectors.test.ts"
+  }
+  outcome = "Refactor collection behind dependency-injected platform adapters while preserving current Linux/WSL semantics, bounds, cancellation, privacy defaults, and per-directory failure isolation. Provide core CPU, memory, root-disk, load, uptime and platform metadata on Darwin with documented platform-specific semantics; keep Linux pressure/reclaim/process attribution capability-gated; and return explicit unavailable capability facts for unknown platforms instead of failing the machine. Produce catalogued metric observations and collector-session state without exposing full command lines or unbounded process data."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/monitor.test.ts community-plugins/plugins/machine-monitor/test/platform-collectors.test.ts")
+}
+
+local hostEntry = new Action {
+  id = "host-entry"
+  owner = "implementer"
+  needs {
+    module.produced(fleetContract); module.verified(fleetContract)
+    module.produced(platformCollectors); module.verified(platformCollectors)
+  }
+  grant {
+    "(plugin)/host.ts"
+    "(plugin)/host-contract.ts"
+    "(plugin)/package.json"
+    "(plugin)/test/host.test.ts"
+  }
+  outcome = "Add the plugin's singular bb.host entry using experimental_defineHostEntry. Expose small typed describe, core-sample, one-directory, and memory-diagnostic calls; use request and lifecycle cancellation; retain CPU/delta state only within the worker session; keep directory work independent from core sampling; and return bounded validated outputs. Rely on the 30-second coordinator cadence to keep an active worker naturally reusable—do not retain a worker or push durable telemetry through ephemeral host signals. Declare and package the host artifact through the existing public SDK 0.4.15 contract, with no private @bb imports or BB core changes."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/host.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local chartFoundation = new Action {
+  id = "timeline-chart-foundation"
+  owner = "implementer"
+  needs { module.produced(fleetContract); module.verified(fleetContract) }
+  grant {
+    "(plugin)/timeline-chart.tsx"
+    "(plugin)/timeline-compiler.ts"
+    "(plugin)/test/timeline-compiler.test.ts"
+    "(plugin)/test/timeline-chart.test.tsx"
+    "(plugin)/test/echarts-hover.test.ts"
+  }
+  outcome = "Extract one BB-owned ECharts host and deterministic machine-timeline compiler. Keep canonical metric/event data outside ECharts; assign stable figure/component/series IDs and generation-scoped datum keys; preserve exact event identity and typed provenance after ordering or reduction; normalize event activation before navigation; and select merge, targeted replacement, or full semantic replacement deliberately when values, tracks, or selected machine change. Replace ECharts-side LTTB sampling with server-owned bounded buckets that preserve extrema and gaps. Render average lines plus truthful peak/envelope information and an aligned event lane without making pixels, seriesIndex, or dataIndex application truth. The host initializes only at nonzero size, coalesces resize/theme work, respects reduced motion, remains quiet while unchanged, and disposes every observer/listener/instance. Provide a native exact event list/action path for keyboard users and visible partial/stale/truncated coverage."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/timeline-compiler.test.ts && community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/timeline-chart.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/echarts-hover.test.ts")
+}
+
+local fleetCoordinator = new Action {
+  id = "fleet-coordinator"
+  owner = "implementer"
+  needs {
+    module.produced(fleetStorage); module.verified(fleetStorage)
+    module.produced(hostEntry); module.verified(hostEntry)
+  }
+  grant {
+    "(plugin)/fleet-coordinator.ts"
+    "(plugin)/server.ts"
+    "(plugin)/test/fleet-coordinator.test.ts"
+    "(plugin)/test/server.test.ts"
+  }
+  outcome = "Replace the singular local loops with one cancellation-safe fleet coordinator that retains the BB server as a labeled source and continuously reconciles every enrolled daemon returned by bb.sdk.hosts.list. Poll connected hosts with bounded global concurrency, deterministic jitter, independent non-overlapping core/directory/memory lanes, adaptive five-second memory-pressure follow-up, explicit RPC timeouts, and prompt collection on host reconnect. Associate every result with the explicit authenticated target host ID, normalize host clock time from request/response midpoint and record uncertainty, reject stale session/sequence results, centralize durable writes, and publish machine-scoped revision invalidations only after commit. Preserve history and last-known health for disconnected/crashed workers, surface per-machine errors/staleness, retry with bounded backoff, and ensure one slow directory or machine never delays other core samples. Keep process attribution off by default and apply configured paths on the target host where its home/path semantics are known."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/fleet-coordinator.test.ts community-plugins/plugins/machine-monitor/test/server.test.ts")
+}
+
+local timelineService = new Action {
+  id = "timeline-service"
+  owner = "implementer"
+  needs { module.produced(fleetStorage); module.verified(fleetStorage) }
+  grant {
+    "(plugin)/timeline-query.ts"
+    "(plugin)/fleet-cache.ts"
+    "(plugin)/test/timeline-query.test.ts"
+    "(plugin)/test/fleet-cache.test.ts"
+  }
+  outcome = "Build a central read model for fleet overview and machine timelines. Query each metric at its declared grain into at most 720 deterministic buckets while retaining min/average/max/last/count, explicit gaps, effective bucket width, raw-versus-normalized time metadata, and complete bounded coverage. Return ordered bounded events independently of metric rows, with exact/truncated counts and typed references. Cache and single-flight results by machine/range/data-revision/settings-revision; invalidate only the changed machine and affected detail kind; never let an obsolete generation repopulate a newer cache. Fleet overview includes every current or retained machine's connection, freshness, latest metrics, warnings, capabilities and revision but not every history, keeping the initial payload bounded at the 256-host control-plane limit."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/timeline-query.test.ts community-plugins/plugins/machine-monitor/test/fleet-cache.test.ts")
+}
+
+local memoryTimelinePlumbing = new Action {
+  id = "memory-timeline-plumbing"
+  owner = "implementer"
+  needs {
+    module.produced(fleetStorage); module.verified(fleetStorage)
+    module.produced(fleetCoordinator); module.verified(fleetCoordinator)
+    module.produced(timelineService); module.verified(timelineService)
+  }
+  grant {
+    "(plugin)/store.ts"
+    "(plugin)/fleet-store.ts"
+    "(plugin)/fleet-coordinator.ts"
+    "(plugin)/timeline-query.ts"
+    "(plugin)/test/store.test.ts"
+    "(plugin)/test/fleet-store.test.ts"
+    "(plugin)/test/fleet-coordinator.test.ts"
+    "(plugin)/test/timeline-query.test.ts"
+  }
+  outcome = "Carry the four catalogued Linux/WSL memory-pressure and swap observations from the independent memory lane into machine timelines instead of leaving their visible series permanently not-collected. Append migrations without rewriting prior strings; persist memory observations with collector session/sequence, raw host time, server send/receive midpoint normalization and uncertainty; keep retry identity idempotent and reject timing/payload reuse. Extend bounded SQL reduction and time-normalization coverage across core and memory observations without double-counting unavailable core placeholders, while unsupported Darwin/unknown capabilities remain explicit. Preserve process-detail privacy, retention, per-machine isolation, <=720 buckets, bounded result rows and post-commit generation invalidation."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/store.test.ts community-plugins/plugins/machine-monitor/test/fleet-store.test.ts community-plugins/plugins/machine-monitor/test/fleet-coordinator.test.ts community-plugins/plugins/machine-monitor/test/timeline-query.test.ts")
+}
+
+local fleetRpc = new Action {
+  id = "fleet-rpc"
+  owner = "implementer"
+  needs {
+    module.produced(fleetContract); module.verified(fleetContract)
+    module.produced(fleetCoordinator); module.verified(fleetCoordinator)
+    module.produced(timelineService); module.verified(timelineService)
+    module.produced(memoryTimelinePlumbing); module.verified(memoryTimelinePlumbing)
+  }
+  grant {
+    "(plugin)/rpc-contract.ts"
+    "(plugin)/server.ts"
+    "(plugin)/test/server.test.ts"
+  }
+  outcome = "Wire fleetOverview, machineTimeline, and aggregate health RPC handlers to the central read model. A UI read or machine switch must never synchronously call a daemon. Realtime invalidations carry only bounded machine ID, revision, and changed-kind metadata; reconnect always reconciles overview and the selected timeline so missed ephemeral signals cannot leave stale truth. Aggregate sidebar warnings name affected machines and distinguish disconnected/stale/collector-error states from metric-threshold warnings. Retain the existing thread-search and attachment RPC behavior."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/server.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local fleetUi = new Action {
+  id = "fleet-ui"
+  owner = "implementer"
+  needs {
+    module.produced(chartFoundation); module.verified(chartFoundation)
+    module.produced(fleetRpc); module.verified(fleetRpc)
+  }
+  grant {
+    "(plugin)/fleet-client.ts"
+    "(plugin)/app.tsx"
+    "(plugin)/app.css"
+    "(plugin)/attachments.tsx"
+    "(plugin)/test/app.test.tsx"
+    "(plugin)/test/mobile-layout.test.ts"
+  }
+  outcome = "Add an accessible fleet picker/overview and selected-machine view while preserving responsive/mobile behavior and the fleet-level Linked threads section. Keep the complete lightweight overview resident; cache detailed timelines by machine/range/revision in a byte-bounded LRU; synchronously render a revision-current cached selection; retain a clearly stale prior selection while one local server read refreshes an uncached/stale target; and prefetch on keyboard focus, pointer intent, and bounded idle opportunity without attempting all 256 histories at once. Guard every async result by machine/range/generation, coalesce identical requests, cancel obsolete selection work, refresh the selected machine after reconnect, and let machine-scoped invalidations update only affected summaries/cache entries. Reuse long-lived chart hosts rather than remounting them on selection. Show connected, disconnected, stale, unsupported-capability, empty, partial and error states per machine, and navigate event thread references through native BB navigation from both pointer and keyboard paths."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts")
+}
+
+local eventSeamWitness = new Action {
+  id = "event-seam-witness"
+  owner = "implementer"
+  needs {
+    module.produced(fleetStorage); module.verified(fleetStorage)
+    module.produced(timelineService); module.verified(timelineService)
+    module.produced(chartFoundation); module.verified(chartFoundation)
+    module.produced(fleetUi); module.verified(fleetUi)
+  }
+  grant {
+    "(plugin)/fleet-contract.ts"
+    "(plugin)/test/fleet-contract.test.ts"
+    "(plugin)/test/event-seam-proof.test.tsx"
+    "(plugin)/test/timeline-compiler.test.ts"
+  }
+  outcome = "Close the synthetic background-job event proof without adding a real producer. Make producer contract version 1 the explicit supported compatibility boundary and reject other producer versions. Add one focused end-to-end witness carrying a true started-to-terminal lifecycle for one machine and exact BB project/thread reference through FleetStore, TimelineQueryService, timeline compilation and UI activation. Prove idempotence, normalized placement beside extrema-preserving buckets, actual duplicate display titles, reorder/new-generation/machine-switch stale-action safety, and the same native thread target from pointer plus literal keyboard activation. Retain the existing dense-event truncation, gap, skew and unknown-kind safety evidence."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/fleet-contract.test.ts && community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/event-seam-proof.test.tsx && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local eventSeamProof = new Guard {
+  id = "event-seam-proof"
+  owner = "implementer"
+  needs {
+    module.produced(fleetStorage); module.verified(fleetStorage)
+    module.produced(timelineService); module.verified(timelineService)
+    module.produced(chartFoundation); module.verified(chartFoundation)
+    module.produced(fleetUi); module.verified(fleetUi)
+    module.produced(eventSeamWitness); module.verified(eventSeamWitness)
+  }
+  observes { "(plugin)/**" }
+  outcome = "Prove the future extension seam end to end with a synthetic background-job lifecycle event, without shipping a real job producer in this delivery: a stable machine-scoped event with start/end and exact project/thread identity is idempotently stored, returned beside extrema-preserving metric buckets in normalized time, rendered in the aligned event lane, remains correctly targeted across reorder/new generations/machine switches, and opens the same thread from pointer and exact-list keyboard actions. Also prove bounded/truncated dense events, unknown event kinds/versions, clock skew, gaps, duplicate labels, and stale ECharts indices fail or disclose safely."
+  oracle = module.mechanical("npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local fleetIntegrationWitness = new Action {
+  id = "fleet-integration-witness"
+  owner = "implementer"
+  needs {
+    module.produced(fleetCoordinator); module.verified(fleetCoordinator)
+    module.produced(fleetRpc); module.verified(fleetRpc)
+    module.produced(fleetUi); module.verified(fleetUi)
+  }
+  grant {
+    "(plugin)/test/fleet-integration.test.ts"
+  }
+  outcome = "Add one deterministic representative-fleet witness through the installed server/public host boundary rather than relying only on separate unit seams. Compose the local BB-server source with authenticated Linux, WSL and Darwin host-entry harnesses; prove independent normalized collection and capability truth, retained stale history for a disconnect and worker crash while healthy peers advance, prompt idempotent reconnect, core progress while directory work is held or fails, skew/uncertainty disclosure, and machine-isolated histories/warnings/settings. Exercise missed-signal reconciliation through persisted RPC truth, then abort and reload the service and assert all coordinator timers/calls/gate slots, host worker leases and server subscriptions return to zero. Reuse existing UI/chart cleanup evidence for browser-owned observers, frames, listeners and instances; do not add a real event producer or production-only test seam."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/fleet-integration.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local fleetIntegrationProof = new Guard {
+  id = "fleet-integration-proof"
+  owner = "implementer"
+  needs {
+    module.produced(fleetCoordinator); module.verified(fleetCoordinator)
+    module.produced(fleetRpc); module.verified(fleetRpc)
+    module.produced(fleetUi); module.verified(fleetUi)
+    module.produced(fleetIntegrationWitness); module.verified(fleetIntegrationWitness)
+  }
+  observes { "(plugin)/**" }
+  outcome = "Prove a representative fleet through the public plugin boundaries: the local server plus several connected Linux/WSL and Darwin daemons collect independently; one disconnected host and one crashing worker retain stale history while others advance; reconnect starts prompt idempotent collection; a slow/failed directory scan does not delay core samples; host clock skew is normalized with visible uncertainty; host-specific histories, warnings, settings and capability gaps never bleed between machines; missed realtime invalidations recover; and shutdown/reload leaves no timers, active calls, leases, observers, or chart instances."
+  oracle = module.mechanical("npm --prefix community-plugins run test --workspace @phosphorco/bb-plugin-machine-monitor && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local latencyProof = new Action {
+  id = "latency-proof"
+  owner = "implementer"
+  needs {
+    module.produced(fleetUi); module.verified(fleetUi)
+    module.verified(fleetIntegrationProof)
+  }
+  grant {
+    "(plugin)/package.json"
+    "community-plugins/package-lock.json"
+    "(plugin)/test/fleet-performance.test.ts"
+    "(plugin)/test/fleet-performance.browser.test.ts"
+    "(plugin)/test/fixtures/**"
+    "(plugin)/PERFORMANCE.md"
+  }
+  outcome = "Create and retain a production-browser latency witness with fixed runtime/plugin revision, browser, viewport, theme/motion, cache state, and a 32-machine fixture containing 720 buckets per core track and 500 selected-machine events. Establish alternating control/candidate distributions and require: a revision-current cached machine switch performs no RPC, no chart remount, no host call, and reaches useful paint within 50 ms p95 with no task over 50 ms; a warm uncached switch performs exactly one coalesced server RPC, no host call, keeps useful overview/stale content visible, and reaches updated useful paint within 250 ms p95; one machine revision invalidates only that machine; and settled idle UI owns no polling timer or repeated render/chart update. Record raw measurements and memory/cache bounds, and fail the harness when fixture or instrumentation preflight differs."
+  oracle = module.mechanical("npm --prefix community-plugins run test:fleet-performance --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local localCollectorSession = new Action {
+  id = "local-collector-session"
+  owner = "implementer"
+  needs {
+    module.produced(fleetStorage); module.verified(fleetStorage)
+    module.produced(fleetCoordinator); module.verified(fleetCoordinator)
+    module.produced(fleetRpc); module.verified(fleetRpc)
+  }
+  grant {
+    "(plugin)/server.ts"
+    "(plugin)/test/server.test.ts"
+  }
+  outcome = "Give the reserved local-bb-server source a fresh server-owned collector session identity on every service lifecycle so its per-session sequences cannot collide with durable history after a reload. Add a persistent-DB reload regression proving a new local process commits after a prior one, while ordinary duplicate retry idempotence remains intact."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/server.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local overviewSnapshotConsistency = new Action {
+  id = "overview-snapshot-consistency"
+  owner = "implementer"
+  needs {
+    module.produced(timelineService); module.verified(timelineService)
+    module.produced(memoryTimelinePlumbing); module.verified(memoryTimelinePlumbing)
+  }
+  grant {
+    "(plugin)/timeline-query.ts"
+    "(plugin)/test/timeline-query.test.ts"
+  }
+  outcome = "Make fleet overview reads generation-consistent despite asynchronous settings/threshold lookup: derive machine rows and their exact latest metrics from one stable store generation or retry a bounded read if the generation changes. Add a deferred-settings concurrent-collection regression that rejects mixed old metrics with new machine revisions."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/timeline-query.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local physicalRpcBound = new Action {
+  id = "physical-rpc-bound"
+  owner = "implementer"
+  needs {
+    module.produced(fleetCoordinator); module.verified(fleetCoordinator)
+    module.produced(memoryTimelinePlumbing); module.verified(memoryTimelinePlumbing)
+  }
+  grant {
+    "(plugin)/fleet-coordinator.ts"
+    "(plugin)/test/fleet-coordinator.test.ts"
+  }
+  outcome = "Preserve a physical upper bound on unresolved host RPC transports when a transport ignores AbortSignal: a timeout may report failure and schedule retry, but its global/host concurrency capacity must stay quarantined until the underlying promise settles, with a bounded no-overlap policy and deterministic regression coverage. Use a monotonic coordinator timing source or clamp normalization so wall-clock rollback cannot make collection chronology regress."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/fleet-coordinator.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local uiFlightSupersession = new Action {
+  id = "ui-flight-supersession"
+  owner = "implementer"
+  needs { module.produced(fleetUi); module.verified(fleetUi) }
+  grant {
+    "(plugin)/fleet-client.ts"
+    "(plugin)/app.tsx"
+    "(plugin)/test/app.test.tsx"
+  }
+  outcome = "Supersede or cancel a selected-machine request at invalidation, rather than allowing its older pending token to become current after an overview revision. Bound outstanding client detail flights in addition to cached bytes. Add deferred stale-response regressions showing stale data cannot re-enable pointer or keyboard event activation, while valid current selection behavior remains intact."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local eventProducerBoundaryDocs = new Action {
+  id = "event-producer-boundary-docs"
+  owner = "implementer"
+  needs { module.verified(eventSeamProof) }
+  grant {
+    "(plugin)/README.md"
+    "(plugin)/ARCHITECTURE.md"
+  }
+  outcome = "Remove staged-seam documentation drift. State precisely that the typed event lane is a tested internal extension seam and that no real event producer is enabled until server-owned admission, quota, retention, timestamp/duration bounds, pagination/overflow, and exact project/thread validation policies are implemented."
+  oracle = module.mechanical("git -C community-plugins diff --check")
+}
+
+local fleetVisualNavigator = new Action {
+  id = "fleet-visual-navigator"
+  owner = "implementer"
+  needs {
+    module.produced(uiFlightSupersession); module.verified(uiFlightSupersession)
+    module.produced(latencyProof); module.verified(latencyProof)
+  }
+  grant {
+    "(plugin)/app.tsx"
+    "(plugin)/app.css"
+    "(plugin)/test/app.test.tsx"
+    "(plugin)/test/mobile-layout.test.ts"
+    "(plugin)/test/fleet-performance.browser.test.ts"
+    "(plugin)/PERFORMANCE.md"
+  }
+  outcome = "Replace the label-heavy machine switching strip with an anomaly-first visual fleet navigator. Each machine is an accessible native selection control whose layered, theme-semantic status field makes connection/freshness, collector failure, warnings, and current CPU/memory/disk pressure legible together at a glance, without color being the only encoding. Critical/degraded machines must visually sort or stand out without losing stable keyboard order. Selecting a machine promotes its existing full timeline inspector and compacts the navigator; preserve a persistent TimelineChart host, cached selection behavior, retained-stale disclosure, exact event actions, responsive/mobile semantics, and quiet idle rendering. Remove duplicate prose only when the visual has an equivalent accessible name/description. Add visual/keyboard/mobile regressions and refresh the production Chromium witness/receipt to demonstrate no latency or remount regression."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run test:fleet-performance --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local repositoryChecks = new Guard {
+  id = "repository-checks"
+  owner = "implementer"
+  needs {
+    module.verified(eventSeamProof)
+    module.verified(fleetIntegrationProof)
+    module.produced(latencyProof); module.verified(latencyProof)
+    module.produced(localCollectorSession); module.verified(localCollectorSession)
+    module.produced(overviewSnapshotConsistency); module.verified(overviewSnapshotConsistency)
+    module.produced(physicalRpcBound); module.verified(physicalRpcBound)
+    module.produced(uiFlightSupersession); module.verified(uiFlightSupersession)
+    module.produced(eventProducerBoundaryDocs); module.verified(eventProducerBoundaryDocs)
+    module.produced(fleetVisualNavigator); module.verified(fleetVisualNavigator)
+  }
+  observes { "community-plugins/**" }
+  outcome = "Run the complete community-plugin repository verification from canonical sources, confirm the Machine Monitor package contains its host artifact and declared dependencies, and leave generated dist output uncommitted."
+  oracle = module.mechanical("npm --prefix community-plugins run test && npm --prefix community-plugins run typecheck && npm --prefix community-plugins run build && git -C community-plugins diff --check")
+}
+
+local liveFleetReview = new Guard {
+  id = "live-fleet-review"
+  owner = "release-owner"
+  needs { module.verified(repositoryChecks) }
+  observes { "(plugin)/**" }
+  outcome = "Exercise the built plugin on the canonical BB runtime with at least two enrolled daemons plus the BB server source. Confirm collection survives one daemon disconnect/reconnect, cached and uncached machine switching feels immediate without triggering daemon work, histories and warnings stay machine-scoped, unsupported diagnostics are honest on each platform, mobile/keyboard paths remain usable, and the synthetic event/reference fixture demonstrates where a future real background-job producer will connect. Review retained performance evidence and verify no unresolved in-scope obligation remains before release/promotion."
+  oracle = module.adjudicated("A live multi-machine run satisfies the stated fleet correctness, latency, platform disclosure, accessibility, event-extension, and preservation rubric; repository status identifies only intended Machine Monitor and plan changes.", "release-owner")
+}
+
+nodes {
+  baseline
+  fleetContract
+  fleetStorage
+  platformCollectors
+  hostEntry
+  chartFoundation
+  fleetCoordinator
+  timelineService
+  memoryTimelinePlumbing
+  fleetRpc
+  fleetUi
+  eventSeamWitness
+  eventSeamProof
+  fleetIntegrationWitness
+  fleetIntegrationProof
+  latencyProof
+  localCollectorSession
+  overviewSnapshotConsistency
+  physicalRpcBound
+  uiFlightSupersession
+  eventProducerBoundaryDocs
+  fleetVisualNavigator
+  repositoryChecks
+  liveFleetReview
+}
