@@ -1,0 +1,148 @@
+amends "workbench:plan"
+
+meta {
+  title = "Add recognized-group filters to Progress Inbox sections"
+  goal = "Let a user constrain a Progress Inbox section to one or more recognized title-prefix groups within its selected projects, while preserving durable state compatibility, family integrity, and stable section ordering."
+}
+
+local baseline = new Guard {
+  id = "baseline-section-invariants"
+  owner = "planner"
+  outcome = "Establish the current section, title-group, worktree, and durable-state invariants before the group-filter change."
+  observes {
+    "plugins/plugins/thread-progress/lib/thread-list-pipeline.ts"
+    "plugins/plugins/thread-progress/lib/thread-groups.ts"
+    "plugins/plugins/thread-progress/lib/worktree-groups.ts"
+    "plugins/plugins/thread-progress/test/thread-list-pipeline.test.ts"
+    "plugins/plugins/thread-progress/test/thread-groups.test.ts"
+    "plugins/plugins/thread-progress/test/worktree-groups.test.ts"
+    "plugins/plugins/thread-progress/test/thread-sections-state-resource.test.ts"
+    "plugins/plugins/thread-progress/test/thread-sections-state-storage.test.ts"
+  }
+  oracle = module.mechanical("/home/ubuntu/.local/share/mise/installs/node/26.3.0/bin/node --test --experimental-strip-types test/thread-list-pipeline.test.ts test/thread-groups.test.ts test/worktree-groups.test.ts test/thread-sections-state-resource.test.ts test/thread-sections-state-storage.test.ts")
+}
+
+local groupPathSemantics = new Selector {
+  id = "group-path-semantics"
+  owner = "cole"
+  outcome = "Choose the membership meaning of a configured recognized group path."
+  question = "Within a selected project, should a configured group `Outcome Owner` match only the exact title-prefix path `Outcome Owner`, or that path and slash-separated descendants such as `Outcome Owner/Production`? In either case, `Outcome Ownership` must not match."
+  options { "exact-path"; "path-and-descendants" }
+  probe = baseline
+}
+
+local groupDiscovery = new Selector {
+  id = "group-discovery-scope"
+  owner = "cole"
+  outcome = "Choose whether group filters are limited to loaded recognized paths or also admit an explicit future/unloaded path."
+  question = "Should the section editor offer only recognized group paths discovered from loaded family-root titles, or also permit manual entry for a path that is not currently loaded? Both choices retain saved paths that later disappear."
+  options { "discovered-paths-only"; "discovered-paths-plus-manual-entry" }
+  probe = baseline
+}
+
+local stateCompatibility = new Selector {
+  id = "group-section-state-compatibility"
+  owner = "cole"
+  outcome = "Choose the saved-state compatibility policy for the new restrictive group predicate."
+  question = "During rollout, should the new payload version reject unupdated editors so they cannot erase a saved group restriction, or should it remain writable by them with the known risk that an older save drops the new filter?"
+  options { "strict-v4-rejects-old-editors"; "v3-best-effort-old-editors-may-erase-filter" }
+  probe = baseline
+}
+
+local sectionContract = new Action {
+  id = "section-group-contract"
+  owner = "thread-progress-implementer"
+  outcome = "Add a bounded, normalized group-path predicate to ThreadSectionConfig; implement the chosen payload compatibility policy; decode legacy saved versions as unrestricted; reject malformed restrictive input rather than silently broadening it; update absorbing-section detection; and prove the selected exact or subtree semantics together with project conjunction, case preservation, slash-boundary safety, no-prefix exclusion, and canonical round trips."
+  grant {
+    "plugins/plugins/thread-progress/lib/thread-list-pipeline.ts"
+    "plugins/plugins/thread-progress/lib/thread-groups.ts"
+    "plugins/plugins/thread-progress/lib/thread-sections-state-resource.ts"
+    "plugins/plugins/thread-progress/lib/thread-sections-state-storage.ts"
+    "plugins/plugins/thread-progress/test/thread-list-pipeline.test.ts"
+    "plugins/plugins/thread-progress/test/thread-sections-state-resource.test.ts"
+    "plugins/plugins/thread-progress/test/thread-sections-state-storage.test.ts"
+  }
+  needs { module.ruled(groupPathSemantics); module.ruled(stateCompatibility) }
+  oracle = module.mechanical("/home/ubuntu/.local/share/mise/installs/node/26.3.0/bin/node --test --experimental-strip-types test/thread-list-pipeline.test.ts test/thread-sections-state-resource.test.ts test/thread-sections-state-storage.test.ts")
+}
+
+local sectionProjection = new Action {
+  id = "section-group-projection"
+  owner = "thread-progress-implementer"
+  outcome = "Apply the approved group predicate at the existing top-level family-root section-membership seam in Progress Inbox. Preserve ordered roots, pre-search claims, maximum handling, section-local/global sort behavior, manual order, and the rule that a child title cannot split its parent family."
+  grant {
+    "plugins/plugins/thread-progress/components/progress-inbox.tsx"
+    "plugins/plugins/thread-progress/test/thread-list-pipeline.test.ts"
+    "plugins/plugins/thread-progress/test/thread-progress-derivation.test.ts"
+    "plugins/plugins/thread-progress/test/thread-participants.test.ts"
+  }
+  needs { module.produced(sectionContract); module.verified(sectionContract) }
+  oracle = module.mechanical("/home/ubuntu/.local/share/mise/installs/node/26.3.0/bin/node --test --experimental-strip-types test/thread-list-pipeline.test.ts test/thread-progress-derivation.test.ts test/thread-participants.test.ts")
+}
+
+local sectionEditor = new Action {
+  id = "section-group-editor"
+  owner = "thread-progress-implementer"
+  outcome = "Extend the section editor with an accessible multi-select group control using the chosen discovery policy. Scope discovered normalized explicit prefixes to selected projects when possible, retain unavailable saved paths visibly, label the unrestricted state clearly, and never turn project fallback labels into selected groups."
+  grant {
+    "plugins/plugins/thread-progress/components/progress-inbox.tsx"
+    "plugins/plugins/thread-progress/components/thread-sections-menu.tsx"
+    "plugins/plugins/thread-progress/app.css"
+    "plugins/plugins/thread-progress/test/thread-participants.test.ts"
+    "plugins/plugins/thread-progress/test/thread-sections-projection.test.ts"
+    "plugins/plugins/thread-progress/README.md"
+    "plugins/plugins/thread-progress/THREAD_GROUPING_DESIGN.md"
+  }
+  needs { module.produced(sectionProjection); module.verified(sectionProjection); module.ruled(groupDiscovery) }
+  oracle = module.mechanical("/home/ubuntu/.local/share/mise/installs/node/26.3.0/bin/node --test --experimental-strip-types test/thread-participants.test.ts test/thread-sections-projection.test.ts test/thread-list-pipeline.test.ts")
+}
+
+local featureProof = new Guard {
+  id = "group-section-feature-proof"
+  owner = "thread-progress-reviewer"
+  outcome = "Verify the completed feature against the public sidebar behavior: a project-scoped Outcome Owner section receives only the approved title-prefix group paths, keeps its ordered family roots intact, and leaves nonmatching rows for a later excluding section."
+  observes {
+    "plugins/plugins/thread-progress/components/progress-inbox.tsx"
+    "plugins/plugins/thread-progress/components/thread-sections-menu.tsx"
+    "plugins/plugins/thread-progress/lib/thread-list-pipeline.ts"
+    "plugins/plugins/thread-progress/lib/thread-groups.ts"
+    "plugins/plugins/thread-progress/test/thread-list-pipeline.test.ts"
+    "plugins/plugins/thread-progress/test/thread-progress-derivation.test.ts"
+    "plugins/plugins/thread-progress/test/thread-participants.test.ts"
+  }
+  needs { module.produced(sectionEditor); module.verified(sectionEditor) }
+  oracle = module.mechanical("/home/ubuntu/.local/share/mise/installs/node/26.3.0/bin/node --test --experimental-strip-types test/thread-list-pipeline.test.ts test/thread-progress-derivation.test.ts test/thread-participants.test.ts test/thread-sections-projection.test.ts")
+}
+
+local repositoryQualification = new Guard {
+  id = "thread-progress-repository-qualification"
+  owner = "thread-progress-reviewer"
+  outcome = "Run the organization-plugin repository's required generation, reference, SDK, type, test, and build checks against the completed feature."
+  observes { "plugins/**"; "sdk-artifacts/**" }
+  needs { module.verified(featureProof) }
+  oracle = module.adjudicated("Run and record bun run sync:check, bun run references:check, bun run sdk-types:check, bun run typecheck, bun run test, and bun run build from plugins/. All must pass against the candidate commit; generated dist output must remain uncommitted.", "thread-progress-reviewer")
+}
+
+local livePluginProof = new Guard {
+  id = "thread-progress-live-plugin-proof"
+  owner = "thread-progress-reviewer"
+  outcome = "Build and reload only the Thread Progress plugin from the canonical plugins checkout, then exercise the configured recognized-group section in the live sidebar and confirm its resolved source path."
+  observes { "plugins/plugins/thread-progress/**" }
+  needs { module.verified(repositoryQualification) }
+  oracle = module.adjudicated("From /home/ubuntu/bb/plugins, run bb plugin build ./plugins/thread-progress and bb plugin reload thread-progress. Use bb plugin source thread-progress to confirm the canonical local source, then conduct and record a live sidebar probe covering project scope, group membership, an excluding later section, a title with no prefix, a title rename, and a nested family. No BB service restart is implied.", "thread-progress-reviewer")
+}
+
+local publish = new Action {
+  id = "publish-group-section-composition"
+  owner = "workspace-steward"
+  outcome = "Commit and push the verified plugins child revision, update the bb-workspace plugins gitlink to that exact revision, commit and push the workspace receipt, and confirm the clean published composition."
+  grant { "plugins/.git"; ".git"; "plugins" }
+  needs { module.verified(livePluginProof) }
+  oracle = module.adjudicated("The plugins child and workspace main commits are pushed; the workspace gitlink equals the verified plugins HEAD; the workspace and all source children are clean and equal freshly fetched origin/main; and any remaining activation gap is reported.", "workspace-steward")
+}
+
+nodes {
+  baseline; groupPathSemantics; groupDiscovery; stateCompatibility
+  sectionContract; sectionProjection; sectionEditor
+  featureProof; repositoryQualification; livePluginProof; publish
+}
