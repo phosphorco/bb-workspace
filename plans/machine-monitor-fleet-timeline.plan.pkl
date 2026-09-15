@@ -360,6 +360,181 @@ local fleetVisualNavigator = new Action {
   oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run test:fleet-performance --workspace @phosphorco/bb-plugin-machine-monitor")
 }
 
+local fleetUtilizationEcharts = new Action {
+  id = "fleet-utilization-echarts"
+  owner = "implementer"
+  needs {
+    module.produced(fleetVisualNavigator); module.verified(fleetVisualNavigator)
+    module.produced(latencyProof); module.verified(latencyProof)
+  }
+  grant {
+    "(plugin)/app.tsx"
+    "(plugin)/app.css"
+    "(plugin)/timeline-chart.tsx"
+    "(plugin)/test/app.test.tsx"
+    "(plugin)/test/timeline-chart.test.tsx"
+    "(plugin)/test/mobile-layout.test.ts"
+    "(plugin)/test/fleet-performance.browser.test.ts"
+    "(plugin)/PERFORMANCE.md"
+  }
+  outcome = "Restore an ECharts utilization overview to the fleet navigator without creating one chart instance per machine. Compile one trusted, bounded vertical bar chart from each machine's current CPU, memory-used/total, and root-disk-used/total readings; its displayed score is the worst available resource utilization, with explicit unavailable state. Draw a visible 70-percent attention target and exact per-machine percentage/headroom disclosure so the distance from the healthy band is legible at a glance. Use stable machine identities and generation-aware values in the compiler; keep native source-ordered cards as the accessible keyboard selection and exact-value path, while chart clicks may only resolve through the same current machine identity. Reuse the shared ECharts lifecycle host, stay quiet for equal data, avoid chart remounts on machine selection, respect reduced motion/theme/resize cleanup, and retain the original mobile no-overflow and browser latency guarantees."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx community-plugins/plugins/machine-monitor/test/timeline-chart.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run test:fleet-performance --workspace @phosphorco/bb-plugin-machine-monitor && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local fleetUtilizationReleaseChecks = new Guard {
+  id = "fleet-utilization-release-checks"
+  owner = "implementer"
+  needs {
+    module.produced(fleetUtilizationEcharts); module.verified(fleetUtilizationEcharts)
+  }
+  observes { "community-plugins/**" }
+  outcome = "Re-run the complete community-plugin verification after the fleet utilization chart change, confirming the reused ECharts host, the exact native fallback, mobile layout, and production browser witness remain compatible with the existing Machine Monitor fleet delivery."
+  oracle = module.mechanical("npm --prefix community-plugins run test && npm --prefix community-plugins run typecheck && npm --prefix community-plugins run build && git -C community-plugins diff --check")
+}
+
+local fleetUtilizationLayoutRefinement = new Action {
+  id = "fleet-utilization-layout-refinement"
+  owner = "implementer"
+  needs {
+    module.produced(fleetUtilizationEcharts); module.verified(fleetUtilizationEcharts)
+  }
+  grant {
+    "(plugin)/app.tsx"; "(plugin)/app.css"; "(plugin)/timeline-chart.tsx"
+    "(plugin)/test/app.test.tsx"; "(plugin)/test/timeline-chart.test.tsx"; "(plugin)/test/mobile-layout.test.ts"
+    "(plugin)/test/fleet-performance.browser.test.ts"; "(plugin)/PERFORMANCE.md"
+  }
+  outcome = "Respond to product review that the fleet utilization chart and machine controls are visually disconnected. Make them read as one coordinated, anomaly-first fleet visual: a bounded shared ECharts plot exposes machine labels and precise utilization/headroom affordance, while compact source-ordered native controls supply connection/freshness/collector context, keyboard selection, and exact values without duplicated prose. Ensure unavailable and stale/disconnected observations do not look like current zero/healthy utilization; bind semantic colors from a scoped themed chart probe rather than inherited browser defaults; preserve stable identity, no per-machine chart instances, quiet equal updates, responsive no-overflow, and the existing persistent inspector timeline."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx community-plugins/plugins/machine-monitor/test/timeline-chart.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run test:fleet-performance --workspace @phosphorco/bb-plugin-machine-monitor && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local fleetUtilizationLayoutReleaseChecks = new Guard {
+  id = "fleet-utilization-layout-release-checks"
+  owner = "implementer"
+  needs {
+    module.produced(fleetUtilizationLayoutRefinement); module.verified(fleetUtilizationLayoutRefinement)
+  }
+  observes { "community-plugins/**" }
+  outcome = "Verify the refined coordinated fleet utilization layout across the full community-plugin suite, typecheck, build, and whitespace check before committing and publishing the selected child repository."
+  oracle = module.mechanical("npm --prefix community-plugins run test && npm --prefix community-plugins run typecheck && npm --prefix community-plugins run build && git -C community-plugins diff --check")
+}
+
+local machineTimelineRenderingPolish = new Action {
+  id = "machine-timeline-rendering-polish"
+  owner = "implementer"
+  needs {
+    module.produced(fleetUtilizationLayoutRefinement); module.verified(fleetUtilizationLayoutRefinement)
+    module.produced(eventSeamWitness); module.verified(eventSeamWitness)
+  }
+  grant {
+    "(plugin)/timeline-compiler.ts"
+    "(plugin)/timeline-chart.tsx"
+    "(plugin)/app.css"
+    "(plugin)/test/timeline-compiler.test.ts"
+    "(plugin)/test/timeline-chart.test.tsx"
+    "(plugin)/test/mobile-layout.test.ts"
+  }
+  outcome = "Respond to product review of the selected machine timeline: retain the exact server buckets, extrema envelope, gap disclosure, and persistent ECharts host, but make the visualization read as a composed monitoring surface. Format units and time deliberately, use compact metric-envelope tooltip rows on a theme-correct surface, make track labels legible without rotated diagnostic text, and preserve responsive/touch, keyboard/native exact-event, stable-identity, stale, and no-remount behavior. Add compiler and host regressions for dark and light semantic presentation rather than accepting ECharts defaults."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/timeline-compiler.test.ts && community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/timeline-chart.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local machineTimelineRenderingReleaseChecks = new Guard {
+  id = "machine-timeline-rendering-release-checks"
+  owner = "implementer"
+  needs {
+    module.produced(machineTimelineRenderingPolish); module.verified(machineTimelineRenderingPolish)
+  }
+  observes { "community-plugins/**" }
+  outcome = "Verify the machine-timeline rendering refinement across the complete community-plugin test, typecheck, build, and whitespace checks before publishing the selected plugin repository revision."
+  oracle = module.mechanical("npm --prefix community-plugins run test && npm --prefix community-plugins run typecheck && npm --prefix community-plugins run build && git -C community-plugins diff --check")
+}
+
+local selectedMachineOperationalDashboard = new Action {
+  id = "selected-machine-operational-dashboard"
+  owner = "implementer"
+  needs {
+    module.produced(machineTimelineRenderingPolish); module.verified(machineTimelineRenderingPolish)
+    module.produced(fleetUtilizationLayoutRefinement); module.verified(fleetUtilizationLayoutRefinement)
+    module.produced(overviewSnapshotConsistency); module.verified(overviewSnapshotConsistency)
+    module.produced(localCollectorSession); module.verified(localCollectorSession)
+  }
+  grant {
+    "(plugin)/fleet-contract.ts"
+    "(plugin)/monitor.ts"
+    "(plugin)/rpc-contract.ts"
+    "(plugin)/timeline-query.ts"
+    "(plugin)/server.ts"
+    "(plugin)/timeline-chart.tsx"
+    "(plugin)/app.tsx"
+    "(plugin)/app.css"
+    "(plugin)/test/fleet-contract.test.ts"
+    "(plugin)/test/timeline-query.test.ts"
+    "(plugin)/test/server.test.ts"
+    "(plugin)/test/timeline-chart.test.tsx"
+    "(plugin)/test/app.test.tsx"
+    "(plugin)/test/mobile-layout.test.ts"
+    "(plugin)/test/fleet-performance.browser.test.ts"
+    "(plugin)/test/fixtures/fleet-performance.fixture.ts"
+    "(plugin)/PERFORMANCE.md"
+  }
+  outcome = "Recompose the selected-machine inspector into the approved operational dashboard hierarchy: machine identity and history control; four real, decision-ready cards for five-minute CPU, memory utilization/capacity, root-disk utilization/capacity, and five-minute load; one persistent trusted ECharts dashboard with a utilization/headroom view and a load view; and a bounded root-disk breakdown sourced from persisted directory observations rather than invented trends. Carry the existing server-side five-minute CPU aggregate and bounded directory summaries through the strict fleet contract and cached machine-timeline response so switching remains local-server-only and generationally correct. Preserve stale/disconnected/unsupported disclosure, the fleet atlas, exact event navigation, native keyboard paths, responsive no-overflow behavior, and a secondary full metric/event timeline for diagnosis. Use the established 70-percent attention policy consistently; show absent values as absent, never as healthy zero. Add compiler/host/UI/server query regressions plus the browser performance receipt for the composed dashboard."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx community-plugins/plugins/machine-monitor/test/timeline-chart.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/fleet-contract.test.ts community-plugins/plugins/machine-monitor/test/timeline-query.test.ts community-plugins/plugins/machine-monitor/test/server.test.ts community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run test:fleet-performance --workspace @phosphorco/bb-plugin-machine-monitor && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local selectedMachineOperationalDashboardReleaseChecks = new Guard {
+  id = "selected-machine-operational-dashboard-release-checks"
+  owner = "implementer"
+  needs {
+    module.produced(selectedMachineOperationalDashboard); module.verified(selectedMachineOperationalDashboard)
+  }
+  observes { "community-plugins/**" }
+  outcome = "Verify the selected-machine operational dashboard across the complete community-plugin suite, typecheck, build, whitespace check, and its deterministic production-browser latency witness before publishing the child repository revision."
+  oracle = module.mechanical("npm --prefix community-plugins run test && npm --prefix community-plugins run typecheck && npm --prefix community-plugins run build && git -C community-plugins diff --check")
+}
+
+local selectedMachineVisualCompositionRefinement = new Action {
+  id = "selected-machine-visual-composition-refinement"
+  owner = "implementer"
+  needs {
+    module.produced(selectedMachineOperationalDashboard); module.verified(selectedMachineOperationalDashboard)
+    module.verified(selectedMachineOperationalDashboardReleaseChecks)
+  }
+  grant {
+    "(plugin)/app.tsx"
+    "(plugin)/app.css"
+    "(plugin)/timeline-chart.tsx"
+    "(plugin)/test/app.test.tsx"
+    "(plugin)/test/timeline-chart.test.tsx"
+    "(plugin)/test/mobile-layout.test.ts"
+    "(plugin)/test/fleet-performance.browser.test.ts"
+    "(plugin)/test/fixtures/fleet-performance-bootstrap.ts"
+    "(plugin)/PERFORMANCE.md"
+  }
+  outcome = "Apply the independent review's concrete visual-composition fixes to the selected-machine dashboard: make the real CPU/memory/root-disk utilization and five-minute load histories legible at a glance as two balanced, persistent ECharts panels; improve operational-card hierarchy and explicit distance to the 70-percent attention threshold; preserve truthful stale/disconnected/unavailable states and all native keyboard/event paths; and retain the bounded disk breakdown and secondary diagnostic timeline. Keep chart identity/lifecycles stable across machine switching, validate compact layout, and update the production-browser receipt."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx community-plugins/plugins/machine-monitor/test/timeline-chart.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run test:fleet-performance --workspace @phosphorco/bb-plugin-machine-monitor && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local selectedMachineVisualCompositionReleaseChecks = new Guard {
+  id = "selected-machine-visual-composition-release-checks"
+  owner = "implementer"
+  needs {
+    module.produced(selectedMachineVisualCompositionRefinement); module.verified(selectedMachineVisualCompositionRefinement)
+  }
+  observes { "community-plugins/**" }
+  outcome = "Run complete community-plugin tests, typecheck, build, and whitespace validation before committing the visual-composition refinement."
+  oracle = module.mechanical("npm --prefix community-plugins run test && npm --prefix community-plugins run typecheck && npm --prefix community-plugins run build && git -C community-plugins diff --check")
+}
+
+local selectedMachineVisualCompositionReloadReview = new Guard {
+  id = "selected-machine-visual-composition-reload-review"
+  owner = "release-owner"
+  needs {
+    module.verified(selectedMachineVisualCompositionReleaseChecks)
+  }
+  observes { "(plugin)/**" }
+  outcome = "After the authorized one-time canonical BB service reload, verify the live plugin serves the committed dashboard bundle, renders the selected-machine dashboard at desktop and narrow widths, and retains connected-machine switching without an error."
+  oracle = module.adjudicated("The reloaded canonical runtime serves the committed selected-machine dashboard and its core visual/interaction states are directly observed.", "release-owner")
+}
+
 local repositoryChecks = new Guard {
   id = "repository-checks"
   owner = "implementer"
@@ -411,6 +586,17 @@ nodes {
   uiFlightSupersession
   eventProducerBoundaryDocs
   fleetVisualNavigator
+  fleetUtilizationEcharts
+  fleetUtilizationReleaseChecks
+  fleetUtilizationLayoutRefinement
+  fleetUtilizationLayoutReleaseChecks
+  machineTimelineRenderingPolish
+  machineTimelineRenderingReleaseChecks
+  selectedMachineOperationalDashboard
+  selectedMachineOperationalDashboardReleaseChecks
+  selectedMachineVisualCompositionRefinement
+  selectedMachineVisualCompositionReleaseChecks
+  selectedMachineVisualCompositionReloadReview
   repositoryChecks
   liveFleetReview
 }
