@@ -535,6 +535,97 @@ local selectedMachineVisualCompositionReloadReview = new Guard {
   oracle = module.adjudicated("The reloaded canonical runtime serves the committed selected-machine dashboard and its core visual/interaction states are directly observed.", "release-owner")
 }
 
+local machineNoticeRailRefinement = new Action {
+  id = "machine-notice-rail-refinement"
+  owner = "implementer"
+  needs {
+    module.produced(selectedMachineVisualCompositionRefinement); module.verified(selectedMachineVisualCompositionRefinement)
+    module.verified(selectedMachineVisualCompositionReleaseChecks)
+  }
+  grant {
+    "(plugin)/app.tsx"
+    "(plugin)/app.css"
+    "(plugin)/test/app.test.tsx"
+    "(plugin)/test/mobile-layout.test.ts"
+  }
+  outcome = "Move selected-machine collector, threshold, stale, loading, and timeline-error notices into a semantic notice rail immediately after the persistent operational dashboard. Preserve alert/status semantics and mobile accessibility while ensuring asynchronous notices cannot push the identity, KPI cards, or chart downward. Keep fleet-level notices below the selected/fleet visual flow as well."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local machineStaticInventory = new Action {
+  id = "machine-static-inventory"
+  owner = "implementer"
+  needs {
+    module.produced(platformCollectors); module.verified(platformCollectors)
+    module.produced(hostEntry); module.verified(hostEntry)
+    module.produced(fleetStorage); module.verified(fleetStorage)
+    module.produced(fleetRpc); module.verified(fleetRpc)
+    module.produced(eventSeamWitness); module.verified(eventSeamWitness)
+    module.produced(fleetIntegrationWitness); module.verified(fleetIntegrationWitness)
+    module.produced(localCollectorSession); module.verified(localCollectorSession)
+    module.produced(overviewSnapshotConsistency); module.verified(overviewSnapshotConsistency)
+    module.produced(physicalRpcBound); module.verified(physicalRpcBound)
+    module.produced(eventProducerBoundaryDocs); module.verified(eventProducerBoundaryDocs)
+    module.produced(selectedMachineOperationalDashboard); module.verified(selectedMachineOperationalDashboard)
+  }
+  grant {
+    "(plugin)/host-contract.ts"
+    "(plugin)/platform-collectors.ts"
+    "(plugin)/host.ts"
+    "(plugin)/fleet-contract.ts"
+    "(plugin)/store.ts"
+    "(plugin)/fleet-store.ts"
+    "(plugin)/fleet-coordinator.ts"
+    "(plugin)/timeline-query.ts"
+    "(plugin)/rpc-contract.ts"
+    "(plugin)/server.ts"
+    "(plugin)/test/host.test.ts"
+    "(plugin)/test/platform-collectors.test.ts"
+    "(plugin)/test/fleet-contract.test.ts"
+    "(plugin)/test/fleet-store.test.ts"
+    "(plugin)/test/fleet-coordinator.test.ts"
+    "(plugin)/test/timeline-query.test.ts"
+    "(plugin)/test/server.test.ts"
+    "(plugin)/test/fleet-integration.test.ts"
+    "(plugin)/ARCHITECTURE.md"
+    "(plugin)/README.md"
+  }
+  outcome = "Add a durable, low-churn, identity-free static machine inventory lane rather than enlarging the cadence-bound metric payload. Persist a latest bounded snapshot per authenticated machine with digest-based idempotence and failure retention; collect only safe, visible Linux/WSL/Darwin facts (OS, CPU topology/model/nominal speed, visible memory, bounded disk/volume facts, and best-effort software RAID) with explicit unavailable/guest/partial facts. Unknown platforms stay zero-probe. Never collect serials, MACs, WWNs, filesystem paths, cloud metadata, IP geolocation, or unbounded command output; location is explicitly operator-provided or unavailable. Make the server collect on initial/reconnect plus a low-frequency refresh, and expose a bounded cached summary/detail through strict fleet RPCs."
+  oracle = module.mechanical("node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/host.test.ts community-plugins/plugins/machine-monitor/test/platform-collectors.test.ts community-plugins/plugins/machine-monitor/test/fleet-contract.test.ts community-plugins/plugins/machine-monitor/test/fleet-store.test.ts community-plugins/plugins/machine-monitor/test/fleet-coordinator.test.ts community-plugins/plugins/machine-monitor/test/timeline-query.test.ts community-plugins/plugins/machine-monitor/test/server.test.ts community-plugins/plugins/machine-monitor/test/fleet-integration.test.ts && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local machineInventoryPresentation = new Action {
+  id = "machine-inventory-presentation"
+  owner = "implementer"
+  needs {
+    module.produced(machineStaticInventory); module.verified(machineStaticInventory)
+    module.produced(machineNoticeRailRefinement); module.verified(machineNoticeRailRefinement)
+  }
+  grant {
+    "(plugin)/app.tsx"
+    "(plugin)/app.css"
+    "(plugin)/test/app.test.tsx"
+    "(plugin)/test/mobile-layout.test.ts"
+    "(plugin)/test/fleet-performance.browser.test.ts"
+    "(plugin)/PERFORMANCE.md"
+  }
+  outcome = "Display the selected machine's static context near its identity without treating it as live utilization: concise OS/CPU/memory/location cards plus an accessible disclosure for bounded disks and software-RAID findings. Show inventory as-of time, visibility (host/guest/container/unknown), provenance, unavailable and partial states honestly; retain a local-server cached switching path with no extra daemon call on selection and preserve the persistent ECharts dashboard and no-overflow/mobile guarantees."
+  oracle = module.mechanical("community-plugins/node_modules/.bin/vitest run community-plugins/plugins/machine-monitor/test/app.test.tsx && node --test --experimental-strip-types community-plugins/plugins/machine-monitor/test/mobile-layout.test.ts && npm --prefix community-plugins run test:fleet-performance --workspace @phosphorco/bb-plugin-machine-monitor && npm --prefix community-plugins run typecheck --workspace @phosphorco/bb-plugin-machine-monitor")
+}
+
+local machineInventoryReleaseChecks = new Guard {
+  id = "machine-inventory-release-checks"
+  owner = "implementer"
+  needs {
+    module.produced(machineNoticeRailRefinement); module.verified(machineNoticeRailRefinement)
+    module.produced(machineStaticInventory); module.verified(machineStaticInventory)
+    module.produced(machineInventoryPresentation); module.verified(machineInventoryPresentation)
+  }
+  observes { "community-plugins/**" }
+  outcome = "Run the complete community-plugin test, typecheck, build, and whitespace checks over the composed static-inventory and notice-rail delivery before any release/reload decision."
+  oracle = module.mechanical("npm --prefix community-plugins run test && npm --prefix community-plugins run typecheck && npm --prefix community-plugins run build && git -C community-plugins diff --check")
+}
+
 local repositoryChecks = new Guard {
   id = "repository-checks"
   owner = "implementer"
@@ -597,6 +688,10 @@ nodes {
   selectedMachineVisualCompositionRefinement
   selectedMachineVisualCompositionReleaseChecks
   selectedMachineVisualCompositionReloadReview
+  machineNoticeRailRefinement
+  machineStaticInventory
+  machineInventoryPresentation
+  machineInventoryReleaseChecks
   repositoryChecks
   liveFleetReview
 }
