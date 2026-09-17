@@ -1,12 +1,12 @@
 {
   "artifact": {
-    "file": "get-bb-plugin-sdk-0.4.54+phosphor.68c40905367a.sdk.0344205facae.tgz",
-    "sha256": "182f1feb1ca7fe7d295f32c962daf5abd0948b07c911560b3115c9ec31e44db7",
-    "bytes": 577808
+    "file": "get-bb-plugin-sdk-0.4.98+phosphor.036bb9f48f60.sdk.b61b038582ca.tgz",
+    "sha256": "85c2bef536965fba785bf754da6aa1a42f03c7e1f2b75f107992003b6891ddf8",
+    "bytes": 601094
   },
-  "sourceReceipt": "68c40905367a1a04acd6899d2fa1e9433a4b27dd",
-  "finalReplayTree": "eaa48b5f7a7ff7bbf9737d2d75372d91528829af",
-  "finalReplaySdkTree": "942037898083cf199d74e02af19d8772514e6155",
+  "sourceReceipt": "036bb9f48f606260634f64cd3385d522a8175232",
+  "finalReplayTree": "036bb9f48f606260634f64cd3385d522a8175232",
+  "finalReplaySdkTree": "3dbfc271dc9a88a656941f6bd700a6d7559be20d",
   "checks": {
     "turboBuildTypes": "pass",
     "turboBuildRuntime": "pass",
@@ -14,9 +14,9 @@
     "coldInstall": "pass",
     "publicEntryResolution": "15/15 pass",
     "rootAndAppImport": "pass",
-    "deterministicRepackSha256": "182f1feb1ca7fe7d295f32c962daf5abd0948b07c911560b3115c9ec31e44db7",
-    "finalReplayTree": "eaa48b5f7a7ff7bbf9737d2d75372d91528829af",
-    "finalReplaySdkTree": "942037898083cf199d74e02af19d8772514e6155",
+    "deterministicRepackSha256": "85c2bef536965fba785bf754da6aa1a42f03c7e1f2b75f107992003b6891ddf8",
+    "finalReplayTree": "036bb9f48f606260634f64cd3385d522a8175232",
+    "finalReplaySdkTree": "3dbfc271dc9a88a656941f6bd700a6d7559be20d",
     "organizationConsumers": "frozen install, sync, references, sdk resolution, typecheck, tests and build pass",
     "communityConsumers": "unchanged intentional registry targets; npm ci, tests, typecheck and build pass",
     "pluginHttpAuthMode": "local | token | none; capability absent",
