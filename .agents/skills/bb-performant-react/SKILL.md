@@ -26,6 +26,10 @@ Before changing code:
    fixed.
 4. State what is measured, source-supported, and inferred. Aggregate provider
    names suggest a hotspot but do not prove commit attribution.
+5. If the UI is slow while render attribution is quiet, time the local app,
+   API, and UI endpoints separately and inspect server CPU and event-loop delay
+   before changing React. A running service or passing health route does not
+   prove the UI is serving.
 
 For deeper diagnosis, implementation patterns, and performance gates, read
 [references/performance-playbook.md](references/performance-playbook.md).

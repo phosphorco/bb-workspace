@@ -108,6 +108,30 @@ query timings, `lastWork`/`slowestWork`, handler self-time when available, and
 a fixed control/candidate run. Cumulative plugin handler duration can mostly be
 queue time when plugins call back into a congested BB server.
 
+When a React surface appears frozen but render work is quiet, distinguish a
+listening process from a serving one. Time the local health, app/API, and UI
+routes separately; inspect the UI socket backlog, server CPU, and event-loop
+delay. A health route can answer while the UI waits behind synchronous plugin
+work. Restarting a stalled server child is a recovery probe, not proof that the
+load source has gone away; observe the replacement after startup settles.
+
+Realtime events and mounted accessories can multiply one RPC across every open
+browser client. Count calls per event and per client, then identify the actual
+server cost before adjusting React subscriptions. Slow-query logs may miss a
+continuous stream of synchronous queries below their threshold. A short native
+CPU sample can identify SQLite work; a short JavaScript profile can identify
+its caller. Treat temporary local inspector access as operational state and
+close it after the probe.
+
+For a hot query, compare `EXPLAIN QUERY PLAN` and timed results on realistic
+data, then verify output equivalence. A small result or page size does not
+bound scanned rows or the complete history walk. SQLite may reorder joins in a
+way that defeats an apparent time filter; use materialization or join-order
+controls only when the measured plan requires them. For startup, reconnect, or
+timer reconciliation, check whether any IDs need work before scanning history,
+coalesce overlapping passes, bound per-page fan-out, preserve catch-up after a
+reconnect, and stop follow-on reads on cancellation.
+
 Treat a timer in a mounted plugin surface as per-client work. Before polling:
 
 - key a bounded server cache by the smallest stable identity and coalesce

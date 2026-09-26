@@ -99,6 +99,13 @@ safe scratch retirement.
 
 ## Verification
 
+Analytics work must follow the accepted
+[performance isolation ADR](docs/adrs/2026-09-analytics-performance-isolation.md).
+Ordinary analytical additions are declarative: no feature-owned host scans,
+lifecycle collectors, cache/refresh loops, database handles, worker pools, or
+eager frontend dependencies. Transitional containment is not proof of complete
+isolation; preserve and disclose freshness/coverage limitations.
+
 Run the checks relevant to every changed child before handoff.
 
 - Workspace composition: `./bin/check --role normal` on `bb-machine`; use

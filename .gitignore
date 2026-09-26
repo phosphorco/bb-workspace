@@ -1,3 +1,6 @@
 .DS_Store
 # Workbench owns transient writer locks; definitions and ledgers remain source.
 *.ledger.jsonl.lock
+# Retained host-local activation backups and the exact proof executable.
+plans/context-magnet-session-etl-plugin-backup/
+plans/context-magnet-workbench-runtime/
