@@ -20,15 +20,16 @@ package resolution. Do not copy `bundled-types` into individual plugins.
 
 The selected package is:
 
-- File: `get-bb-plugin-sdk-0.4.54+phosphor.68c40905367a.sdk.0344205facae.tgz`
-- SHA-256: `182f1feb1ca7fe7d295f32c962daf5abd0948b07c911560b3115c9ec31e44db7`
+- File: `get-bb-plugin-sdk-0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a.tgz`
+- SHA-256: `feb4c3d309b2b5752459d63b2c8bdfc3bd0c49d08f6f7355538cc9b82a0db1a3`
 - Name: `@get-bb/plugin-sdk`
-- Version: `0.4.54+phosphor.68c40905367a.sdk.0344205facae`
-- Selected source receipt: `68c40905367a1a04acd6899d2fa1e9433a4b27dd`
+- Version: `0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a`
+- Selected source receipt: `045a825edd2baf1d56dfaaf676642e071619c515`
 
-The final fork replay tree `eaa48b5f7a7ff7bbf9737d2d75372d91528829af`
-retains the identical plugin SDK subtree `942037898083cf199d74e02af19d8772514e6155`,
-so this already-verified artifact remains the selected package without repacking.
+The archive was built and packed from a disposable replay of the exact fork
+result tree `045a825edd2baf1d56dfaaf676642e071619c515`. Its adjacent provenance
+receipt binds the archive bytes and public packaged input to that tree; the
+receipt does not depend on `fork/build/bb`.
 
 The version suffix identifies the fork and packaged input. Semver compatibility
 alone is not provenance: the archive hash and adjacent `.provenance.json` receipt
@@ -67,8 +68,8 @@ Then, from the workspace root, pack into a fresh output directory:
 
 ```sh
 node sdk-artifacts/prepare-plugin-sdk.mjs \
-  --source fork/build/bb \
-  --source-receipt 68c40905367a1a04acd6899d2fa1e9433a4b27dd \
+  --source /path/to/disposable/materialization \
+  --source-receipt 045a825edd2baf1d56dfaaf676642e071619c515 \
   --output /tmp/bb-sdk-reproduction
 ```
 

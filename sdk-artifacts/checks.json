@@ -1,25 +1,28 @@
 {
   "artifact": {
-    "file": "get-bb-plugin-sdk-0.4.98+phosphor.036bb9f48f60.sdk.b61b038582ca.tgz",
-    "sha256": "85c2bef536965fba785bf754da6aa1a42f03c7e1f2b75f107992003b6891ddf8",
-    "bytes": 601094
+    "file": "get-bb-plugin-sdk-0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a.tgz",
+    "sha256": "feb4c3d309b2b5752459d63b2c8bdfc3bd0c49d08f6f7355538cc9b82a0db1a3",
+    "bytes": 609296
   },
-  "sourceReceipt": "036bb9f48f606260634f64cd3385d522a8175232",
-  "finalReplayTree": "036bb9f48f606260634f64cd3385d522a8175232",
-  "finalReplaySdkTree": "3dbfc271dc9a88a656941f6bd700a6d7559be20d",
+  "sourceReceipt": "045a825edd2baf1d56dfaaf676642e071619c515",
+  "finalReplayTree": "045a825edd2baf1d56dfaaf676642e071619c515",
+  "finalReplaySdkTree": "e30fcdd7f9f67a7920be51af0ed4ec59bf6ada1c",
   "checks": {
-    "turboBuildTypes": "pass",
-    "turboBuildRuntime": "pass",
+    "turboBuildTypes": "pass from disposable replay",
+    "turboBuildRuntime": "pass from disposable replay",
     "artifactVerifyExisting": "pass",
-    "coldInstall": "pass",
-    "publicEntryResolution": "15/15 pass",
+    "coldInstall": "bun install --frozen-lockfile pass using isolated temporary Bun and npm caches",
+    "publicEntryResolution": "17/17 package exports present",
     "rootAndAppImport": "pass",
-    "deterministicRepackSha256": "85c2bef536965fba785bf754da6aa1a42f03c7e1f2b75f107992003b6891ddf8",
-    "finalReplayTree": "036bb9f48f606260634f64cd3385d522a8175232",
-    "finalReplaySdkTree": "3dbfc271dc9a88a656941f6bd700a6d7559be20d",
-    "organizationConsumers": "frozen install, sync, references, sdk resolution, typecheck, tests and build pass",
+    "deterministicRepackSha256": "feb4c3d309b2b5752459d63b2c8bdfc3bd0c49d08f6f7355538cc9b82a0db1a3",
+    "finalReplayTree": "045a825edd2baf1d56dfaaf676642e071619c515",
+    "finalReplaySdkTree": "e30fcdd7f9f67a7920be51af0ed4ec59bf6ada1c",
+    "providerAdmissionPatchSha256": "634f8ad29799f89086b81f00f7684fb0c6d849f8ead8310d0526af55e4b8f860",
+    "providerAdmissionDeclarations": "admissions, admissionGaps, admissionAttemptSeqHighWatermark, admissionObservationSeqHighWatermark, admissionRetentionHighWatermark present in packed and installed declarations",
+    "organizationConsumers": "frozen install, sync:check, installed archive resolution, and sdk-types:check pass",
     "communityConsumers": "unchanged intentional registry targets; npm ci, tests, typecheck and build pass",
     "pluginHttpAuthMode": "local | token | none; capability absent",
+    "contextMagnetTraceDeclaration": "experimental_contextMagnetTrace public declaration present",
     "producerRenderingHook": "optional public declaration present"
   }
 }
