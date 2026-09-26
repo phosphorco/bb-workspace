@@ -20,23 +20,21 @@ package resolution. Do not copy `bundled-types` into individual plugins.
 
 The selected package is:
 
-- File: `get-bb-plugin-sdk-0.5.24+phosphor.747ead9adb7b.sdk.68c85e61a3da.tgz`
-- SHA-256: `10ca413bafcbe718088f95ef8dcec9e2f2081166d63a72e34c101d56adbb8faa`
+- File: `get-bb-plugin-sdk-0.5.29+phosphor.f35653218f9b.sdk.a0aca52c9e73.tgz`
+- SHA-256: `527f582a3a8fdf9c4ded610dd0696d5496b617d86f2affb3f389b3829244b77d`
 - Name: `@get-bb/plugin-sdk`
-- Version: `0.5.24+phosphor.747ead9adb7b.sdk.68c85e61a3da`
-- Selected source receipt: `747ead9adb7bd7556ade8614d6fc6d7412fb1bd0`
+- Version: `0.5.29+phosphor.f35653218f9b.sdk.a0aca52c9e73`
+- Selected source receipt: `f35653218f9b209fdadd344c4b17718eb34640ea`
 
-The SDK artifact was selected from fork commit
-`5d9057bd3f18ec9f5841821d6e1848a909db172b`, which locks result tree
-`747ead9adb7bd7556ade8614d6fc6d7412fb1bd0`. The later reconciled fork
-tree `045c543f6da18c402f13415c9ee367458a98e1a2` retains the identical
-`packages/plugin-sdk` Git tree `b94840c902414c8763d2c617b601aa9aca90be80`.
-The adjacent provenance receipt binds the archive bytes, declarations, and
-runtime entries to that exact tree; it does not depend on the live materialization.
+The SDK artifact was built from the upstream 0.44.0 refresh, locking result
+tree `f35653218f9b209fdadd344c4b17718eb34640ea`. The adjacent provenance
+receipt binds the archive bytes, declarations, and runtime entries to that
+exact source tree. The subsequent migration and test tree
+`a5be4c5a2233f9f02631fce86debf82b8a4920a6` retains identical SDK sources.
 
 The version suffix identifies the fork and packaged input. Semver compatibility
 alone is not provenance: the archive hash and adjacent `.provenance.json` receipt
-identify the exact bytes. Upstream `0.5.24` does not include all fork contracts.
+identify the exact bytes. Upstream `0.5.29` does not include all fork contracts.
 The source package version and the running server were not changed for packing.
 
 ## Install the selected composition
@@ -72,7 +70,7 @@ Then, from the workspace root, pack into a fresh output directory:
 ```sh
 node sdk-artifacts/prepare-plugin-sdk.mjs \
   --source /path/to/disposable/materialization \
-  --source-receipt 747ead9adb7bd7556ade8614d6fc6d7412fb1bd0 \
+  --source-receipt f35653218f9b209fdadd344c4b17718eb34640ea \
   --output /tmp/bb-sdk-reproduction
 ```
 
