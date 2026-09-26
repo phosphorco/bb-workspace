@@ -26,8 +26,11 @@ The selected package is:
 - Version: `0.5.24+phosphor.747ead9adb7b.sdk.68c85e61a3da`
 - Selected source receipt: `747ead9adb7bd7556ade8614d6fc6d7412fb1bd0`
 
-The selected fork commit `5d9057bd3f18ec9f5841821d6e1848a909db172b`
-locks result tree `747ead9adb7bd7556ade8614d6fc6d7412fb1bd0`.
+The SDK artifact was selected from fork commit
+`5d9057bd3f18ec9f5841821d6e1848a909db172b`, which locks result tree
+`747ead9adb7bd7556ade8614d6fc6d7412fb1bd0`. The later reconciled fork
+tree `769109b90cba3716d0ba1c569f8b618529be563d` retains the identical
+`packages/plugin-sdk` Git tree `b94840c902414c8763d2c617b601aa9aca90be80`.
 The adjacent provenance receipt binds the archive bytes, declarations, and
 runtime entries to that exact tree; it does not depend on the live materialization.
 
