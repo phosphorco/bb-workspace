@@ -20,20 +20,20 @@ package resolution. Do not copy `bundled-types` into individual plugins.
 
 The selected package is:
 
-- File: `get-bb-plugin-sdk-0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a.tgz`
-- SHA-256: `feb4c3d309b2b5752459d63b2c8bdfc3bd0c49d08f6f7355538cc9b82a0db1a3`
+- File: `get-bb-plugin-sdk-0.5.24+phosphor.747ead9adb7b.sdk.68c85e61a3da.tgz`
+- SHA-256: `10ca413bafcbe718088f95ef8dcec9e2f2081166d63a72e34c101d56adbb8faa`
 - Name: `@get-bb/plugin-sdk`
-- Version: `0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a`
-- Selected source receipt: `045a825edd2baf1d56dfaaf676642e071619c515`
+- Version: `0.5.24+phosphor.747ead9adb7b.sdk.68c85e61a3da`
+- Selected source receipt: `747ead9adb7bd7556ade8614d6fc6d7412fb1bd0`
 
-The archive was built and packed from a disposable replay of the exact fork
-result tree `045a825edd2baf1d56dfaaf676642e071619c515`. Its adjacent provenance
-receipt binds the archive bytes and public packaged input to that tree; the
-receipt does not depend on `fork/build/bb`.
+The selected fork commit `5d9057bd3f18ec9f5841821d6e1848a909db172b`
+locks result tree `747ead9adb7bd7556ade8614d6fc6d7412fb1bd0`.
+The adjacent provenance receipt binds the archive bytes, declarations, and
+runtime entries to that exact tree; it does not depend on the live materialization.
 
 The version suffix identifies the fork and packaged input. Semver compatibility
 alone is not provenance: the archive hash and adjacent `.provenance.json` receipt
-identify the exact bytes. Upstream `0.4.54` does not include all fork contracts.
+identify the exact bytes. Upstream `0.5.24` does not include all fork contracts.
 The source package version and the running server were not changed for packing.
 
 ## Install the selected composition
@@ -69,7 +69,7 @@ Then, from the workspace root, pack into a fresh output directory:
 ```sh
 node sdk-artifacts/prepare-plugin-sdk.mjs \
   --source /path/to/disposable/materialization \
-  --source-receipt 045a825edd2baf1d56dfaaf676642e071619c515 \
+  --source-receipt 747ead9adb7bd7556ade8614d6fc6d7412fb1bd0 \
   --output /tmp/bb-sdk-reproduction
 ```
 
