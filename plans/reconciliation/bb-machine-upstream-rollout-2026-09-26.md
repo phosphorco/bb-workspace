@@ -41,4 +41,19 @@ invalid thread request reached schema validation (400).
 
 This host's resolver returns NXDOMAIN for its own Service hostname; HTTPS was
 verified with the assigned Service address 100.84.229.173 using --resolve.
-Router activation remains the final deployment step at this receipt.
+The matching router generation
+`42b732e767638c3539f71752ecbad59877acdcfee9f707063548005f91e71273`
+is now active; doctor reports healthy, matchesBundle=true, no issues, and
+Codex 0.156.1. The install completed but its full status response exceeded the
+CLI's 1 MiB output limit; the independent doctor probe confirmed activation.
+No provider conversations were launched merely to validate the deployment.
+
+Workspace normal contract passes. Service has zero automatic restarts, all
+selected plugins are running, and original background jobs are unfrozen.
+The broad machine check stops on the pre-existing Home Manager marker mismatch
+(selected machine repo 63de7e7, installed marker 49ee89b). Workbench hook
+activation is advisory and still needs reconciliation; this rollout did not
+perform an unrelated full machine apply. A peer HTTPS check from Rosetta was
+unavailable because SSH timed out; owned ingress was tested locally through
+its assigned Service IP. Verified-person browser acceptance was not claimed.
+
