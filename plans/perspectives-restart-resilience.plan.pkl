@@ -118,7 +118,7 @@ local restartProof = new Guard {
     "community-plugins/plugins/perspectives/test/Perspectives.test.ts"
     "community-plugins/plugins/perspectives/test/restart-recovery.test.ts"
     "community-plugins/plugins/perspectives/COORDINATOR_DESIGN.md"
-    "fork/patches/0035-test-perspectives-add-live-restart-fault-barriers.patch"
+    "fork/patches/0036-test-perspectives-add-live-restart-fault-barriers.patch"
   }
   needs { module.produced(scopedRecoveryTools); module.verified(scopedRecoveryTools); module.verified(forkFaultBarrierQualification) }
   oracle = module.adjudicated("Record commands, runtime isolation, coordinator ID or launch-uncertain result, queue row IDs, delivery events, child IDs, event timing, exact artifact bytes, and caller outcome for each restart point. A pass requires a readable synthesis or explicit bounded failure/partial result after recovery, with no silent loss or undisclosed duplicate panel. If scheduled delivery cannot wake a required state, fail and revise the implementation or BB core before release.", "perspectives-reviewer")
@@ -129,7 +129,7 @@ local forkFaultBarrierQualification = new Guard {
   owner = "perspectives-reviewer"
   outcome = "Qualify the opt-in BB fork fault barriers used by live-restart-proof without changing the normal runtime. Confirm the patch replays on the pinned upstream and series, disabled hooks preserve ordinary behavior, enabled hooks pause at the three exact durable boundaries, and an isolated patched server can run on disposable data. Inspect the changed fork composition and run relevant fork install, typecheck, tests, and build checks in a disposable authoring checkout."
   observes {
-    "fork/patches/0035-test-perspectives-add-live-restart-fault-barriers.patch"
+    "fork/patches/0036-test-perspectives-add-live-restart-fault-barriers.patch"
     "fork/patches/series"
     "fork/patches/sha256"
     "fork/result-tree.lock"
@@ -168,7 +168,7 @@ local releaseReview = new Guard {
     "community-plugins/plugins/perspectives/COORDINATOR_DESIGN.md"
     "community-plugins/plugins/perspectives/README.md"
     "community-plugins/plugins/perspectives/Perspectives.ts"
-    "fork/patches/0035-test-perspectives-add-live-restart-fault-barriers.patch"
+    "fork/patches/0036-test-perspectives-add-live-restart-fault-barriers.patch"
   }
   needs { module.verified(restartProof); module.verified(repositoryQualification); module.verified(forkFaultBarrierQualification) }
   oracle = module.adjudicated("Cole accepts the demonstrated coordinator and caller experience, including any disclosed limits from the isolated restart proof, as ready for publication. This is a judgment on a concrete candidate, not an automatic publication grant.", "cole")
