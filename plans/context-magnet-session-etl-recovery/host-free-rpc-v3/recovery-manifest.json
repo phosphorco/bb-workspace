@@ -1,0 +1,20 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/server.ts",
+    "plugins/plugins/context-magnet-inspector/test/inspector-payload.test.ts",
+    "plugins/plugins/context-magnet-inspector/test/plugin-integration.test.ts"
+  ],
+  "grantSha256": "b210d784c86ec791d32d02bd125f11e3abf7339e867edf4bb0527b18f94eefe6",
+  "node": "host-free-rpc-v3",
+  "reversePatches": [
+    {
+      "bytes": 45431,
+      "path": "plugins/plugins/context-magnet-inspector/server.ts",
+      "reversePatch": "host-free-rpc-v3/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch",
+      "sha256": "5f305d1d86df5a1e3afd6a4ef79baece5965679d5e048bf4fc115faf6ed7b895",
+      "tracked": true
+    }
+  ],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

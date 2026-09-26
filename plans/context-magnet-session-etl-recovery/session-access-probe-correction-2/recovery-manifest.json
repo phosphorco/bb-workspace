@@ -1,0 +1,13 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/docs/codex-session-access-probe.md",
+    "plugins/plugins/context-magnet-inspector/test/codex-session-access-probe.test.ts",
+    "plugins/plugins/context-magnet-inspector/test/fixtures/codex-session-access-probe.json",
+    "plugins/plugins/context-magnet-inspector/test/run-codex-session-access-probe.mts"
+  ],
+  "grantSha256": "f2ae27d65e1e1aa4260c8bd5a085c4eb10f9b2202e5cd484b885f6ad2134c910",
+  "node": "session-access-probe-correction-2",
+  "reversePatches": [],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

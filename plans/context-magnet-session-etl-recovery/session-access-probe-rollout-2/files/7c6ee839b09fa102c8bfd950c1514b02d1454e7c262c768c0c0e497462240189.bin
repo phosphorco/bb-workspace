@@ -1,0 +1,11 @@
+# Original Codex rollout feasibility probe
+
+This probe is read-only and does not start Codex, an app server, or a provider-session RPC. It first reads bodyless BB thread metadata and then requests only the server-filtered `thread/identity` and `turn/completed` lanes. The thread must be live, non-archived, and `providerId: codex`; conflicting identities and unrecognized fields fail closed.
+
+Ownership is resolved from the existing router database using `bun:sqlite` with `readonly:true, create:false`. One route must join exactly one enabled, non-draining owner and have no migration claim. The router process and status command are never opened. Owner and filesystem identifiers are transient and are returned only as a SHA-256 account slot.
+
+The already-recorded rollout is admitted only as a regular non-symlink file contained beneath that owner. The reader opens it no-follow, streams it once, verifies UTF-8 and JSONL before interpreting records, caps cumulative bytes at 8 MiB, one line at 4 MiB, records at 512, turn records at 256, and context records at 128. It recognizes only the observed Codex 0.153.2 dialect: `session_meta`, `event_msg`, `response_item`, `world_state`, `turn_context`, and `token_usage_record`. The session metadata must declare 0.153.2. Unknown, malformed, truncated, escaping, nonregular, oversized, or racing input fails closed.
+
+The compact receipt contains only rollout size, digest, record counts, dialect, redacted account slot, and an exact receipt outcome. A Context Magnet receipt is recognized only from a versioned `context_magnet_receipt` item with `context-magnet-receipt/v1`; no timestamp, text, generic developer item, or prompt spelling is inferred. A complete stream with no such item reports `zero-exact-context-receipts`, which proves access feasibility but makes no contribution claim.
+
+The probe compares BB metadata/event high-watermark, owner route revision, direct process inventory, workspace dirty-state identity, and rollout file identity before and after streaming. It never emits provider text, messages, reasoning, commands, tools, environment values, account paths, rollout paths, or raw records.

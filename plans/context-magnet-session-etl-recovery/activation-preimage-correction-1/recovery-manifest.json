@@ -1,0 +1,12 @@
+{
+  "changedPaths": [
+    "plans/context-magnet-session-etl-activation-preimage.json",
+    "plans/verify-context-magnet-session-etl-activation-preimage.mjs",
+    "plans/verify-context-magnet-session-etl-preimage.mjs"
+  ],
+  "grantSha256": "7db17020b7481959d0f94e0972424b972f3acf241310f3a100e9b5cd28bef6b5",
+  "node": "activation-preimage-correction-1",
+  "reversePatches": [],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

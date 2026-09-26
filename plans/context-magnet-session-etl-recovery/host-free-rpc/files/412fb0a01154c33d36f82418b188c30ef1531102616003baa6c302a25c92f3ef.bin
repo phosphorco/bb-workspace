@@ -1,0 +1,96 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+import ts from "typescript";
+import vm from "node:vm";
+
+async function appExports(): Promise<Record<string, unknown>> {
+  const source = await readFile(new URL("../app.tsx", import.meta.url), "utf8");
+  const compiled = ts.transpileModule(source, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
+  }).outputText;
+  const module = { exports: {} as Record<string, unknown> };
+  const require = (id: string): unknown => {
+    if (id === "react" || id === "react/jsx-runtime" || id === "./app.css") return {};
+    if (id === "@get-bb/plugin-sdk/app") return { definePluginApp: (callback: (app: { slots: { threadPanelAction: () => void } }) => unknown) => callback({ slots: { threadPanelAction: () => undefined } }) };
+    throw new Error(`Unexpected runtime import: ${id}`);
+  };
+  vm.runInNewContext(compiled, { module, exports: module.exports, require, Map, Object, Array, Set, console });
+  return module.exports;
+}
+
+const threadId = "thread-host-page";
+const snapshot = { id: "snapshot-1", capturedAt: "2026-09-20T20:00:00.000Z", operationSeqHighWatermark: 20 };
+const contribution = (id: string) => ({ contributionKey: { threadId, id } });
+const operation = (id: string, eventSeq: number, contributions: readonly object[], turnId?: string) => ({ anchor: { threadId, operationId: id, eventSeq, ...(turnId === undefined ? {} : { turnId }) }, contributions });
+const page = (cursor: string | null, nextCursor: string | null, operations: readonly object[], overrides: Record<string, unknown> = {}) => ({
+  version: "context-magnet.trace-carrier/v1",
+  threadId,
+  snapshot,
+  operations,
+  unmatched: [],
+  page: { cursor, nextCursor },
+  gaps: [],
+  completeness: "complete",
+  nextCursor,
+  ...overrides,
+});
+
+test("accumulates one authoritative continuation, merging a repeated supplied operation anchor", async () => {
+  const accumulate = (await appExports()).accumulateHostProjection;
+  assert.equal(typeof accumulate, "function");
+  const first = page(null, "opaque-2", [operation("op-one", 3, [contribution("a")])]);
+  const continuation = page("opaque-2", null, [operation("op-one", 3, [contribution("b")]), operation("op-two", 9, [contribution("c")])], {
+    completeness: "partial",
+    gaps: [{ pageCursor: "opaque-2", gap: { kind: "retention", scope: "contributions", reason: "retention boundary" } }],
+  });
+  const append = accumulate as (previous: unknown, next: unknown) => any;
+  const combined = append(append(null, first), continuation);
+  assert.equal(combined.nextCursor, null);
+  assert.equal(combined.completeness, "partial");
+  assert.deepEqual(Array.from(combined.operations, (entry: any) => [entry.anchor.operationId, Array.from(entry.contributions, (item: any) => item.contributionKey.id)]), [["op-one", ["a", "b"]], ["op-two", ["c"]]]);
+  assert.equal(combined.gaps.length, 1);
+});
+
+test("rejects snapshot, cursor, and contribution-key drift without inventing a host relation", async () => {
+  const exported = await appExports();
+  const append = exported.accumulateHostProjection as (previous: unknown, next: unknown) => any;
+  const ErrorType = exported.HostPageAccumulatorError as new (...args: any[]) => Error;
+  const first = append(null, page(null, "opaque-2", [operation("op-one", 3, [contribution("a")])]));
+  assert.throws(() => append(first, page("wrong-cursor", null, [])), ErrorType);
+  assert.throws(() => append(first, page("opaque-2", null, [], { snapshot: { ...snapshot, id: "other" } })), ErrorType);
+  assert.throws(() => append(first, page("opaque-2", null, [operation("op-two", 4, [contribution("a")])])), ErrorType);
+  const turned = append(null, page(null, "opaque-2", [operation("op-one", 3, [contribution("a")], "turn-a")]));
+  assert.throws(() => append(turned, page("opaque-2", null, [operation("op-one", 3, [contribution("b")], "turn-b")])), ErrorType);
+  assert.throws(() => append(first, page("opaque-2", null, [operation("op-earlier", 2, [contribution("b")])])), ErrorType);
+  const twoOperations = append(null, page(null, "opaque-2", [operation("op-one", 3, [contribution("a")]), operation("op-last", 5, [contribution("b")])]));
+  assert.throws(() => append(twoOperations, page("opaque-2", null, [operation("op-one", 3, [contribution("c")])])), ErrorType, "only the final prior operation may extend at a continuation boundary");
+  const enriched = append(first, page("opaque-2", null, [operation("op-one", 3, [contribution("b")], "turn-added")]));
+  assert.equal(enriched.operations[0].anchor.turnId, "turn-added", "a supplied turn id enriches an otherwise unlabeled canonical operation");
+});
+
+test("segments accumulated host operations into bounded contiguous presentation chunks without transcript nesting", async () => {
+  const segment = (await appExports()).segmentHostOperations as (operations: readonly unknown[], maximum?: number) => readonly (readonly any[])[];
+  const chunks = segment([
+    operation("one", 1, [], "turn-a"), operation("two", 2, [], "turn-a"), operation("three", 3, [], "turn-a"),
+    operation("four", 4, [], "turn-b"), operation("five", 5, []), operation("six", 6, []),
+  ], 2);
+  assert.deepEqual(Array.from(chunks, (chunk) => Array.from(chunk, ({ anchor }) => anchor.operationId)), [["one", "two"], ["three"], ["four"], ["five", "six"]]);
+  const unmatched = Array.from({ length: 201 }, (_, index) => ({ contribution: contribution(`unmatched-${index}`), state: "carrier-unmatched" }));
+  const segmentUnmatched = (await appExports()).segmentUnmatchedContributions as (rows: readonly unknown[], maximum?: number) => readonly (readonly unknown[])[];
+  assert.deepEqual(Array.from(segmentUnmatched(unmatched, 100), (chunk) => chunk.length), [100, 100, 1]);
+});
+
+test("continuation uses one supplied opaque cursor per action and keeps the lane quiet", async () => {
+  const source = await readFile(new URL("../app.tsx", import.meta.url), "utf8");
+  assert.match(source, /rpc\.call\("inspect", \{ threadId, hostCursor: cursor \}\)/u);
+  assert.match(source, /continuationInFlight\.current/u);
+  assert.match(source, /Previous pages remain visible/u);
+  assert.match(source, /next\.host\.projection === null/u);
+  assert.match(source, /unmatchedBlocks\.map\(\(unmatched, index\) => <UnmatchedWorkingBlock/u);
+  assert.match(source, /segmentHostOperations\(trace\.operations\)/u);
+  assert.match(source, /visibleHostTrace = hostTrace\?\.threadId === threadId/u);
+  assert.match(source, /last valid trace remains visible/u);
+  assert.match(source, /result\.host\.gaps\.length > 0/u);
+  assert.doesNotMatch(source, /setInterval|setTimeout|IntersectionObserver|document\.addEventListener/u);
+});

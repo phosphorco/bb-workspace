@@ -1,0 +1,28 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/app.css",
+    "plugins/plugins/context-magnet-inspector/app.tsx",
+    "plugins/plugins/context-magnet-inspector/test/session-etl-performance.test.ts",
+    "plugins/plugins/context-magnet-inspector/test/session-etl-renderer.test.ts"
+  ],
+  "grantSha256": "ffea46dc2bd5a14147a20c91b1a0defa386c3126dcc16e5866cb34214936406e",
+  "node": "host-free-renderer",
+  "reversePatches": [
+    {
+      "bytes": 5009,
+      "path": "plugins/plugins/context-magnet-inspector/app.css",
+      "reversePatch": "host-free-renderer/reverse/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.patch",
+      "sha256": "8be3453e063724bf72d127eeedb26ae5bba0c73555c676b82de8162c2b09b039",
+      "tracked": true
+    },
+    {
+      "bytes": 24291,
+      "path": "plugins/plugins/context-magnet-inspector/app.tsx",
+      "reversePatch": "host-free-renderer/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch",
+      "sha256": "994968795e8cec175ceb1389cc887e6da04f3d0bfae1fb2ea191c965facc689d",
+      "tracked": true
+    }
+  ],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

@@ -1,0 +1,128 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/test/working-block-renderer.test.ts b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/a13e30639814fe5617a081397f8294279215b99d845846f0000afa3c92ec0b5d.bin
+index 95445c13647d91befc263baf9cce26ead0590fdf..5ce6e728ed90cad583cdd3b7ba35ba31d5d31fd6 100644
+--- a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/test/working-block-renderer.test.ts
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/a13e30639814fe5617a081397f8294279215b99d845846f0000afa3c92ec0b5d.bin
+@@ -1,29 +1,104 @@
+ import assert from "node:assert/strict";
+ import { readFile } from "node:fs/promises";
+ import test from "node:test";
++import ts from "typescript";
++import vm from "node:vm";
+ 
+-const appSource = () => readFile(new URL("../app.tsx", import.meta.url), "utf8");
++type Message = Readonly<{ threadId: string; id: string; role: "user" | "assistant" | "system"; sequence: number }>;
++type Block = Readonly<{ id: string; placement: unknown; operations: readonly unknown[] }>;
++type Layout = Readonly<{ entries: readonly Readonly<{ message: Message; before: readonly Block[]; within: readonly Block[]; after: readonly Block[] }>[]; unplaced: readonly Block[] }>;
+ 
+-test("the active renderer accepts only the canonical ETL envelope and native ThreadChat", async () => {
+-  const source = await appSource();
+-  assert.match(source, /<ThreadChat\s+threadId=\{threadId\}/u);
+-  assert.match(source, /sessionEtlFromResult\(result\)/u);
+-  assert.match(source, /deriveSessionEtlNarrative\(projection\)/u);
+-  assert.match(source, /Canonical context evidence only/u);
+-  assert.doesNotMatch(source, /layoutTraceProjection|workingBlocks|TraceContribution|experimental_contextMagnetContributions/u);
++async function appExports(): Promise<Record<string, unknown>> {
++  const source = await readFile(new URL("../app.tsx", import.meta.url), "utf8");
++  const compiled = ts.transpileModule(source, {
++    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
++  }).outputText;
++  const module = { exports: {} as Record<string, unknown> };
++  const require = (id: string): unknown => {
++    if (id === "react" || id === "react/jsx-runtime" || id === "./app.css") return {};
++    if (id === "@get-bb/plugin-sdk/app") return {
++      definePluginApp: (callback: (app: { slots: { threadPanelAction: () => void } }) => unknown) => callback({ slots: { threadPanelAction: () => undefined } }),
++    };
++    throw new Error(`Unexpected runtime import: ${id}`);
++  };
++  vm.runInNewContext(compiled, { module, exports: module.exports, require, Map, Object, Array, Set, console });
++  return module.exports;
++}
++
++async function layoutTraceProjection(projection: unknown): Promise<Layout> {
++  const layout = (await appExports()).layoutTraceProjection;
++  assert.equal(typeof layout, "function", "app.tsx must export the pure carrier layout function");
++  return (layout as (value: unknown) => Layout)(projection);
++}
++
++const message = (id: string, role: Message["role"], sequence: number): Message => ({ threadId: "thread-1", id, role, sequence });
++const block = (id: string, placement: unknown): Block => ({ id, placement, operations: [] });
++
++test("layouts before, assistant-within, and after blocks in supplied transcript and block order", async () => {
++  const user = message("user-1", "user", 90);
++  const assistant = message("assistant-1", "assistant", 10);
++  const nextUser = message("user-2", "user", 30);
++  const projection = {
++    transcript: [user, assistant, nextUser],
++    workingBlocks: [
++      block("before-user", { kind: "before", anchor: user }),
++      block("within-assistant-a", { kind: "within", anchor: assistant }),
++      block("within-assistant-b", { kind: "within", anchor: assistant }),
++      block("after-assistant", { kind: "after", anchor: assistant }),
++    ],
++  };
++  const layout = await layoutTraceProjection(projection);
++  assert.deepEqual(Array.from(layout.entries, ({ message: item }) => item.id), ["user-1", "assistant-1", "user-2"], "transcript order is carrier-supplied, never sequence-sorted");
++  assert.deepEqual(Array.from(layout.entries[0]?.before ?? [], ({ id }) => id), ["before-user"]);
++  assert.deepEqual(Array.from(layout.entries[1]?.within ?? [], ({ id }) => id), ["within-assistant-a", "within-assistant-b"]);
++  assert.deepEqual(Array.from(layout.entries[1]?.after ?? [], ({ id }) => id), ["after-assistant"]);
++  assert.deepEqual(Array.from(layout.unplaced), []);
+ });
+ 
+-test("the canonical renderer keeps context admission distinct from model-use claims", async () => {
+-  const source = await appSource();
+-  assert.match(source, /This row records admission only\. It does not claim model use or consumption\./u);
+-  assert.match(source, /Exact admitted context/u);
+-  assert.match(source, /admittedContext\.length <= 64 \* 1024/u);
+-  assert.doesNotMatch(source, /consumptionStatusLabel|declarationStatusLabel|providerAdmissionStatusLabel/u);
++test("keeps unmatched, unavailable, and non-retained anchors explicit rather than inferring a trace position", async () => {
++  const assistant = message("assistant-1", "assistant", 1);
++  const projection = {
++    transcript: [assistant],
++    workingBlocks: [
++      block("unmatched", { kind: "unmatched", reason: "anchor-not-retained" }),
++      block("unavailable", { kind: "unavailable", reason: "carrier" }),
++      block("foreign-anchor", { kind: "before", anchor: message("not-retained", "user", 2) }),
++    ],
++  };
++  const layout = await layoutTraceProjection(projection);
++  assert.deepEqual(Array.from(layout.unplaced, ({ id }) => id), ["unmatched", "unavailable", "foreign-anchor"]);
++  assert.deepEqual(Array.from(layout.entries[0]?.before ?? []), []);
++  assert.deepEqual(Array.from(layout.entries[0]?.within ?? []), []);
++  assert.deepEqual(Array.from(layout.entries[0]?.after ?? []), []);
+ });
+ 
+-test("the canonical renderer invalidates a selected row when projection identity or state changes", async () => {
+-  const source = await appSource();
+-  assert.match(source, /selection\?\.projection === projection/u);
+-  assert.match(source, /useLayoutEffect\(\(\) => \{ setSelection\(null\); triggerElementRef\.current = null; \}, \[projection, state\]\)/u);
+-  assert.match(source, /restoreInspectorTrigger\(trigger\)/u);
++test("renders declaration, provider admission, and model receipt as separate compact states", async () => {
++  const exported = await appExports();
++  const consumptionLabel = exported.consumptionStatusLabel;
++  const declarationLabel = exported.declarationStatusLabel;
++  const admissionLabel = exported.providerAdmissionStatusLabel;
++  assert.equal(typeof consumptionLabel, "function", "app.tsx must export the compact model-use helper");
++  assert.equal(typeof declarationLabel, "function", "app.tsx must export the compact declaration helper");
++  assert.equal(typeof admissionLabel, "function", "app.tsx must export the compact provider-admission helper");
++  const consumption = consumptionLabel as (value: unknown) => Readonly<{ glyph: string; label: string }>;
++  const declaration = declarationLabel as (value: any) => Readonly<{ glyph: string; label: string }>;
++  const admission = admissionLabel as (value: any) => Readonly<{ glyph: string; label: string }>;
++  assert.deepEqual({ ...consumption({ state: "consumed", kind: "model-owned-receipt" }) }, { glyph: "●", label: "Consumed (model-owned receipt)" });
++  assert.deepEqual({ ...consumption({ state: "consumed", kind: "host-observed" }) }, { glyph: "◐", label: "Host observed; model use not verified" }, "host observation is never presented as consumed");
++  assert.deepEqual({ ...consumption({ state: "not-observed" }) }, { glyph: "○", label: "Model use not observed" });
++  assert.deepEqual({ ...consumption({ state: "unknown" }) }, { glyph: "?", label: "Model use unknown" });
++  assert.deepEqual({ ...consumption({ state: "unavailable", reason: "carrier" }) }, { glyph: "—", label: "Model use unavailable" });
++
++  const retained = (observations: readonly unknown[], declaration = "declared", gaps: readonly unknown[] = []) => ({ declaration, observations, gaps, attempt: { id: "attempt-1", providerKind: "codex", requestKind: "start", instructionMode: "append" } });
++  const contribution = (admissions: readonly unknown[] | undefined, consumption: unknown = { state: "not-observed" }, admissionGaps: readonly unknown[] = []) => ({ admissions, consumption, admissionGaps });
++  assert.deepEqual({ ...declaration(contribution([])) }, { glyph: "◇", label: "Declared" }, "a retained zero-attempt list is the carrier's declared-only state");
++  assert.deepEqual({ ...declaration(contribution([], { state: "not-observed" }, [{ kind: "retention" }])) }, { glyph: "◇", label: "Declared (admission history retention gap)" }, "a retention gap qualifies admission history without withdrawing the declaration");
++  const accepted = contribution([retained([{ kind: "constructed" }, { kind: "accepted" }])]);
++  assert.deepEqual({ ...declaration(accepted) }, { glyph: "◇", label: "Declared" });
++  assert.deepEqual({ ...admission(accepted) }, { glyph: "✓", label: "Provider accepted; model use not observed" }, "accepted remains distinguishable from consumption");
++  assert.equal(admission(contribution([retained([{ kind: "constructed" }])])).label, "Provider constructed");
++  assert.equal(admission(contribution([retained([{ kind: "failed-settlement", settlement: "transport-not-accepted" }])])).label, "Provider admission failed settlement (transport-not-accepted)");
++  assert.equal(declaration(contribution([retained([], "unavailable", [{ kind: "instrumentation" }])])).label, "Declaration unavailable");
++  assert.equal(declaration(contribution([retained([], "declared"), retained([], "unavailable")])).label, "Declaration partial/unavailable (some declaration evidence retained)", "mixed records retain the declaration fact without hiding unavailable evidence");
++  assert.equal(admission(contribution(undefined, { state: "unknown" }, [{ kind: "retention" }])).label, "Provider admission unavailable/partial (retention gap)");
+ });

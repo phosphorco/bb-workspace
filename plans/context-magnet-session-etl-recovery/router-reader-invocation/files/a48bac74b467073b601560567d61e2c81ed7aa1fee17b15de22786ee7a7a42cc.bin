@@ -1,0 +1,308 @@
+import { createHash } from "node:crypto";
+import { join } from "node:path";
+
+export const shellQuote = (value: string): string => `'${value.replaceAll("'", `'"'"'`)}'`;
+
+export const routerPath = (home: string): string =>
+  join(home, ".codex-subscription-router", "lib", "router.mjs");
+
+export const routerRuntimePath = (home: string): string =>
+  join(home, ".codex-subscription-router", "lib", "bun");
+
+export const routerLauncherPath = (home: string): string =>
+  join(home, ".codex-subscription-router", "lib", "router-command");
+
+export const routerCommand = (home: string, args: string): string =>
+  `${shellQuote(routerLauncherPath(home))} ${args}`;
+
+// Use a host-local filesystem probe so only ENOENT means absent. Transport,
+// permission, malformed-file and dangling-link errors must remain errors.
+export const inspectHostInstallationCommand = (home: string): string => {
+  const script = String.raw`
+const fs = require("node:fs");
+const path = require("node:path");
+const root = path.join(process.argv[1], ".codex-subscription-router");
+const exists = (name) => {
+  try { fs.lstatSync(path.join(root, name)); return true; }
+  catch (error) { if (error.code === "ENOENT") return false; throw error; }
+};
+const launcher = exists("lib/router-command") ? fs.readFileSync(path.join(root, "lib/router-command"), "utf8") : null;
+const legacyRouterPresent = exists("lib/router.mjs");
+if (legacyRouterPresent) fs.accessSync(path.join(root, "lib/router.mjs"), fs.constants.R_OK);
+const statePresent = ["state.db", "state.db-wal", "state.db-shm", "state.json", "accounts"].some(exists);
+if (launcher === null && !legacyRouterPresent && statePresent) throw new Error("Router runtime is missing while durable state remains; operator recovery is required. Do not reinstall as an empty router.");
+console.log(JSON.stringify({ launcher, installed: launcher !== null || legacyRouterPresent }));
+`;
+  return `runtime="$(command -v node || command -v bun || true)"; test -n "$runtime" || { printf '%s\\n' 'Node or Bun is required to inspect router installation.' >&2; exit 1; }; "$runtime" -e ${shellQuote(script)} ${shellQuote(home)}`;
+};
+
+export const statusCommand = (home: string, refresh = false): string =>
+  `observed_codex="$(command -v codex || true)"; launcher=${shellQuote(routerLauncherPath(home))}; if test -x "$launcher"; then "$launcher" status${refresh ? " --refresh" : ""} --observed-codex "$observed_codex"; else ${shellQuote(routerPath(home))} status${refresh ? " --refresh" : ""} --observed-codex "$observed_codex"; fi`;
+
+const preinstallDoctorScript = String.raw`
+const { spawnSync } = require("node:child_process");
+const { accessSync, realpathSync } = require("node:fs");
+const { constants } = require("node:fs");
+const path = require("node:path");
+const home = process.argv[1];
+const resolve = (value) => { try { return realpathSync(value); } catch { return null; } };
+const candidates = (name) => {
+  const seen = new Set();
+  return (process.env.PATH || "").split(":").flatMap((directory) => {
+    const candidate = path.join(directory || ".", name);
+    if (seen.has(candidate)) return [];
+    seen.add(candidate);
+    try { accessSync(candidate, constants.X_OK); return [candidate]; } catch { return []; }
+  });
+};
+const probe = (executable) => {
+  if (!executable) return { version: null, error: null };
+  const result = spawnSync(executable, ["--version"], { encoding: "utf8", timeout: 15000, maxBuffer: 65536 });
+  if (result.status !== 0) return { version: null, error: (result.stderr || result.stdout || "version probe failed").trim() };
+  return { version: result.stdout.trim().split("\n")[0] || null, error: null };
+};
+const mise = (name) => {
+  const executable = resolve(candidates("mise")[0]);
+  if (!executable) return { executable: null, version: null, selectedPath: null, selectedVersion: null, error: "mise was not found on PATH" };
+  const selected = spawnSync(executable, ["-C", home, "which", name], { encoding: "utf8", timeout: 15000, maxBuffer: 65536 });
+  if (selected.status !== 0) return { executable, version: probe(executable).version, selectedPath: null, selectedVersion: null, error: (selected.stderr || selected.stdout || "mise could not resolve " + name).trim() };
+  const selectedPath = selected.stdout.trim().split("\n").at(-1) || null;
+  const selectedProbe = probe(selectedPath);
+  return { executable, version: probe(executable).version, selectedPath, selectedVersion: selectedProbe.version, error: selectedProbe.error };
+};
+const issues = [{ code: "router_not_installed", severity: "warning", summary: "The Codex subscription router is not installed on this machine.", remediation: "Use Install router when this machine should route Codex subscriptions." }];
+const add = (code, severity, summary, remediation) => issues.push({ code, severity, summary, remediation });
+const miseData = process.env.MISE_DATA_DIR || path.join(home, ".local", "share", "mise");
+const codexShim = path.join(miseData, "shims", "codex");
+const claudeShim = path.join(miseData, "shims", "claude");
+const codexCandidates = candidates("codex");
+const claudeCandidates = candidates("claude");
+const observedCodex = codexCandidates[0] || null;
+const observedClaude = claudeCandidates[0] || null;
+const codexMise = mise("codex");
+const claudeMise = mise("claude");
+const codexVersion = probe(observedCodex);
+const claudeVersion = probe(observedClaude);
+if (!observedCodex) add("codex_not_found", "error", "Codex is not available on BB's PATH.", "Install or reapply the managed Codex CLI.");
+else if (codexVersion.error) add("codex_version_probe_failed", "error", "Codex failed its version probe.", "Run the displayed executable with --version and repair that installation.");
+else if (path.resolve(observedCodex) === path.resolve(codexShim) && !codexMise.selectedPath) add("mise_codex_unresolved", "error", "Mise cannot resolve a usable Codex executable.", "Reinstall the pinned Codex release with mise and reapply.");
+else if (path.resolve(observedCodex) === path.resolve(codexShim) && codexVersion.version !== codexMise.selectedVersion) add("mise_selection_drift", "error", "The Codex shim version differs from mise's machine-global selection.", "Run the machine apply or agent CLI updater.");
+else if (codexMise.selectedPath && resolve(observedCodex) === resolve(codexMise.selectedPath) && path.resolve(observedCodex) !== path.resolve(codexShim)) add("codex_mise_shim_bypassed", "warning", "Codex resolves to mise's installation path instead of its managed shim.", "Restore the managed PATH order so the mise shims directory comes first.");
+else if (!codexMise.selectedPath || resolve(observedCodex) !== resolve(codexMise.selectedPath)) add("codex_external_owner", "warning", "Codex resolves outside the managed mise installation.", "Inspect the ordered candidates and remove the competing owner if it is unintended.");
+let claudeSource = "missing";
+if (observedClaude) {
+  if (path.resolve(observedClaude) === path.resolve(claudeShim) || (claudeMise.selectedPath && resolve(observedClaude) === resolve(claudeMise.selectedPath))) claudeSource = "mise";
+  else if ([path.join(home, ".local", "bin", "claude"), path.join(home, ".claude", "local", "claude")].includes(observedClaude)) claudeSource = "fallback";
+  else claudeSource = "external";
+}
+if (!observedClaude) add("claude_not_found", "error", "Claude Code is not available on BB's PATH.", "Install or reapply the managed Claude CLI.");
+else if (claudeVersion.error) add("claude_version_probe_failed", "error", "Claude Code failed its version probe.", "Run the displayed executable with --version and repair that installation.");
+else if (claudeSource === "mise" && !claudeMise.selectedPath) add("mise_claude_unresolved", "error", "Mise cannot resolve a usable Claude executable.", "Reinstall the pinned Claude release with mise and reapply.");
+else if (claudeSource === "mise" && claudeVersion.version !== claudeMise.selectedVersion) add("mise_claude_drift", "error", "The observed Claude version differs from mise's machine-global selection.", "Run the machine apply or agent CLI updater.");
+else if (claudeSource === "mise" && path.resolve(observedClaude) !== path.resolve(claudeShim)) add("claude_mise_shim_bypassed", "warning", "Claude resolves to mise's installation path instead of its managed shim.", "Restore the managed PATH order so the mise shims directory comes first.");
+else if (claudeSource === "fallback") add("claude_fallback_selected", "warning", "Claude Code is using a fallback installation instead of mise.", "Remove the fallback owner or restore the managed mise PATH order.");
+else if (claudeSource === "external") add("claude_external_owner", "warning", "Claude Code resolves outside the managed mise installation.", "Inspect the ordered candidates and remove the competing owner if it is unintended.");
+console.log(JSON.stringify({
+  healthy: !issues.some((issue) => issue.severity === "error"), issues,
+  codex: { active: false, observedPath: observedCodex, resolvedTarget: resolve(observedCodex), routedPath: observedCodex, routedVersion: codexVersion.version, configuredShimPath: null, configuredShimTarget: null, routerLauncherPath: path.join(home, ".codex-subscription-router", "lib", "router-command"), miseLauncherPath: null, candidates: codexCandidates, mise: codexMise },
+  claude: { observedPath: observedClaude, resolvedTarget: resolve(observedClaude), version: claudeVersion.version, source: claudeSource, miseShimPath: claudeShim, candidates: claudeCandidates, mise: claudeMise },
+}));
+`;
+
+export const preinstallDoctorCommand = (home: string): string =>
+  `runtime="$(command -v node || command -v bun || true)"; test -n "$runtime" || { printf '%s\n' 'Node or Bun is required to inspect CLI health.' >&2; exit 1; }; "$runtime" -e ${shellQuote(preinstallDoctorScript)} ${shellQuote(home)}`;
+
+export const hostFileModesCommand = (home: string): string => {
+  const lib = join(home, ".codex-subscription-router", "lib");
+  return `chmod 700 ${shellQuote(join(lib, "router.mjs"))}`
+    + ` && chmod 600 ${["accounts.mjs", "routing.mjs", "state.mjs"]
+      .map((name) => shellQuote(join(lib, name))).join(" ")}`;
+};
+
+/**
+ * Every file that makes up one deployed router generation, in the order the
+ * bundle records them. This list had two owners: `server.ts` staged from its
+ * own copy and `test/deployment.test.ts` asserted against a second. Adding a
+ * module to one and not the other produced a generation that passed its
+ * digest check and then failed preflight with a missing import.
+ */
+export const HOST_FILES = [
+  "router.mjs", "accounts.mjs", "routing.mjs", "state.mjs",
+  "backend.mjs", "backend-config.mjs", "sqlite-state.mjs", "process-identity.mjs", "migration.mjs",
+  "session-migration.mjs", "shared-hooks.mjs",
+  // Homed algebras. Capitalized and eponymous: the module is named for the
+  // type it owns, and consumers import it as a namespace.
+  "SessionId.ts", "HistoryBase.ts", "Lineage.ts", "RolloutFault.ts",
+] as const;
+
+export type HostFile = (typeof HOST_FILES)[number];
+
+export interface HostGenerationManifest {
+  formatVersion: 1;
+  digest: string;
+  files: Record<string, string>;
+}
+
+export const createHostGenerationManifest = (
+  files: Readonly<Record<string, string>>,
+): HostGenerationManifest => {
+  const hashes = Object.fromEntries(Object.entries(files)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([name, content]) => [name, createHash("sha256").update(content).digest("hex")]));
+  const digest = createHash("sha256")
+    .update(JSON.stringify({ formatVersion: 1, files: hashes }))
+    .digest("hex");
+  return { formatVersion: 1, digest, files: hashes };
+};
+
+export const hostGenerationDirectory = (home: string, digest: string): string =>
+  join(home, ".codex-subscription-router", "lib", "versions", digest);
+
+export const activeHostGeneration = (launcher: string): string | null =>
+  launcher.match(/\/versions\/([a-f0-9]{64})\/router\.mjs(?:['"\s]|$)/)?.[1] ?? null;
+
+export const candidateHostGenerationCommand = (
+  home: string,
+  manifest: HostGenerationManifest,
+  args: string,
+): string => {
+  const runtime = routerRuntimePath(home);
+  const router = join(hostGenerationDirectory(home, manifest.digest), "router.mjs");
+  return `runtime=${shellQuote(runtime)}; test -x "$runtime" || runtime="$(command -v bun)"; test -n "$runtime" || { printf '%s\n' 'Bun is required to run the Codex subscription router.' >&2; exit 1; }; "$runtime" ${shellQuote(router)} ${args}`;
+};
+
+const activateGenerationScript = String.raw`
+let control;
+try {
+const { closeSync, chmodSync, fsyncSync, openSync, readFileSync, renameSync, symlinkSync, writeFileSync } = require("node:fs");
+const { createHash } = require("node:crypto");
+const { dirname, join } = require("node:path");
+const { spawnSync } = require("node:child_process");
+const { Database } = require("bun:sqlite");
+const [lib, encodedManifest, encodedExpectedGeneration, encodedExpectedJsonSha256] = process.argv.slice(1);
+const manifest = JSON.parse(encodedManifest);
+const expectedGeneration = JSON.parse(encodedExpectedGeneration);
+const expectedJsonSha256 = JSON.parse(encodedExpectedJsonSha256);
+if (manifest.formatVersion !== 1 || !/^[a-f0-9]{64}$/.test(manifest.digest)) throw new Error("invalid router generation manifest");
+if (expectedGeneration !== null && !/^[a-f0-9]{64}$/.test(expectedGeneration)) throw new Error("invalid expected router generation");
+if (expectedJsonSha256 !== null && !/^[a-f0-9]{64}$/.test(expectedJsonSha256)) throw new Error("invalid expected JSON state digest");
+const canonical = JSON.stringify({ formatVersion: 1, files: Object.fromEntries(Object.entries(manifest.files).sort(([a], [b]) => a.localeCompare(b))) });
+if (createHash("sha256").update(canonical).digest("hex") !== manifest.digest) throw new Error("router generation digest does not match manifest");
+const generation = join(lib, "versions", manifest.digest);
+for (const [name, expected] of Object.entries(manifest.files)) {
+  if (!/^[A-Za-z0-9.-]+$/.test(name) || name.includes("..")) throw new Error("invalid router generation file name");
+  const path = join(generation, name);
+  const actual = createHash("sha256").update(readFileSync(path)).digest("hex");
+  if (actual !== expected) throw new Error("router generation file digest mismatch: " + name);
+  chmodSync(path, name === "router.mjs" ? 0o700 : 0o600);
+  const handle = openSync(path, "r"); fsyncSync(handle); closeSync(handle);
+}
+const preflight = spawnSync(process.execPath, [join(generation, "router.mjs"), "runtime", "preflight"], { encoding: "utf8" });
+if (preflight.status !== 0) throw new Error("router generation preflight failed: " + (preflight.stderr || preflight.stdout).trim());
+const capabilities = JSON.parse(preflight.stdout.trim().split("\n").at(-1));
+if (capabilities.runtimeExecPath !== process.execPath || capabilities.runtimeVersion !== process.versions.bun) throw new Error("router generation preflight used a different Bun runtime");
+if (!capabilities.bun || !capabilities.sqliteAvailable) throw new Error("router runtime must be Bun with built-in SQLite");
+const manifestPath = join(generation, "manifest.json");
+const manifestTemporary = manifestPath + "." + process.pid + ".tmp";
+writeFileSync(manifestTemporary, JSON.stringify({ ...manifest, capabilities }, null, 2) + "\n", { mode: 0o600 });
+const manifestHandle = openSync(manifestTemporary, "r"); fsyncSync(manifestHandle); closeSync(manifestHandle);
+renameSync(manifestTemporary, manifestPath);
+const generationHandle = openSync(generation, "r"); fsyncSync(generationHandle); closeSync(generationHandle);
+const quoteForSh = (value) => "'" + value.replaceAll("'", "'\\\"'\\\"'") + "'";
+const launcher = join(lib, "router-command");
+const launcherTemporary = launcher + "." + process.pid + ".tmp";
+writeFileSync(launcherTemporary, "#!/bin/sh\nexec " + quoteForSh(process.execPath) + " " + quoteForSh(join(generation, "router.mjs")) + " \"$@\"\n", { mode: 0o700 });
+const launcherHandle = openSync(launcherTemporary, "r"); fsyncSync(launcherHandle); closeSync(launcherHandle);
+
+// Serialize the generation comparison, one-way migration, schema preparation,
+// and publication. SQLite releases this host-local mutex automatically after
+// process death, while the launcher remains the authoritative generation.
+control = new Database(join(lib, "deployment.db"), { create: true });
+control.exec("PRAGMA busy_timeout=30000; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS deployment_receipt (singleton INTEGER PRIMARY KEY CHECK(singleton = 1), generation_digest TEXT, activated_at INTEGER NOT NULL);");
+control.exec("BEGIN IMMEDIATE");
+let currentGeneration = null;
+try {
+  const contents = readFileSync(launcher, "utf8");
+  currentGeneration = contents.match(/\/versions\/([a-f0-9]{64})\/router\.mjs(?:['"\s]|$)/)?.[1] ?? null;
+} catch (error) {
+  if (!error || error.code !== "ENOENT") throw error;
+}
+if (currentGeneration !== expectedGeneration) throw new Error("active router generation changed: expected " + String(expectedGeneration) + ", found " + String(currentGeneration));
+
+const migrationArgs = [join(generation, "router.mjs"), "state", "migrate-legacy-if-needed"];
+if (expectedJsonSha256 !== null) migrationArgs.push("--expect-json-sha256", expectedJsonSha256);
+const migration = spawnSync(process.execPath, migrationArgs, {
+  encoding: "utf8", env: { ...process.env, CODEX_SUBSCRIPTION_ROUTER_HOME: dirname(lib) },
+});
+if (migration.status !== 0) throw new Error("router state migration failed: " + (migration.stderr || migration.stdout).trim());
+const preparation = spawnSync(process.execPath, [join(generation, "router.mjs"), "state", "prepare-active"], {
+  encoding: "utf8", env: { ...process.env, CODEX_SUBSCRIPTION_ROUTER_HOME: dirname(lib) },
+});
+if (preparation.status !== 0) throw new Error("router state preparation failed: " + (preparation.stderr || preparation.stdout).trim());
+
+// Do not replace even compatibility aliases until authority checks pass.
+const link = join(lib, ".router-" + process.pid + "-" + Math.random().toString(16).slice(2));
+symlinkSync("router-command", link);
+renameSync(link, join(lib, "router.mjs"));
+const runtimeLink = join(lib, ".bun-" + process.pid + "-" + Math.random().toString(16).slice(2));
+symlinkSync(process.execPath, runtimeLink);
+renameSync(runtimeLink, join(lib, "bun"));
+const libHandle = openSync(lib, "r"); fsyncSync(libHandle); closeSync(libHandle);
+
+// Publish the sole authoritative pointer last, then durably record the receipt.
+renameSync(launcherTemporary, launcher);
+const finalLibHandle = openSync(lib, "r"); fsyncSync(finalLibHandle); closeSync(finalLibHandle);
+control.query("INSERT INTO deployment_receipt(singleton, generation_digest, activated_at) VALUES (1, ?, ?) ON CONFLICT(singleton) DO UPDATE SET generation_digest=excluded.generation_digest, activated_at=excluded.activated_at").run(manifest.digest, Date.now());
+control.exec("COMMIT");
+process.stdout.write(JSON.stringify({ activated: true, ...capabilities, generationDigest: manifest.digest }) + "\n");
+} catch (error) {
+  try { control?.exec("ROLLBACK"); } catch {}
+  process.stderr.write((error && error.stack ? error.stack : String(error)) + "\n");
+  process.exitCode = 1;
+} finally {
+  try { control?.close(); } catch {}
+}
+`;
+
+export const activateHostGenerationCommand = (
+  home: string,
+  manifest: HostGenerationManifest,
+  options: { expectedGeneration: string | null; expectedJsonSha256?: string | null },
+): string => {
+  const lib = join(home, ".codex-subscription-router", "lib");
+  const runtime = routerRuntimePath(home);
+  return `runtime=${shellQuote(runtime)}; test -x "$runtime" || runtime="$(command -v bun)"; test -n "$runtime" || { printf '%s\n' 'Bun is required to run the Codex subscription router.' >&2; exit 1; }; "$runtime" -e ${shellQuote(activateGenerationScript)} ${shellQuote(lib)} ${shellQuote(JSON.stringify(manifest))} ${shellQuote(JSON.stringify(options.expectedGeneration))} ${shellQuote(JSON.stringify(options.expectedJsonSha256 ?? null))}`;
+};
+
+export const accountCommand = (
+  action: "add" | "cancel" | "enable" | "disable" | "remove",
+  value: string,
+): string => `account ${action} ${shellQuote(value)}`;
+
+export const accountAddCommand = (accountId: string, label?: string): string =>
+  `account add --id ${shellQuote(accountId)}${label ? ` ${shellQuote(label)}` : ""}`;
+
+export const machineAccountLoginCommand = (): string => "account login-machine";
+
+export const accountCeilingCommand = (accountId: string, ceiling: number | null): string =>
+  `account cap ${shellQuote(accountId)} ${shellQuote(ceiling == null ? "none" : String(ceiling))}`;
+
+export const newThreadPolicyCommand = (policy: "route" | "passthrough"): string =>
+  `policy new-threads ${shellQuote(policy)}`;
+
+export const accountRenameCommand = (accountId: string, label: string): string =>
+  `account rename ${shellQuote(accountId)} ${shellQuote(label)}`;
+
+export const threadCommand = (threadId: string, accountId: string): string =>
+  `thread assign ${shellQuote(threadId)} ${shellQuote(accountId)}`;
+
+// BB's daemon PATH is not necessarily an interactive shell PATH. Select a
+// durable user bin that the daemon actually searches before the current Codex
+// executable. On a reinstall, `observed_codex` already IS the shim: reuse a
+// durable shim or skip a transient project shim that resolves to this router.
+export const findWritableShimDirectorySnippet =
+  `shim="$(/bin/sh -c ${shellQuote(`shim=""; observed_codex="$1"; router_launcher="$2"; resolved_observed="$(readlink -f "$observed_codex" 2>/dev/null || printf '%s' "$observed_codex")"; old_ifs="$IFS"; IFS=:; for directory in $PATH; do IFS="$old_ifs"; test -n "$directory" || directory=.; candidate="$directory/codex"; case "$directory" in "$HOME/.local/bin"|"$HOME/bin"|"$HOME/.local/share/mise/shims") durable=true;; *) durable=false;; esac; if test "$candidate" = "$observed_codex"; then if test "$durable" = true && test -d "$directory" && test -w "$directory"; then shim="$candidate"; break; fi; if test -z "$router_launcher" || test "$resolved_observed" != "$router_launcher"; then break; fi; elif test "$durable" = true && test -d "$directory" && test -w "$directory" && { test ! -e "$candidate" || test -L "$candidate"; }; then shim="$candidate"; break; fi; done; printf '%s' "$shim"`)} sh "$observed_codex" "$router_launcher")";`;
+
+export const installCommand = (home: string): string => {
+  return `observed_codex="$(command -v codex)"; test -n "$observed_codex"; router_launcher=${shellQuote(routerLauncherPath(home))}; ${findWritableShimDirectorySnippet} test -n "$shim" || { printf '%s\n' 'No writable durable user PATH directory exists before the active Codex executable. Add ~/.local/bin to the BB daemon PATH and restart BB.' >&2; exit 1; }; mise_shim="${"${MISE_DATA_DIR:-$HOME/.local/share/mise}"}/shims/codex"; if test "$shim" = "$mise_shim" || test "$observed_codex" = "$mise_shim"; then mise_executable="$(command -v mise || true)"; test -n "$mise_executable" || { printf '%s\n' 'The router selected the mise Codex shim, but mise is not executable.' >&2; exit 1; }; mise_executable="$(readlink -f "$mise_executable" || printf '%s' "$mise_executable")"; real_codex="$("$mise_executable" -C "$HOME" which codex)"; test -x "$real_codex" || { printf '%s\n' 'mise did not resolve an executable Codex.' >&2; exit 1; }; ${shellQuote(routerLauncherPath(home))} install --real-codex "$real_codex" --shim "$shim" --mise "$mise_executable"; else real_codex="$(readlink -f "$observed_codex" || printf '%s' "$observed_codex")"; ${shellQuote(routerLauncherPath(home))} install --real-codex "$real_codex" --shim "$shim"; fi`;
+};

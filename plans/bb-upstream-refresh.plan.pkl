@@ -1,0 +1,44 @@
+amends "workbench:plan"
+
+meta { title = "Refresh BB core without host activation"; goal = "Rebase the preserved fork onto upstream main observed on 2026-09-24, review downstream correctness and plugin compatibility, and verify a restart-ready source candidate without restarting the host." }
+
+local baseline = new Action {
+  id = "baseline"
+  owner = "root"
+  outcome = "Record exact 2026-09-24 upstream target, dirty source preservation, and no-activation scope."
+  grant { "plans/bb-upstream-refresh-baseline.md" }
+  oracle = module.mechanical("test \"$(git -C fork/upstream rev-parse origin/main)\" = fdd3de3b19b97e6cd1ef7300cbb54711431249d3 && rg -q 'fdd3de3b19b97e6cd1ef7300cbb54711431249d3' plans/bb-upstream-refresh-baseline.md")
+}
+local replay = new Action {
+  id = "replay"
+  owner = "fork-replay"
+  needs { module.verified(baseline) }
+  outcome = "Replay the 32-patch downstream queue on fdd3de3b, reconcile conflicts against current behavior, and produce exact candidate locks with per-patch dispositions."
+  grant { "fork/patches/**"; "fork/upstream.lock"; "fork/result-tree.lock"; "fork/DOWNSTREAM.md"; "fork/README.md"; "fork/plans/upstream-refresh/**" }
+  oracle = module.adjudicated("Queue replays exactly from fdd3de3b with verified checksums and result tree; conflicts preserve approved ADR behavior including machine fallback; removals have upstream equivalence evidence; no live runtime modified.", "root")
+}
+local redundancy = new Action {
+  id = "redundancy-review"
+  owner = "patch-review"
+  needs { module.verified(baseline) }
+  outcome = "Review changes from 78804e79 to fdd3de3b and classify downstream patches as needed, upstreamed, conflicting, or decision-required."
+  grant { "plans/bb-upstream-refresh-review.md" }
+  oracle = module.adjudicated("Concrete patch/upstream evidence identifies obsolete fixes and protects intentional custom behavior.", "root")
+}
+local compatibility = new Action {
+  id = "plugin-review"
+  owner = "plugin-review"
+  needs { module.verified(baseline) }
+  outcome = "Identify breaking SDK, runtime, database, and frontend changes from fdd3de3b affecting selected direct plugins and Analytics work."
+  grant { "plans/bb-upstream-refresh-compatibility.md" }
+  oracle = module.adjudicated("Current plugin consumers are checked against actual upstream contracts; required follow-up tests and changes are explicit.", "root")
+}
+local acceptance = new Guard {
+  id = "candidate-acceptance"
+  owner = "root"
+  needs { module.verified(replay); module.verified(redundancy); module.verified(compatibility) }
+  outcome = "Verify exact refreshed source and selected plugins, report restart readiness and any remaining gates without activating."
+  observes { "fork/**"; "plugins/**"; "community-plugins/**"; "plans/bb-upstream-refresh-*.md" }
+  oracle = module.adjudicated("Exact fdd3de3b patch replay, dependency install, core typecheck/test/build, migration-copy qualification, and affected plugin checks pass; performance artifacts and identity fallback are reverified; unresolved work is disclosed; Analytics stays disabled and no host restart occurs.", "root")
+}
+nodes { baseline; replay; redundancy; compatibility; acceptance }

@@ -1,0 +1,98 @@
+.context-magnet-panel { display: grid; min-height: 100%; grid-template-rows: minmax(17rem, 1fr) auto; background: var(--background); color: var(--foreground); }
+.context-magnet-chat { min-height: 0; border-bottom: 1px solid var(--border); }
+.context-magnet-trace-spine { padding: 12px 14px 16px; background: var(--muted); }
+.context-magnet-trace-spine > header { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.context-magnet-trace-spine h2 { margin: 0; font-size: 13px; line-height: 1.35; }
+.context-magnet-trace-spine header p, .context-magnet-detail { margin: 3px 0 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.45; }
+.context-magnet-snapshot { max-width: 40%; overflow-wrap: anywhere; color: var(--muted-foreground); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; text-align: end; }
+.context-magnet-trace-entries, .context-magnet-operations, .context-magnet-contributions, .context-magnet-gaps, .context-magnet-unmatched, .context-magnet-unplaced, .context-magnet-locators, .context-magnet-events { margin: 0; padding: 0; list-style: none; }
+.context-magnet-trace-entry { margin-top: 9px; }
+.context-magnet-transcript-marker { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; min-width: 0; padding: 5px 7px; border-left: 2px solid var(--border); color: var(--muted-foreground); font-size: 11px; }
+.context-magnet-transcript-marker span { font-weight: 650; text-transform: capitalize; }
+.context-magnet-transcript-marker code { overflow-wrap: anywhere; font-size: 10px; }
+.context-magnet-role-assistant > .context-magnet-transcript-marker { border-left-color: var(--primary); color: var(--foreground); }
+.context-magnet-within { width: 100%; margin-top: 6px; padding: 0 0 0 8px; border-left: 1px solid var(--border); }
+.context-magnet-within > p { margin: 0 0 5px; color: var(--muted-foreground); font-size: 10px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+.context-magnet-working-block { margin: 6px 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--background); content-visibility: auto; contain-intrinsic-size: auto 42px; }
+.context-magnet-working-block > summary { display: flex; min-height: 34px; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 10px; border-radius: var(--radius); cursor: pointer; color: var(--foreground); font-size: 12px; font-weight: 650; }
+.context-magnet-working-block > summary span:last-child { color: var(--muted-foreground); font-size: 11px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.context-magnet-turn-label { display: inline-block; max-width: 12rem; margin-left: 6px; overflow: hidden; color: var(--muted-foreground); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 400; text-overflow: ellipsis; vertical-align: baseline; white-space: nowrap; }
+.context-magnet-working-block > summary:focus-visible, .context-magnet-limits > summary:focus-visible, .context-magnet-status:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.context-magnet-working-block[open] > summary { border-bottom: 1px solid var(--border); border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: color-mix(in srgb, var(--muted), transparent 35%); }
+.context-magnet-working-body { padding: 8px 10px 10px; }
+.context-magnet-working-columns, .context-magnet-operation { display: grid; grid-template-columns: minmax(0, 1fr) minmax(11rem, 40%); gap: 12px; }
+.context-magnet-working-columns { margin: 0 0 4px 28px; color: var(--muted-foreground); font-size: 10px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+.context-magnet-operation { align-items: start; padding: 7px 0; border-top: 1px solid var(--border); }
+.context-magnet-operation:first-child { border-top: 0; }
+.context-magnet-operation-main { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; min-width: 0; }
+.context-magnet-operation-sequence { display: inline-grid; width: 20px; height: 20px; place-items: center; border-radius: 999px; background: var(--muted); color: var(--muted-foreground); font-size: 10px; font-variant-numeric: tabular-nums; }
+.context-magnet-operation-main strong, .context-magnet-operation-main code { display: block; overflow-wrap: anywhere; }
+.context-magnet-operation-main strong { font-size: 12px; line-height: 1.3; }
+.context-magnet-operation-main code { margin-top: 2px; color: var(--muted-foreground); font-size: 10px; }
+.context-magnet-operation-lane { min-width: 0; }
+.context-magnet-operation-empty { margin: 1px 0 0; color: var(--muted-foreground); font-size: 11px; line-height: 1.4; }
+.context-magnet-unmatched-description { margin: 0 0 7px; color: var(--muted-foreground); font-size: 11px; line-height: 1.4; }
+.context-magnet-contributions { display: flex; flex-wrap: wrap; gap: 4px; }
+.context-magnet-contributions li { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.context-magnet-status { display: inline-flex; max-width: 100%; min-height: 24px; align-items: center; gap: 4px; overflow-x: auto; border: 1px solid var(--border); border-radius: 999px; padding: 2px 7px; background: var(--background); color: var(--foreground); cursor: pointer; font-size: 10px; line-height: 1.2; white-space: nowrap; }
+.context-magnet-status:hover { background: color-mix(in srgb, var(--muted), transparent 20%); }
+.context-magnet-status-glyph { display: inline-grid; width: 1.1em; place-items: center; font-weight: 750; }
+.context-magnet-state { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 2px; color: var(--muted-foreground); }
+.context-magnet-state + .context-magnet-state { margin-left: 1px; padding-left: 5px; border-left: 1px solid var(--border); }
+.context-magnet-delivery { color: currentColor; }
+.context-magnet-declaration, .context-magnet-admission, .context-magnet-consumption { font-size: 10px; }
+.context-magnet-outcome-delivered { border-color: var(--primary); color: var(--primary); }
+.context-magnet-outcome-rejected, .context-magnet-outcome-failed, .context-magnet-outcome-unavailable { border-color: var(--destructive); color: var(--destructive); }
+.context-magnet-status-note { color: var(--muted-foreground); font-size: 10px; white-space: nowrap; }
+.context-magnet-popover { width: min(28rem, calc(100vw - 32px)); max-height: min(70vh, 38rem); overflow: auto; margin: 0; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; background: var(--popover, var(--background)); color: var(--foreground); box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground), transparent 82%); font-size: 12px; line-height: 1.45; }
+.context-magnet-popover::backdrop { background: transparent; }
+.context-magnet-popover > header { display: flex; align-items: start; gap: 7px; }
+.context-magnet-popover > header svg { width: 15px; height: 15px; color: var(--primary); }
+.context-magnet-popover > header div { display: grid; gap: 1px; min-width: 0; }
+.context-magnet-popover > header code { overflow-wrap: anywhere; color: var(--muted-foreground); font-size: 10px; }
+.context-magnet-popover > p { margin: 0; color: var(--muted-foreground); }
+.context-magnet-facts { display: grid; gap: 4px; margin: 9px 0 0; }
+.context-magnet-facts div { display: grid; grid-template-columns: 6.75rem minmax(0, 1fr); gap: 6px; }
+.context-magnet-facts dt { color: var(--muted-foreground); }
+.context-magnet-facts dd { margin: 0; overflow-wrap: anywhere; }
+.context-magnet-admission-details { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--border); }
+.context-magnet-admission-details h3 { margin: 0; color: var(--foreground); font-size: 11px; }
+.context-magnet-admission-details p { margin: 4px 0 0; color: var(--muted-foreground); }
+.context-magnet-admission-details ul { display: grid; gap: 3px; margin: 5px 0 0; padding-left: 16px; }
+.context-magnet-admission-details li { overflow-wrap: anywhere; }
+.context-magnet-locators { display: grid; gap: 3px; margin-top: 8px; }
+.context-magnet-locators code { overflow-wrap: anywhere; color: var(--muted-foreground); font-size: 10px; }
+.context-magnet-limits, .context-magnet-audit { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 11px; line-height: 1.45; }
+.context-magnet-limits > summary, .context-magnet-audit > summary { cursor: pointer; color: var(--foreground); }
+.context-magnet-load-more { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.context-magnet-load-more button { min-height: 30px; border: 1px solid var(--border); border-radius: var(--radius); padding: 5px 9px; background: var(--background); color: var(--foreground); cursor: pointer; font: inherit; font-size: 12px; }
+.context-magnet-load-more button:hover:not(:disabled) { background: color-mix(in srgb, var(--muted), transparent 20%); }
+.context-magnet-load-more button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.context-magnet-load-more button:disabled { cursor: progress; color: var(--muted-foreground); }
+.context-magnet-load-status { margin: 7px 0 0; color: var(--destructive); font-size: 11px; line-height: 1.4; }
+.context-magnet-gaps, .context-magnet-unmatched, .context-magnet-unplaced { display: grid; gap: 4px; margin-top: 6px; }
+.context-magnet-gaps li, .context-magnet-unmatched li, .context-magnet-unplaced li { padding: 5px 7px; border-radius: var(--radius); background: color-mix(in srgb, var(--destructive), transparent 92%); overflow-wrap: anywhere; }
+.context-magnet-events { display: grid; gap: 6px; margin-top: 8px; }
+.context-magnet-event { padding: 6px 7px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--background); font-size: 11px; }
+.context-magnet-fields { display: grid; gap: 2px; margin: 5px 0 0; }
+.context-magnet-fields div { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 6px; }
+.context-magnet-fields dt { color: var(--muted-foreground); }
+.context-magnet-fields dd { margin: 0; overflow-wrap: anywhere; }
+.context-magnet-workbench { padding: 12px 14px 16px; background: var(--muted); }
+.context-magnet-working-header { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.context-magnet-working-header h2 { margin: 0; font-size: 13px; line-height: 1.35; }
+.context-magnet-working-header p { margin: 3px 0 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.45; }
+.context-magnet-eyebrow { color: var(--muted-foreground); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.context-magnet-workbench-records, .context-magnet-reasons { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.context-magnet-workbench-record { display: flex; width: 100%; min-height: 38px; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 8px; background: var(--background); color: var(--foreground); cursor: pointer; text-align: left; }
+.context-magnet-workbench-record:hover { background: color-mix(in srgb, var(--muted), transparent 20%); }
+.context-magnet-workbench-record:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.context-magnet-workbench-record-main { display: grid; min-width: 0; gap: 1px; }
+.context-magnet-workbench-record-main strong { overflow-wrap: anywhere; font-size: 11px; text-transform: capitalize; }
+.context-magnet-workbench-record-main span, .context-magnet-workbench-record-meta { overflow: hidden; color: var(--muted-foreground); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.context-magnet-workbench-record-meta { max-width: 40%; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.context-magnet-popover h4 { margin: 10px 0 4px; font-size: 11px; }
+.context-magnet-reasons li { padding: 5px 7px; border-radius: var(--radius); background: var(--muted); overflow-wrap: anywhere; }
+.context-magnet-workbench-excerpt { max-height: 13rem; overflow: auto; margin: 5px 0 0; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px; background: var(--background); color: var(--foreground); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; line-height: 1.45; white-space: pre-wrap; }
+@supports (position-anchor: auto) { .context-magnet-popover { position: fixed; position-anchor: auto; position-area: block-end span-inline-start; position-try-fallbacks: flip-block, flip-inline; inset: auto; margin: 5px 0 0; } }
+@media (max-width: 560px) { .context-magnet-panel { grid-template-rows: minmax(13rem, 1fr) auto; } .context-magnet-trace-spine > header, .context-magnet-working-header { display: grid; } .context-magnet-snapshot { max-width: none; text-align: start; } .context-magnet-working-columns { display: none; } .context-magnet-operation { grid-template-columns: 1fr; gap: 7px; } .context-magnet-popover { width: min(25rem, calc(100vw - 20px)); } }

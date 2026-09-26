@@ -1,0 +1,19 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/test/workbench-adapter-v2.test.ts",
+    "plugins/plugins/context-magnet-inspector/workbench-adapter.ts"
+  ],
+  "grantSha256": "66463bb17c54eb535755d06c387a10794fd3b4001434a98294f980f8425d9e9a",
+  "node": "workbench-receipt-slot-adapter",
+  "reversePatches": [
+    {
+      "bytes": 37052,
+      "path": "plugins/plugins/context-magnet-inspector/workbench-adapter.ts",
+      "reversePatch": "workbench-receipt-slot-adapter/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch",
+      "sha256": "018bd382ee702603ec26b5b959f7028b528c37fdcc68777cb5a9330384200e7c",
+      "tracked": true
+    }
+  ],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

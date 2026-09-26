@@ -1,0 +1,157 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import test from "node:test";
+import {
+  READER_ATTESTATION,
+  assertSafeReaderProjection,
+  readOriginalRolloutSession,
+  selectReadonlyOriginalOwner,
+} from "../host/context-magnet-session-reader.mjs";
+
+const sha = (text: string) => createHash("sha256").update(text).digest("hex");
+const body = "bounded Workbench context";
+const receipt = (overrides: Record<string, unknown> = {}) => ({
+  version: "context-magnet.receipt/v1", nonce: "nonce-1", nativeSessionId: "session-1", turnId: "turn-1",
+  storeInstance: "store-1", generation: "generation-1", generationKeys: ["generation-key"], recordKeys: ["record-key"], contributionKeys: ["contribution-key"],
+  emittedUtf8Bytes: Buffer.byteLength(body), emittedSha256: sha(body), executableIdentity: "executable-1", sourceIdentity: "source-1", ...overrides,
+});
+const framed = (overrides: Record<string, unknown> = {}, text = body) => `context-magnet.hook-text/v1\n${JSON.stringify(receipt(overrides))}\n\n--context-magnet-body--\n${text}`;
+const record = (type: string, payload: object) => JSON.stringify({ type, payload });
+const meta = () => record("session_meta", { cli_version: "0.153.2", id: "native-rollout-1", session_id: "session-1" });
+const carrier = (text: string, kind = "hooks.additional_context", turnId = "turn-1") => record("response_item", { type: "message", role: "developer", id: "item-1", internal_chat_message_metadata_passthrough: { turn_id: turnId, content_item_kinds: [kind] }, content: [{ type: "input_text", text }] });
+
+function fixture(lines: string[]) {
+  const home = mkdtempSync(join(tmpdir(), "cm-reader-home-")), rolloutPath = join(home, "rollout.jsonl");
+  writeFileSync(rolloutPath, `${lines.join("\n")}\n`);
+  const readonlyState = { readonly: true, routes: [{ providerThreadId: "provider-1", ownerId: "owner-1", rolloutPath, revision: 7 }], migrationClaims: [], accounts: [{ id: "owner-1", codexHome: home, enabled: true, draining: false }] };
+  return { home, rolloutPath, readonlyState, input: { readerAttestation: READER_ATTESTATION, readonlyState, providerThreadId: "provider-1" } };
+}
+const cleanup = (value: { home: string }) => rmSync(value.home, { recursive: true, force: true });
+
+test("selects one enabled, nondraining, claim-free original route from readonly state", () => {
+  const value = fixture([meta()]);
+  try {
+    assert.equal(selectReadonlyOriginalOwner(value.readonlyState, "provider-1").revision, "7");
+    assert.throws(() => selectReadonlyOriginalOwner({ ...value.readonlyState, readonly: false }, "provider-1"));
+    assert.throws(() => selectReadonlyOriginalOwner({ ...value.readonlyState, migrationClaims: ["provider-1"] }, "provider-1"));
+    assert.throws(() => selectReadonlyOriginalOwner({ ...value.readonlyState, accounts: [{ id: "owner-1", codexHome: value.home, enabled: true, draining: true }] }, "provider-1"));
+    assert.throws(() => selectReadonlyOriginalOwner({ ...value.readonlyState, routes: [...value.readonlyState.routes, { ...value.readonlyState.routes[0] }] }, "provider-1"));
+  } finally { cleanup(value); }
+});
+
+test("reduces a mixed native rollout with one aligned framed receipt without a cross-source join", async () => {
+  const value = fixture([meta(), record("event_msg", { ignored: true }), carrier("generic developer content", "developer.text"), carrier(framed()), record("turn_context", {})]);
+  try {
+    const result = await readOriginalRolloutSession(value.input);
+    assert.equal(result.state, "ready");
+    assert.deepEqual(result.events.map((event: any) => event.kind), ["source-fence", "persisted-rollout-receipt"]);
+    assert.equal((result.meta as any).router.readonly, true);
+    assert.equal((result.meta as any).router.authority, "router-snapshot");
+    assert.equal((result.meta as any).bb, undefined);
+    assert.doesNotThrow(() => assertSafeReaderProjection(result));
+    assert.doesNotMatch(JSON.stringify(result), /bounded Workbench context|rollout\.jsonl|cm-reader-home/u);
+  } finally { cleanup(value); }
+});
+
+test("does not accept, republish, or let BB lifecycle/checkpoint facts influence this native projection", async () => {
+  const value = fixture([meta(), carrier(framed())]);
+  try {
+    const baseline = await readOriginalRolloutSession(value.input);
+    const tainted = await readOriginalRolloutSession({ ...value.input, eventHighWatermark: 999, terminalState: "failed", checkpointTurnId: "bb-checkpoint", bb: { providerThreadId: "other" } });
+    assert.deepEqual(tainted, baseline);
+    assert.doesNotMatch(JSON.stringify(tainted), /eventHighWatermark|terminalState|terminalCheckpoint|checkpointTurnId|bbProviderThreadId|"bb"/u);
+  } finally { cleanup(value); }
+});
+
+test("retains the complete receipt join key as deterministic redacted slots with no raw identities, keys, or body", async () => {
+  const value = fixture([meta(), carrier(framed())]);
+  try {
+    const result = await readOriginalRolloutSession(value.input);
+    const details = result.events.find((event: any) => event.kind === "persisted-rollout-receipt")?.details as Record<string, unknown>;
+    assert.deepEqual(Object.keys(details), ["receiptVersion", "nonceSlot", "nativeSessionIdSlot", "turnIdSlot", "storeInstanceSlot", "generationSlot", "generationKeySlots", "recordKeySlots", "contributionKeySlots", "emittedUtf8Bytes", "emittedSha256", "executableIdentitySlot", "sourceIdentitySlot"]);
+    assert.equal(details.receiptVersion, "context-magnet.receipt/v1");
+    for (const key of ["nonceSlot", "nativeSessionIdSlot", "turnIdSlot", "storeInstanceSlot", "generationSlot", "executableIdentitySlot", "sourceIdentitySlot"]) assert.match(details[key] as string, /^sha256:[a-f0-9]{64}$/);
+    assert.deepEqual((details.generationKeySlots as string[]).map((value) => value.startsWith("sha256:")), [true]);
+    assert.deepEqual((details.recordKeySlots as string[]).map((value) => value.startsWith("sha256:")), [true]);
+    assert.deepEqual((details.contributionKeySlots as string[]).map((value) => value.startsWith("sha256:")), [true]);
+    assert.doesNotMatch(JSON.stringify(result), /nonce-1|session-1|turn-1|store-1|generation-1|generation-key|record-key|contribution-key|executable-1|source-1|bounded Workbench context/u);
+  } finally { cleanup(value); }
+});
+
+test("does not elevate generic developer text, and makes zero, unbound, duplicate, and malformed native evidence explicit", async () => {
+  const ordinary = fixture([meta(), carrier("not a hook", "developer.text")]);
+  const unbound = fixture([meta(), carrier("ordinary hook text")]);
+  const duplicate = fixture([meta(), carrier(framed()), carrier(framed({ nonce: "nonce-2" }))]);
+  const malformed = fixture([meta(), carrier("context-magnet.hook-text/v1\n{}\n\n--context-magnet-body--\nx")]);
+  try {
+    assert.equal((await readOriginalRolloutSession(ordinary.input)).events.at(-1)?.details.reason, "zero-receipts");
+    assert.equal((await readOriginalRolloutSession(unbound.input)).events.at(-1)?.details.reason, "unbound-emission");
+    assert.equal((await readOriginalRolloutSession(duplicate.input)).events.at(-1)?.details.reason, "duplicate-native-receipt");
+    assert.equal((await readOriginalRolloutSession(malformed.input)).events.at(-1)?.details.reason, "invalid-hook-carrier");
+  } finally { [ordinary, unbound, duplicate, malformed].forEach(cleanup); }
+});
+
+test("enforces exact native framing, receipts, bounds, UTF-8 and dialect without retaining source bodies", async () => {
+  const cases = [
+    fixture([meta(), carrier(framed({}, "x".repeat(65)))]),
+    fixture([meta(), carrier(framed({ recordKeys: [] }))]),
+    fixture([meta(), carrier(framed({ nativeSessionId: "other" }))]),
+    fixture([meta(), record("response_item", { type: "message", role: "developer", id: "two-hooks", internal_chat_message_metadata_passthrough: { turn_id: "turn-1", content_item_kinds: ["hooks.additional_context", "hooks.additional_context"] }, content: [{ type: "input_text", text: framed() }, { type: "input_text", text: framed({ nonce: "nonce-2" }) }] })]),
+    fixture([meta(), record("compacted", {})]),
+    fixture(Array.from({ length: 17 }, (_, index) => index === 0 ? meta() : record("event_msg", { index }))),
+  ];
+  try {
+    for (const value of cases) assert.equal((await readOriginalRolloutSession(value.input)).state, "partial");
+    const invalid = fixture([meta()]); writeFileSync(invalid.rolloutPath, Buffer.from([0xff]));
+    assert.equal((await readOriginalRolloutSession(invalid.input)).events.at(-1)?.details.reason, "decode"); cleanup(invalid);
+  } finally { cases.forEach(cleanup); }
+});
+
+test("uses fd-first nofollow containment and both file and source fences", async () => {
+  const value = fixture([meta(), carrier(framed())]);
+  const outside = mkdtempSync(join(tmpdir(), "cm-reader-outside-"));
+  try {
+    const link = join(value.home, "link.jsonl"); symlinkSync(value.rolloutPath, link);
+    const linked = await readOriginalRolloutSession({ ...value.input, readonlyState: { ...value.readonlyState, routes: [{ ...value.readonlyState.routes[0], rolloutPath: link }] } });
+    assert.equal(linked.events.at(-1)?.details.reason, "unsafe-rollout");
+    const escaped = join(outside, "escaped.jsonl"); writeFileSync(escaped, meta());
+    const escapedResult = await readOriginalRolloutSession({ ...value.input, readonlyState: { ...value.readonlyState, routes: [{ ...value.readonlyState.routes[0], rolloutPath: escaped }] } });
+    assert.equal(escapedResult.events.at(-1)?.details.reason, "unsafe-rollout");
+    const fifo = join(value.home, "rollout.fifo"); assert.equal(spawnSync("mkfifo", [fifo]).status, 0);
+    const fifoResult = await readOriginalRolloutSession({ ...value.input, readonlyState: { ...value.readonlyState, routes: [{ ...value.readonlyState.routes[0], rolloutPath: fifo }] } });
+    assert.equal(fifoResult.events.at(-1)?.details.reason, "unsafe-rollout");
+    const race = await readOriginalRolloutSession({ ...value.input, afterOpen: () => { const replacement = join(value.home, "replacement.jsonl"); writeFileSync(replacement, `${meta()}\n`); renameSync(replacement, value.rolloutPath); } });
+    assert.equal(race.events.at(-1)?.details.reason, "source-fence-changed");
+    const sourceChanged = await readOriginalRolloutSession({ ...value.input, sourceFence: "one", postSourceFence: "two" });
+    assert.equal(sourceChanged.events.at(-1)?.details.reason, "source-fence-changed");
+  } finally { cleanup(value); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("accepts a proven-scale 133-record original rollout and enforces the 15-second stream deadline", async () => {
+  const large = fixture([meta(), ...Array.from({ length: 131 }, (_, index) => record("event_msg", { index })), carrier(framed())]);
+  const timed = fixture([meta(), carrier(framed())]);
+  try {
+    assert.equal((await readOriginalRolloutSession(large.input)).state, "ready");
+    let tick = 0;
+    const result = await readOriginalRolloutSession({ ...timed.input, clock: () => (tick++ === 0 ? 0 : 15_001) });
+    assert.equal(result.events.at(-1)?.details.reason, "time-bound");
+  } finally { cleanup(large); cleanup(timed); }
+});
+
+test("refuses an attestation expected value that does not match the exact loaded helper bytes", async () => {
+  const value = fixture([meta(), carrier(framed())]);
+  try {
+    const result = await readOriginalRolloutSession({ ...value.input, expectedReaderDigest: "0".repeat(64) });
+    assert.equal(result.state, "unavailable");
+    assert.equal(result.events[0]?.details.reason, "reader-attestation");
+  } finally { cleanup(value); }
+});
+
+test("has no router lifecycle, provider, child-process, or app-server launch dependency", () => {
+  const source = readFileSync(new URL("../host/context-magnet-session-reader.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /child_process|spawn\(|app-server|resumeThread|assignThread|router\.mjs|workbench/u);
+});

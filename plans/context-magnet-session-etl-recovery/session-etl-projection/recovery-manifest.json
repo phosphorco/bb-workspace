@@ -1,0 +1,19 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/context-magnet.ts",
+    "plugins/plugins/context-magnet-inspector/test/session-etl-projection.test.ts"
+  ],
+  "grantSha256": "76c189cddc8694c1dbc5ad28773d006cdec7816dfcaa93df6e36f2f48a2948a8",
+  "node": "session-etl-projection",
+  "reversePatches": [
+    {
+      "bytes": 23727,
+      "path": "plugins/plugins/context-magnet-inspector/context-magnet.ts",
+      "reversePatch": "session-etl-projection/reverse/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.patch",
+      "sha256": "00fbab4edda36e6d03b23b9403b5c8ad37a1c6e7c59c6858369899c0b5d2eae7",
+      "tracked": true
+    }
+  ],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

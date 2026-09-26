@@ -1,0 +1,35 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const source = await readFile(new URL("../app.tsx", import.meta.url), "utf8");
+const css = await readFile(new URL("../app.css", import.meta.url), "utf8");
+
+test("closed Working blocks and the Workbench lane each own one shared native popover, not per-row overlay work", () => {
+  assert.match(source, /const \[renderRows, setRenderRows\] = useState\(false\)/u);
+  assert.match(source, /\{renderRows && <div className="context-magnet-working-body">/u);
+  assert.match(source, /<ContributionPopover contribution=\{selectedContribution\} popoverId=\{popoverId\} \/>/u);
+  assert.match(source, /<WorkbenchRecordPopover record=\{selected\} popoverId=\{popoverId\} \/>/u);
+  assert.equal((source.match(/popover="auto"/gu) ?? []).length, 2, "each lane has one shared native popover surface");
+  assert.match(source, /popoverTargetAction="show"/u);
+  assert.match(source, /Declaration: \$\{declaration\.label\}/u);
+  assert.match(source, /Provider: \{admission\.label\}/u);
+  assert.match(source, /Model: \{consumption\.label\}/u);
+  assert.match(source, /Provider accepted; model use not observed/u);
+  assert.match(source, /Consumed \(model-owned receipt\)/u);
+  assert.match(source, /Host observed; model use not verified/u);
+  assert.match(source, /context-magnet-declaration/u);
+  assert.match(source, /context-magnet-admission/u);
+  assert.match(source, /context-magnet-consumption/u);
+  assert.doesNotMatch(source, /createPortal|document\.addEventListener|setInterval|setTimeout|IntersectionObserver|TraceContributionDetails/u);
+});
+
+test("trace rows remain lane-aligned, offscreen-contained, responsive, and theme-token based", () => {
+  assert.match(css, /\.context-magnet-working-columns, \.context-magnet-operation \{ display: grid; grid-template-columns:/u);
+  assert.match(css, /content-visibility: auto/u);
+  assert.match(css, /contain-intrinsic-size/u);
+  assert.match(css, /@media \(max-width: 560px\)/u);
+  assert.doesNotMatch(css, /#[0-9a-f]{3,8}\b/iu);
+  assert.match(css, /var\(--background\)/u);
+  assert.match(css, /var\(--ring\)/u);
+});

@@ -1,0 +1,32 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/app.css b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/host-free-renderer/files/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.bin
+index aeb88411ad314e0afecafa6e1c81338fc5809ee1..537a3a04d6199910182a5306012a5c957b931c0f 100644
+--- a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/app.css
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/host-free-renderer/files/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.bin
+@@ -96,27 +96,3 @@
+ .context-magnet-workbench-excerpt { max-height: 13rem; overflow: auto; margin: 5px 0 0; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px; background: var(--background); color: var(--foreground); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; line-height: 1.45; white-space: pre-wrap; }
+ @supports (position-anchor: auto) { .context-magnet-popover { position: fixed; position-anchor: auto; position-area: block-end span-inline-start; position-try-fallbacks: flip-block, flip-inline; inset: auto; margin: 5px 0 0; } }
+ @media (max-width: 560px) { .context-magnet-panel { grid-template-rows: minmax(13rem, 1fr) auto; } .context-magnet-trace-spine > header, .context-magnet-working-header { display: grid; } .context-magnet-snapshot { max-width: none; text-align: start; } .context-magnet-working-columns { display: none; } .context-magnet-operation { grid-template-columns: 1fr; gap: 7px; } .context-magnet-popover { width: min(25rem, calc(100vw - 20px)); } }
+-
+-/* The host owns the transcript; this compact adjacent reading path owns ETL facts only. */
+-.context-magnet-etl { padding: 12px 14px 16px; background: var(--muted); }
+-.context-magnet-etl > header { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+-.context-magnet-etl h2 { margin: 0; font-size: 13px; line-height: 1.35; }
+-.context-magnet-etl header p, .context-magnet-etl-state { margin: 3px 0 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.45; }
+-.context-magnet-etl-rows { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+-.context-magnet-etl-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 10px; border-left: 3px solid var(--border); padding: 7px 0 7px 9px; }
+-.context-magnet-etl-context-added { border-left-color: var(--primary); }
+-.context-magnet-etl-gap { border-left-color: var(--destructive); }
+-.context-magnet-etl-main { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); gap: 8px; }
+-.context-magnet-etl-seq { color: var(--muted-foreground); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-variant-numeric: tabular-nums; text-align: end; }
+-.context-magnet-etl-main strong { font-size: 12px; }
+-.context-magnet-etl-main p { margin: 2px 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.4; }
+-.context-magnet-etl-context { max-height: 14rem; overflow: auto; margin: 6px 0; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px; background: var(--background); color: var(--foreground); font: inherit; font-size: 12px; line-height: 1.45; white-space: pre-wrap; }
+-.context-magnet-etl-turn, .context-magnet-etl-citation { display: block; overflow-wrap: anywhere; color: var(--muted-foreground); font-size: 10px; line-height: 1.35; }
+-.context-magnet-etl-inspect { min-height: 28px; border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 7px; background: var(--background); color: var(--foreground); cursor: pointer; font: inherit; font-size: 11px; }
+-.context-magnet-etl-inspect:hover { background: color-mix(in srgb, var(--background), var(--muted) 40%); }
+-.context-magnet-etl-inspect:focus-visible, .context-magnet-etl-inspector button:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+-.context-magnet-etl-overlay { position: fixed; z-index: 50; inset: 0; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--foreground), transparent 78%); }
+-.context-magnet-etl-inspector { width: min(34rem, 100%); max-height: min(36rem, 100%); overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; background: var(--popover); color: var(--popover-foreground); box-shadow: var(--shadow-lg, 0 12px 28px color-mix(in srgb, var(--foreground), transparent 78%)); }
+-.context-magnet-etl-inspector > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+-.context-magnet-etl-inspector button { border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 7px; background: var(--background); color: var(--foreground); font: inherit; cursor: pointer; }
+-@media (max-width: 560px) { .context-magnet-etl > header { display: grid; } .context-magnet-etl-row { grid-template-columns: 1fr; } .context-magnet-etl-inspect { justify-self: start; } }

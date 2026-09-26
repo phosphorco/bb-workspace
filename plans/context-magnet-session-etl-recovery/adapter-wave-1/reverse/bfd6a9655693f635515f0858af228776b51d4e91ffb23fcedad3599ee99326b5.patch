@@ -1,0 +1,395 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/workbench-adapter.ts b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/adapter-wave-1/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin
+index 6ad4b9c61427c7d662c62b61f6ecaf2aae26fef1..1316169c449801701a20bbc5208a46fb4abae77d 100644
+--- a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/workbench-adapter.ts
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/adapter-wave-1/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin
+@@ -1,7 +1,4 @@
+ import { execFile } from "node:child_process";
+-import { createHash } from "node:crypto";
+-import { readFile, realpath } from "node:fs/promises";
+-import { dirname, isAbsolute } from "node:path";
+ import { promisify } from "node:util";
+ 
+ const execFileAsync = promisify(execFile);
+@@ -258,382 +255,3 @@ export async function inspectWorkbenchQuery(query: WorkbenchQuery | null, run: W
+     return unavailable("Workbench context inspection is unavailable for this binding.", query.target ?? null);
+   }
+ }
+-
+-// Decision-adapter v2 deliberately has a separate entry point from the legacy
+-// inspection projection above.  It is the only path in this module that is
+-// allowed to retain a bounded emitted body, and it requires the independent
+-// native-session and BB-checkpoint inputs needed for an exact receipt join.
+-
+-export const WORKBENCH_DECISION_ADAPTER_VERSION = "context-magnet.workbench-decision-adapter/v2";
+-
+-const DECISION_MAX_OUTPUT_BYTES = 256 * 1024;
+-const DECISION_MAX_BODY_BYTES = 64 * 1024;
+-const DECISION_MAX_RECORDS = 64;
+-const DECISION_MAX_KEYS = 16;
+-const DECISION_TIMEOUT_MS = 1_500;
+-/** execFile's transport buffer for each captured stream. */
+-const STDERR_TRANSPORT_MAX_BYTES = DECISION_MAX_OUTPUT_BYTES;
+-/** A response is rejected unless its diagnostic stderr fits this smaller cap. */
+-const STDERR_ACCEPTED_MAX_BYTES = 4 * 1024;
+-const SLOT = /^sha256:[a-f0-9]{64}$/u;
+-const OPAQUE = /^[A-Za-z0-9_-]{16,200}$/u;
+-const HEX = /^[a-f0-9]{64}$/u;
+-const DECISION_TEXT = /^[A-Za-z0-9._:-]{1,256}$/u;
+-const FIXED_ENV = Object.freeze({ LANG: "C", LC_ALL: "C" });
+-const SAFE_ENV_KEYS = new Set(["HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "XDG_CACHE_HOME", "PATH", "LANG", "LC_ALL"]);
+-
+-type DecisionRow = Record<string, unknown>;
+-
+-/**
+- * A process has already been pinned to a real Workbench executable.  The raw
+- * attestation is intentionally process-local; all adapter output uses slots.
+- */
+-export type WorkbenchFixedProcess = Readonly<{
+-  attestation: Readonly<{
+-    realpath: string;
+-    version: string;
+-    executableIdentity: string;
+-    sourceIdentity: string;
+-  }>;
+-  environment: Readonly<Record<string, string>>;
+-  /** Re-attests the configured executable without exposing its path or environment to output. */
+-  recheckIdentity: () => Promise<Readonly<{
+-    realpath: string;
+-    version: string;
+-    executableIdentity: string;
+-    sourceIdentity: string;
+-  }>>;
+-  invoke: (argv: readonly string[], options: Readonly<{
+-    cwd: string;
+-    env: Readonly<Record<string, string>>;
+-    timeoutMs: number;
+-    maxOutputBytes: number;
+-    /** Accepted stderr cap after capture, not a streaming-process limit. */
+-    maxStderrBytes: number;
+-  }>) => Promise<Readonly<{ stdout: string; stderr: string }>>;
+-}>;
+-
+-export type WorkbenchDecisionRequest = Readonly<{
+-  /** A declared project scope, never an account/home/runtime path. */
+-  projectPath: string;
+-  /** Native Codex session identity; a BB thread id is not accepted here. */
+-  nativeSessionId: string;
+-  /** Native receipt turn; never inferred from a BB thread or timestamp. */
+-  nativeTurnId: string;
+-  /** BB's independently supplied terminal checkpoint turn. */
+-  bbCheckpointTurnId: string;
+-  sourceFence: Readonly<{ storeInstanceSlot: string; generationSlot: string }>;
+-}>;
+-
+-export type WorkbenchDecisionReceipt = Readonly<{
+-  receiptVersion: "context-magnet.receipt/v1";
+-  nonceSlot: string;
+-  nativeSessionIdSlot: string;
+-  turnIdSlot: string;
+-  storeInstanceSlot: string;
+-  generationSlot: string;
+-  generationKeySlots: readonly string[];
+-  recordKeySlots: readonly string[];
+-  contributionKeySlots: readonly string[];
+-  emittedUtf8Bytes: number;
+-  emittedSha256: string;
+-  executableIdentitySlot: string;
+-  sourceIdentitySlot: string;
+-}>;
+-
+-export type WorkbenchDecisionAuthority = Readonly<{
+-  /** Retained solely for a later exact unique receipt join. */
+-  body: string;
+-  bodySha256: string;
+-  bodyUtf8Bytes: number;
+-  receipt: WorkbenchDecisionReceipt;
+-  outcome: string;
+-  reason: string;
+-}>;
+-
+-export type WorkbenchDecisionResult = Readonly<{
+-  version: typeof WORKBENCH_DECISION_ADAPTER_VERSION;
+-  state: "ready" | "no-contribution" | "gap" | "unavailable";
+-  reason: string;
+-  audienceSlot: string;
+-  nativeTurnSlot: string;
+-  bbCheckpointTurnSlot: string;
+-  process: Readonly<{ executableSlot: string; sourceSlot: string }> | null;
+-  authority: WorkbenchDecisionAuthority | null;
+-}>;
+-
+-type RawReceipt = Readonly<{
+-  version: "context-magnet.receipt/v1";
+-  nonce: string;
+-  nativeSessionId: string;
+-  turnId: string;
+-  storeInstance: string;
+-  generation: string;
+-  generationKeys: readonly string[];
+-  recordKeys: readonly string[];
+-  contributionKeys: readonly string[];
+-  emittedUtf8Bytes: number;
+-  emittedSha256: string;
+-  executableIdentity: string;
+-  sourceIdentity: string;
+-}>;
+-
+-type DecisionRecord = Readonly<{
+-  audience: string;
+-  turnId: string;
+-  contributionId: string | null;
+-  contributionCount: number;
+-  content: string | null;
+-  outcome: string;
+-  reason: string;
+-  receipt: RawReceipt | null;
+-}>;
+-
+-type DecisionEnvelope = Readonly<{
+-  storeInstance: string;
+-  generation: string;
+-  complete: boolean;
+-  records: readonly DecisionRecord[];
+-}>;
+-
+-function slot(value: string): string {
+-  return `sha256:${createHash("sha256").update(value, "utf8").digest("hex")}`;
+-}
+-
+-function decisionObject(value: unknown): DecisionRow | null {
+-  return typeof value === "object" && value !== null && !Array.isArray(value) ? value as DecisionRow : null;
+-}
+-
+-function hasExactKeys(value: DecisionRow, keys: readonly string[]): boolean {
+-  const actual = Object.keys(value).sort();
+-  const expected = [...keys].sort();
+-  return actual.length === expected.length && actual.every((key, index) => key === expected[index]);
+-}
+-
+-function decisionText(value: unknown, max = 256): string | null {
+-  return typeof value === "string" && value.length > 0 && value.length <= max ? value : null;
+-}
+-
+-function decisionCount(value: unknown): number | null {
+-  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
+-}
+-
+-function orderedKeys(value: unknown): readonly string[] | null {
+-  if (!Array.isArray(value) || value.length === 0 || value.length > DECISION_MAX_KEYS) return null;
+-  const keys: string[] = [];
+-  const seen = new Set<string>();
+-  for (const key of value) {
+-    if (typeof key !== "string" || !DECISION_TEXT.test(key) || seen.has(key)) return null;
+-    seen.add(key); keys.push(key);
+-  }
+-  return Object.freeze(keys);
+-}
+-
+-function decodeReceipt(value: unknown): RawReceipt | null {
+-  const row = decisionObject(value);
+-  if (row === null || !hasExactKeys(row, ["Version", "Nonce", "NativeSessionID", "TurnID", "StoreInstance", "Generation", "GenerationKeys", "RecordKeys", "ContributionKeys", "EmittedUTF8Bytes", "EmittedSHA256", "ExecutableIdentity", "SourceIdentity"])) return null;
+-  if (row.Version !== "context-magnet.receipt/v1") return null;
+-  const nonce = decisionText(row.Nonce, 200);
+-  const nativeSessionId = decisionText(row.NativeSessionID);
+-  const turnId = decisionText(row.TurnID);
+-  const storeInstance = decisionText(row.StoreInstance);
+-  const generation = decisionText(row.Generation);
+-  const generationKeys = orderedKeys(row.GenerationKeys);
+-  const recordKeys = orderedKeys(row.RecordKeys);
+-  const contributionKeys = orderedKeys(row.ContributionKeys);
+-  const emittedUtf8Bytes = decisionCount(row.EmittedUTF8Bytes);
+-  const emittedSha256 = decisionText(row.EmittedSHA256, 64);
+-  const executableIdentity = decisionText(row.ExecutableIdentity);
+-  const sourceIdentity = decisionText(row.SourceIdentity);
+-  if (nonce === null || !OPAQUE.test(nonce) || nativeSessionId === null || turnId === null || storeInstance === null || generation === null || generationKeys === null || recordKeys === null || contributionKeys === null || emittedUtf8Bytes === null || emittedUtf8Bytes > DECISION_MAX_BODY_BYTES || emittedSha256 === null || !HEX.test(emittedSha256) || executableIdentity === null || sourceIdentity === null) return null;
+-  return Object.freeze({ version: row.Version, nonce, nativeSessionId, turnId, storeInstance, generation, generationKeys, recordKeys, contributionKeys, emittedUtf8Bytes, emittedSha256, executableIdentity, sourceIdentity });
+-}
+-
+-function decodeDecisionRecord(value: unknown): DecisionRecord | null {
+-  const row = decisionObject(value);
+-  if (row === null || !hasExactKeys(row, ["Audience", "TurnID", "ContributionID", "ContributionCount", "Content", "Outcome", "Reason", "Receipt"])) return null;
+-  const audience = decisionText(row.Audience);
+-  const turnId = decisionText(row.TurnID);
+-  const contributionId = row.ContributionID === null ? null : decisionText(row.ContributionID);
+-  const contributionCount = decisionCount(row.ContributionCount);
+-  const content = row.Content === null ? null : typeof row.Content === "string" ? row.Content : null;
+-  const outcome = decisionText(row.Outcome);
+-  const reason = decisionText(row.Reason);
+-  const receipt = row.Receipt === null ? null : decodeReceipt(row.Receipt);
+-  if (audience === null || turnId === null || contributionCount === null || content === null && row.Content !== null || outcome === null || reason === null || receipt === null && row.Receipt !== null) return null;
+-  if ((contributionCount === 0) !== (contributionId === null) || (contributionCount === 0) !== (content === null) || (contributionCount === 0) !== (receipt === null)) return null;
+-  if (content !== null && Buffer.byteLength(content, "utf8") > DECISION_MAX_BODY_BYTES) return null;
+-  return Object.freeze({ audience, turnId, contributionId, contributionCount, content, outcome, reason, receipt });
+-}
+-
+-function decodeEnvelope(source: string): DecisionEnvelope | null {
+-  if (source.length === 0 || Buffer.byteLength(source, "utf8") > DECISION_MAX_OUTPUT_BYTES) return null;
+-  let parsed: unknown;
+-  try { parsed = JSON.parse(source) as unknown; } catch { return null; }
+-  const row = decisionObject(parsed);
+-  if (row === null || !hasExactKeys(row, ["StoreInstance", "Generation", "Complete", "PartialPage", "PartialScan", "HasMore", "Gaps", "Records"])) return null;
+-  const storeInstance = decisionText(row.StoreInstance);
+-  const generation = decisionText(row.Generation);
+-  if (storeInstance === null || generation === null || row.Complete !== true || row.PartialPage !== false || row.PartialScan !== false || row.HasMore !== false || !Array.isArray(row.Gaps) || row.Gaps.length !== 0 || !Array.isArray(row.Records) || row.Records.length > DECISION_MAX_RECORDS) return null;
+-  const records: DecisionRecord[] = [];
+-  for (const candidate of row.Records) {
+-    const record = decodeDecisionRecord(candidate);
+-    if (record === null) return null;
+-    records.push(record);
+-  }
+-  return Object.freeze({ storeInstance, generation, complete: true, records: Object.freeze(records) });
+-}
+-
+-function sameRawReceipt(left: RawReceipt, right: RawReceipt): boolean {
+-  return left.version === right.version && left.nonce === right.nonce && left.nativeSessionId === right.nativeSessionId && left.turnId === right.turnId && left.storeInstance === right.storeInstance && left.generation === right.generation && left.emittedUtf8Bytes === right.emittedUtf8Bytes && left.emittedSha256 === right.emittedSha256 && left.executableIdentity === right.executableIdentity && left.sourceIdentity === right.sourceIdentity
+-    && JSON.stringify(left.generationKeys) === JSON.stringify(right.generationKeys)
+-    && JSON.stringify(left.recordKeys) === JSON.stringify(right.recordKeys)
+-    && JSON.stringify(left.contributionKeys) === JSON.stringify(right.contributionKeys);
+-}
+-
+-function sameRecord(left: DecisionRecord, right: DecisionRecord): boolean {
+-  return left.audience === right.audience && left.turnId === right.turnId && left.contributionId === right.contributionId && left.contributionCount === right.contributionCount && left.content === right.content && left.outcome === right.outcome && left.reason === right.reason
+-    && ((left.receipt === null && right.receipt === null) || (left.receipt !== null && right.receipt !== null && sameRawReceipt(left.receipt, right.receipt)));
+-}
+-
+-function baseResult(request: WorkbenchDecisionRequest | null, process: WorkbenchFixedProcess | null, state: WorkbenchDecisionResult["state"], reason: string, authority: WorkbenchDecisionAuthority | null = null): WorkbenchDecisionResult {
+-  return Object.freeze({
+-    version: WORKBENCH_DECISION_ADAPTER_VERSION,
+-    state,
+-    reason,
+-    audienceSlot: request === null ? slot("unbound") : slot(`codex:${request.nativeSessionId}`),
+-    nativeTurnSlot: request === null ? slot("unbound") : slot(request.nativeTurnId),
+-    bbCheckpointTurnSlot: request === null ? slot("unbound") : slot(request.bbCheckpointTurnId),
+-    process: process === null ? null : Object.freeze({ executableSlot: slot(process.attestation.executableIdentity), sourceSlot: slot(process.attestation.sourceIdentity) }),
+-    authority,
+-  });
+-}
+-
+-function validateDecisionRequest(request: WorkbenchDecisionRequest): boolean {
+-  return request.projectPath === PROJECT_ROOT
+-    && DECISION_TEXT.test(request.nativeSessionId)
+-    && !request.nativeSessionId.startsWith("thr_")
+-    && DECISION_TEXT.test(request.nativeTurnId)
+-    && DECISION_TEXT.test(request.bbCheckpointTurnId)
+-    && SLOT.test(request.sourceFence.storeInstanceSlot)
+-    && SLOT.test(request.sourceFence.generationSlot);
+-}
+-
+-function fixedArgv(command: "history" | "contribution" | "turn", request: WorkbenchDecisionRequest, contributionId?: string): readonly string[] {
+-  const prefix = command === "history"
+-    ? ["context", "history"]
+-    : command === "contribution"
+-      ? ["context", "inspect", "contribution", contributionId!]
+-      : ["context", "inspect", "turn", request.bbCheckpointTurnId];
+-  return Object.freeze([...prefix, "--path", request.projectPath, "--audience", `codex:${request.nativeSessionId}`, "--limit", String(DECISION_MAX_RECORDS), "--max-bytes", String(DECISION_MAX_OUTPUT_BYTES), "--json"]);
+-}
+-
+-async function readDecision(process: WorkbenchFixedProcess, argv: readonly string[], request: WorkbenchDecisionRequest): Promise<DecisionEnvelope | null> {
+-  const response = await process.invoke(argv, Object.freeze({ cwd: request.projectPath, env: process.environment, timeoutMs: DECISION_TIMEOUT_MS, maxOutputBytes: STDERR_TRANSPORT_MAX_BYTES, maxStderrBytes: STDERR_ACCEPTED_MAX_BYTES }));
+-  if (Buffer.byteLength(response.stdout, "utf8") > DECISION_MAX_OUTPUT_BYTES || Buffer.byteLength(response.stderr, "utf8") > STDERR_ACCEPTED_MAX_BYTES) return null;
+-  return decodeEnvelope(response.stdout);
+-}
+-
+-function receiptAuthority(record: DecisionRecord): WorkbenchDecisionAuthority | null {
+-  if (record.content === null || record.receipt === null) return null;
+-  const bytes = Buffer.byteLength(record.content, "utf8");
+-  const digest = createHash("sha256").update(record.content, "utf8").digest("hex");
+-  if (bytes !== record.receipt.emittedUtf8Bytes || digest !== record.receipt.emittedSha256) return null;
+-  const receipt: WorkbenchDecisionReceipt = Object.freeze({
+-    receiptVersion: record.receipt.version, nonceSlot: slot(record.receipt.nonce), nativeSessionIdSlot: slot(record.receipt.nativeSessionId), turnIdSlot: slot(record.receipt.turnId), storeInstanceSlot: slot(record.receipt.storeInstance), generationSlot: slot(record.receipt.generation), generationKeySlots: Object.freeze(record.receipt.generationKeys.map(slot)), recordKeySlots: Object.freeze(record.receipt.recordKeys.map(slot)), contributionKeySlots: Object.freeze(record.receipt.contributionKeys.map(slot)), emittedUtf8Bytes: bytes, emittedSha256: digest, executableIdentitySlot: slot(record.receipt.executableIdentity), sourceIdentitySlot: slot(record.receipt.sourceIdentity),
+-  });
+-  return Object.freeze({ body: record.content, bodySha256: digest, bodyUtf8Bytes: bytes, receipt, outcome: record.outcome, reason: record.reason });
+-}
+-
+-function sameAttestation(left: WorkbenchFixedProcess["attestation"], right: WorkbenchFixedProcess["attestation"]): boolean {
+-  return left.realpath === right.realpath && left.version === right.version && left.executableIdentity === right.executableIdentity && left.sourceIdentity === right.sourceIdentity;
+-}
+-
+-function validFixedEnvironment(environment: Readonly<Record<string, string>>): boolean {
+-  if (environment.LANG !== "C" || environment.LC_ALL !== "C" || !Object.keys(environment).every((key) => SAFE_ENV_KEYS.has(key))) return false;
+-  const path = environment.PATH;
+-  if (typeof path !== "string" || path.length === 0 || path.length > 8_192 || !path.split(":").every((part) => isAbsolute(part) && part.length <= 1_024)) return false;
+-  return ["HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "XDG_CACHE_HOME"].every((key) => environment[key] === undefined || (isAbsolute(environment[key]!) && environment[key]!.length <= 1_024));
+-}
+-
+-async function inspectDecisionReads(request: WorkbenchDecisionRequest, process: WorkbenchFixedProcess): Promise<WorkbenchDecisionResult> {
+-  const processFence = { executableSlot: slot(process.attestation.executableIdentity), sourceSlot: slot(process.attestation.sourceIdentity) };
+-  const history = await readDecision(process, fixedArgv("history", request), request);
+-  const turn = await readDecision(process, fixedArgv("turn", request), request);
+-  if (history === null || turn === null) return baseResult(request, process, "gap", "incomplete-or-invalid-query");
+-  if (slot(history.storeInstance) !== request.sourceFence.storeInstanceSlot || slot(history.generation) !== request.sourceFence.generationSlot || history.storeInstance !== turn.storeInstance || history.generation !== turn.generation) return baseResult(request, process, "gap", "store-or-generation-fence-mismatch");
+-  const matches = history.records.filter((record) => record.audience === `codex:${request.nativeSessionId}` && record.turnId === request.nativeTurnId);
+-  if (matches.length !== 1 || turn.records.length !== 1) return baseResult(request, process, "gap", "duplicate-or-missing-decision-record");
+-  const observed = matches[0]!;
+-  const turnObserved = turn.records[0]!;
+-  if (!sameRecord(observed, turnObserved)) return baseResult(request, process, "gap", "cross-session-or-cross-turn-mismatch");
+-  if (observed.contributionCount === 0) return baseResult(request, process, "no-contribution", "complete-zero-contribution");
+-  if (observed.contributionCount !== 1) return baseResult(request, process, "gap", "ambiguous-contribution-count");
+-  if (observed.contributionId === null || observed.receipt === null) return baseResult(request, process, "gap", "missing-contribution-receipt");
+-  const contribution = await readDecision(process, fixedArgv("contribution", request, observed.contributionId), request);
+-  if (contribution === null || contribution.storeInstance !== history.storeInstance || contribution.generation !== history.generation || contribution.records.length !== 1 || !sameRecord(observed, contribution.records[0]!)) return baseResult(request, process, "gap", "contribution-query-mismatch");
+-  const receipt = observed.receipt;
+-  if (receipt.nativeSessionId !== request.nativeSessionId || receipt.turnId !== request.nativeTurnId || receipt.turnId !== request.bbCheckpointTurnId || receipt.storeInstance !== history.storeInstance || receipt.generation !== history.generation || slot(receipt.executableIdentity) !== processFence.executableSlot || slot(receipt.sourceIdentity) !== processFence.sourceSlot) return baseResult(request, process, "gap", "receipt-or-executable-identity-mismatch");
+-  const authority = receiptAuthority(observed);
+-  return authority === null
+-    ? baseResult(request, process, "gap", "body-byte-or-digest-mismatch")
+-    : baseResult(request, process, "ready", "complete-unique-receipt", authority);
+-}
+-
+-/**
+- * Query one explicitly named native session and exact checkpoint turn.  Every
+- * failure is a named gap/unavailable state; this adapter never guesses a
+- * session, BB thread, turn, receipt, or empty outcome.
+- */
+-export async function inspectWorkbenchDecision(request: WorkbenchDecisionRequest | null, process: WorkbenchFixedProcess | null): Promise<WorkbenchDecisionResult> {
+-  if (request === null) return baseResult(null, process, "unavailable", "missing-explicit-native-binding");
+-  if (process === null || !validateDecisionRequest(request)) return baseResult(request, process, "unavailable", "invalid-binding-or-process");
+-  const sourceVersion = /^workbench 0\.8\.1 \(([a-f0-9]{40})\)$/u.exec(process.attestation.version);
+-  if (!isAbsolute(process.attestation.realpath) || sourceVersion === null || sourceVersion[1] !== process.attestation.sourceIdentity || !HEX.test(process.attestation.executableIdentity) || !validFixedEnvironment(process.environment)) return baseResult(request, process, "unavailable", "invalid-executable-attestation");
+-  if (request.nativeTurnId !== request.bbCheckpointTurnId) return baseResult(request, process, "gap", "cross-session-or-cross-turn-mismatch");
+-  try {
+-    if (!sameAttestation(process.attestation, await process.recheckIdentity())) return baseResult(request, process, "unavailable", "executable-attestation-drift");
+-    const result = await inspectDecisionReads(request, process);
+-    return sameAttestation(process.attestation, await process.recheckIdentity())
+-      ? result
+-      : baseResult(request, process, "gap", "executable-attestation-drift");
+-  } catch {
+-    return baseResult(request, process, "unavailable", "workbench-process-unavailable");
+-  }
+-}
+-
+-function captureFixedEnvironment(executablePath: string): Readonly<Record<string, string>> {
+-  const captured: Record<string, string> = { ...FIXED_ENV, PATH: process.env.PATH ?? dirname(executablePath) };
+-  for (const key of ["HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "XDG_CACHE_HOME"] as const) if (process.env[key] !== undefined) captured[key] = process.env[key]!;
+-  if (!validFixedEnvironment(captured)) throw new Error("Workbench environment is outside the fixed safe allowlist.");
+-  return Object.freeze(captured);
+-}
+-
+-async function readExecutableIdentity(configuredPath: string, environment: Readonly<Record<string, string>>): Promise<WorkbenchFixedProcess["attestation"]> {
+-  const resolved = await realpath(configuredPath);
+-  const bytes = await readFile(resolved);
+-  if (bytes.length === 0 || bytes.length > 128 * 1024 * 1024) throw new Error("Workbench executable exceeds the attestation bound.");
+-  const executableIdentity = createHash("sha256").update(bytes).digest("hex");
+-  const versionResult = await execFileAsync(resolved, ["version"], { cwd: PROJECT_ROOT, env: { ...environment }, shell: false, timeout: DECISION_TIMEOUT_MS, maxBuffer: 4_096, windowsHide: true });
+-  const version = versionResult.stdout.trim();
+-  const versionMatch = /^workbench 0\.8\.1 \(([a-f0-9]{40})\)$/u.exec(version);
+-  if (versionMatch === null) throw new Error("Workbench version attestation did not match 0.8.1.");
+-  return Object.freeze({ realpath: resolved, version, executableIdentity, sourceIdentity: versionMatch[1]! });
+-}
+-
+-/** Create a real, shell-free process only after realpath, version, digest, and environment attestation. */
+-export async function attestWorkbenchExecutable(executablePath: string): Promise<WorkbenchFixedProcess> {
+-  if (!isAbsolute(executablePath)) throw new Error("Workbench executable must be an absolute configured path.");
+-  const environment = captureFixedEnvironment(executablePath);
+-  const attestation = await readExecutableIdentity(executablePath, environment);
+-  return Object.freeze({
+-    attestation,
+-    environment,
+-    recheckIdentity: async () => readExecutableIdentity(executablePath, environment),
+-    invoke: async (argv, options) => {
+-      if (!sameAttestation(attestation, await readExecutableIdentity(executablePath, environment))) throw new Error("Workbench executable changed before invocation.");
+-      const result = await execFileAsync(attestation.realpath, [...argv], { cwd: options.cwd, env: { ...options.env }, shell: false, timeout: options.timeoutMs, maxBuffer: options.maxOutputBytes, windowsHide: true });
+-      return Object.freeze({ stdout: result.stdout, stderr: result.stderr });
+-    },
+-  });
+-}

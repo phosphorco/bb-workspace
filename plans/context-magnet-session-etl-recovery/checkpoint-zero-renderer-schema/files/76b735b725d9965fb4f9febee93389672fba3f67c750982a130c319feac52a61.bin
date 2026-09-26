@@ -1,0 +1,38 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
+import test from "node:test";
+
+async function loadRenderer(): Promise<any> {
+  const source = await readFile(new URL("../app.tsx", import.meta.url), "utf8");
+  const start = source.indexOf("const SESSION_ETL_RENDER_MAXIMUM");
+  const end = source.indexOf("type InspectorResultWithHost");
+  assert.ok(start >= 0 && end > start, "renderer helpers must remain a self-contained pure module");
+  const typescript = createRequire(import.meta.url)("typescript") as typeof import("typescript");
+  const compiled = typescript.transpileModule(source.slice(start, end), { compilerOptions: { module: typescript.ModuleKind.CommonJS, target: typescript.ScriptTarget.ES2022, jsx: typescript.JsxEmit.ReactJSX } }).outputText;
+  const module = { exports: {} as Record<string, unknown> };
+  new Function("exports", "require", "module", compiled)(module.exports, createRequire(import.meta.url), module);
+  return module.exports;
+}
+
+const projection = (count: number, metadataSize: number) => ({
+  meta: { bb: { terminalCheckpoint: { state: "succeeded" } } },
+  events: Array.from({ length: count }, (_, index) => ({ seq: index + 1, kind: "gap", locator: { source: "rollout", ref: `gap:${index}`, redacted: true }, details: { reason: "partial", padding: "x".repeat(metadataSize) }, associations: [] })),
+  projection: [], omittedEventCount: 0,
+}) as any;
+
+test("projects no more than the canonical 16 rendered rows", async () => {
+  const { deriveSessionEtlNarrative } = await loadRenderer();
+  assert.equal(deriveSessionEtlNarrative(projection(64, 0)).length, 16);
+});
+
+test("one selection is a keyed lookup independent of row count and metadata size", async () => {
+  const { deriveSessionEtlNarrative, indexSessionEtlNarrative } = await loadRenderer();
+  const short = deriveSessionEtlNarrative(projection(1, 1));
+  const bounded = deriveSessionEtlNarrative(projection(16, 64 * 1024));
+  const shortIndex = indexSessionEtlNarrative(short);
+  const boundedIndex = indexSessionEtlNarrative(bounded);
+  assert.equal(shortIndex.get(short[0]!.key), short[0]);
+  assert.equal(boundedIndex.get(bounded[15]!.key), bounded[15]);
+  assert.equal(boundedIndex.size, 16, "selection never realizes an unbounded overlay or row collection");
+});

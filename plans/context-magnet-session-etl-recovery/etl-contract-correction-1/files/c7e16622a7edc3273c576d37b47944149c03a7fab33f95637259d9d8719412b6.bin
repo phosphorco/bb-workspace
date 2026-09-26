@@ -1,0 +1,293 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+type Dict = Record<string, unknown>;
+type Locator = Readonly<{ source: string; ref: string; redacted: true }>;
+type Association = Readonly<{ keys: Dict; derivationVersion: string; supportingLocators: readonly Locator[] }>;
+type SafeEvent = Readonly<{ seq: number; kind: string; locator: Locator; details: Dict; associations: readonly Association[] }>;
+type Result = Readonly<{ meta: Dict; events: readonly SafeEvent[]; projection: readonly Pick<SafeEvent, "seq" | "kind" | "locator">[] }>;
+type Receipt = Readonly<{ version: string; nonce: string; nativeSessionId: string; turnId?: string; storeInstance: string; generation: string; generationKeys: readonly string[]; recordKeys: readonly string[]; contributionKeys: readonly string[]; emittedUtf8Bytes: number; emittedSha256: string; executableIdentity: string; sourceIdentity: string }>;
+
+const MAX_BODY_UTF8_BYTES = 64;
+const MAX_NATIVE_RECORDS = 16;
+const MAX_RECEIPT_KEYS = 16;
+const MAX_EVENTS = 16;
+
+const isDict = (value: unknown): value is Dict => value !== null && typeof value === "object" && !Array.isArray(value);
+const isStrings = (value: unknown): value is string[] => Array.isArray(value) && value.every((part) => typeof part === "string");
+const equal = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
+const digest = (text: string) => createHash("sha256").update(text).digest("hex");
+
+async function load(): Promise<any> {
+  return JSON.parse(await readFile(new URL("./fixtures/session-etl.json", import.meta.url), "utf8"));
+}
+
+function parseReceipt(value: unknown): Receipt | undefined {
+  if (!isDict(value) || value.version !== "context-magnet.receipt/v1") return;
+  const scalar = ["nonce", "nativeSessionId", "storeInstance", "generation", "emittedSha256", "executableIdentity", "sourceIdentity"];
+  if (!scalar.every((field) => typeof value[field] === "string" && (value[field] as string).trim().length > 0) || (value.turnId !== undefined && (typeof value.turnId !== "string" || value.turnId.trim().length === 0))) return;
+  if (!isStrings(value.generationKeys) || !isStrings(value.recordKeys) || !isStrings(value.contributionKeys) || ![value.generationKeys, value.recordKeys, value.contributionKeys].every((keys) => keys.length > 0 && keys.length <= MAX_RECEIPT_KEYS && keys.every((key) => key.trim().length > 0))) return;
+  if (!/^[A-Za-z0-9_-]{16,}$/.test(value.nonce as string) || !/^[a-f0-9]{64}$/.test(value.emittedSha256 as string)) return;
+  if (!Number.isInteger(value.emittedUtf8Bytes) || (value.emittedUtf8Bytes as number) < 0) return;
+  return value as unknown as Receipt;
+}
+
+type Carrier = { state: "ordinary" } | { state: "gap"; reason: string } | { state: "hook"; receipt: Receipt; framedBody: string };
+
+function hookCarrier(record: unknown): Carrier {
+  if (!isDict(record) || record.type !== "response_item" || !isDict(record.payload)) return { state: "ordinary" };
+  const payload = record.payload;
+  if (payload.type !== "message" || payload.role !== "developer") return { state: "ordinary" };
+  if (!isDict(payload.internal_chat_message_metadata_passthrough)) return { state: "ordinary" };
+  const metadata = payload.internal_chat_message_metadata_passthrough;
+  if (!Array.isArray(metadata.content_item_kinds) || !metadata.content_item_kinds.includes("hooks.additional_context")) return { state: "ordinary" };
+  if (typeof payload.id !== "string" || typeof metadata.turn_id !== "string" || !Array.isArray(payload.content) || metadata.content_item_kinds.length !== payload.content.length) return { state: "gap", reason: "malformed-carrier" };
+  const hookParts: string[] = [];
+  for (const [index, kind] of metadata.content_item_kinds.entries()) {
+    const part = payload.content[index];
+    if (kind !== "hooks.additional_context") continue;
+    if (!isDict(part) || part.type !== "input_text" || typeof part.text !== "string") return { state: "gap", reason: "malformed-carrier" };
+    hookParts.push(part.text);
+  }
+  if (hookParts.length === 0) return { state: "ordinary" };
+  if (hookParts.length !== 1) return { state: "gap", reason: "malformed-carrier" };
+  const prefix = "context-magnet.hook-text/v1\n";
+  const delimiter = "\n\n--context-magnet-body--\n";
+  if (!hookParts[0]!.startsWith(prefix)) return { state: "gap", reason: "malformed-carrier" };
+  const boundary = hookParts[0]!.indexOf(delimiter, prefix.length);
+  if (boundary < 0) return { state: "gap", reason: "malformed-carrier" };
+  const receiptText = hookParts[0]!.slice(prefix.length, boundary);
+  const framedBody = hookParts[0]!.slice(boundary + delimiter.length);
+  let receipt: Receipt | undefined;
+  try { receipt = parseReceipt(JSON.parse(receiptText!)); } catch { /* fail closed */ }
+  return receipt === undefined ? { state: "gap", reason: "malformed-carrier" } : { state: "hook", receipt, framedBody };
+}
+
+function event(seq: number, kind: string, source: string, ref: string, details: Dict = {}, associations: readonly Association[] = []): SafeEvent {
+  return { seq, kind, locator: { source, ref, redacted: true }, details, associations };
+}
+
+function association(keys: Dict, derivationVersion: string, supportingLocators: readonly Locator[]): Association {
+  return { keys, derivationVersion, supportingLocators };
+}
+
+function validatedMeta(value: unknown): Dict | undefined {
+  if (!isDict(value) || value.kind !== "meta" || value.version !== "context-magnet.session-etl/v1" || typeof value.normalizerVersion !== "string" || typeof value.projectorVersion !== "string" || !isDict(value.bb) || !isDict(value.router) || !isDict(value.rollout) || !isDict(value.workbench)) return;
+  if (!isDict(value.bb.terminalCheckpoint) || !isDict(value.rollout.digest) || !isDict(value.rollout.file) || !isDict(value.identities) || !isDict(value.workbench.query)) return;
+  const nonempty = (candidate: unknown) => typeof candidate === "string" && candidate.trim().length > 0;
+  if (!nonempty(value.normalizerVersion) || !nonempty(value.projectorVersion) || !nonempty(value.bb.providerThreadId) || !Number.isInteger(value.bb.eventHighWatermark) || (value.bb.eventHighWatermark as number) < 0 || !["succeeded", "failed", "interrupted", "unknown"].includes(value.bb.terminalCheckpoint.state as string) || !nonempty(value.router.revision) || !nonempty(value.router.ownerSlot) || value.router.readonly !== true || !["codex-rollout", "unsupported", "unknown"].includes(value.rollout.dialect as string) || value.rollout.digest.algorithm !== "sha256" || !nonempty(value.rollout.digest.value) || !nonempty(value.rollout.file.identity) || !nonempty(value.workbench.storeInstance) || !nonempty(value.workbench.generation) || !["complete", "partial", "unavailable"].includes(value.workbench.query.completeness as string) || !nonempty(value.workbench.query.sourceBounds) || !nonempty(value.workbench.query.truncation)) return;
+  return structuredClone(value);
+}
+
+function finish(meta: Dict, events: readonly SafeEvent[]): Result {
+  const bounded = events.length <= MAX_EVENTS ? events : [event(1, "gap", "bb", "bb:event-bound", { reason: "event-bound" }, [association({ limit: String(MAX_EVENTS) }, "bounds/v1", [{ source: "bb", ref: "bb:checkpoint", redacted: true }])])];
+  return { meta, events: bounded, projection: bounded.map(({ seq, kind, locator }) => ({ seq, kind, locator })) };
+}
+
+function sameReceipt(receipt: Receipt, candidate: any): boolean {
+  return !!candidate && ["nonce", "nativeSessionId", "turnId", "storeInstance", "generation", "emittedUtf8Bytes", "emittedSha256", "executableIdentity", "sourceIdentity"].every((field) => candidate[field] === receipt[field as keyof Receipt]) &&
+    ["generationKeys", "recordKeys", "contributionKeys"].every((field) => equal(candidate[field], receipt[field as keyof Receipt]));
+}
+
+type Candidate = Readonly<{ receipt: Receipt; framedBody: string; locator: string }>;
+
+function nativeCandidates(nativeRecords: unknown): { candidates: Candidate[]; malformed: boolean; collectionBound: boolean } {
+  if (!Array.isArray(nativeRecords)) return { candidates: [], malformed: true, collectionBound: false };
+  if (nativeRecords.length > MAX_NATIVE_RECORDS) return { candidates: [], malformed: false, collectionBound: true };
+  const candidates: Candidate[] = [];
+  for (const source of nativeRecords) {
+    if (!isDict(source) || typeof source.locator !== "string" || !/^rollout:[A-Za-z0-9:_-]+$/.test(source.locator)) return { candidates: [], malformed: true, collectionBound: false };
+    const carrier = hookCarrier(source.record);
+    if (carrier.state === "gap") return { candidates: [], malformed: true, collectionBound: false };
+    if (carrier.state === "hook") candidates.push({ receipt: carrier.receipt, framedBody: carrier.framedBody, locator: source.locator });
+  }
+  return { candidates, malformed: false, collectionBound: false };
+}
+
+function project(input: any): Result {
+  const meta = validatedMeta(input.meta);
+  if (meta === undefined) return finish({ kind: "meta", version: "invalid" }, [event(1, "gap", "bb", "bb:meta", { reason: "invalid-meta" })]);
+  const terminal = input.terminal ?? meta.bb.terminalCheckpoint;
+  const bbLocator: Locator = { source: "bb", ref: "bb:checkpoint", redacted: true };
+  const rolloutGapLocator: Locator = { source: "rollout", ref: "rollout:gap", redacted: true };
+  const events: SafeEvent[] = [event(1, "source-lifecycle", "bb", "bb:checkpoint", { state: terminal.state, ...(terminal.turnId === undefined ? {} : { turnId: terminal.turnId }) }, [association({ eventHighWatermark: String(meta.bb.eventHighWatermark) }, "lifecycle/v1", [bbLocator])])];
+  const gap = (reason: string) => finish(meta, [...events, event(events.length + 1, "gap", "rollout", "rollout:gap", { reason }, [association({ reason }, "gap/v1", [bbLocator, rolloutGapLocator])])]);
+  if (input.authorized === false) return gap("unauthorized");
+  if (input.rollout?.dialect === "unsupported" || meta.rollout.dialect === "unsupported") return gap("unsupported-dialect");
+  if (input.rollout?.compacted === true) return gap("compacted");
+  if (input.sourceFenceChanged === true) return gap("source-fence-changed");
+  const native = nativeCandidates(input.nativeRecords);
+  if (native.collectionBound) return gap("collection-bound");
+  if (native.malformed) return gap("malformed-carrier");
+  const workbench = input.workbench;
+  if (workbench.completeness === "partial" || meta.workbench.query.completeness !== "complete") return gap("partial-workbench-page");
+  if (workbench.content === null && workbench.contributionCount === 0) {
+    if (native.candidates.length > 0) return gap("zero-contribution-conflict");
+    const workbenchLocator: Locator = { source: "workbench", ref: "wb:observation", redacted: true };
+    events.push(event(2, "workbench-observed", "workbench", "wb:observation", { contributionCount: 0 }, [association({ storeInstance: meta.workbench.storeInstance, generation: meta.workbench.generation }, "workbench-observation/v1", [bbLocator, workbenchLocator])]));
+    events.push(event(3, "workbench-no-contribution", "workbench", "wb:observation", { contributionCount: 0 }, [association({ storeInstance: meta.workbench.storeInstance, generation: meta.workbench.generation }, "workbench-no-contribution/v1", [bbLocator, workbenchLocator])]));
+    return finish(meta, events);
+  }
+  if (native.candidates.length === 0) return gap("unbound-workbench-emission");
+  if (native.candidates.length !== 1) return gap("multiple-or-duplicate-receipts");
+  const candidate = native.candidates[0]!;
+  const receipt = candidate.receipt;
+  const bodyDigest = digest(candidate.framedBody);
+  const workbenchDigest = typeof workbench.content === "string" ? digest(workbench.content) : "";
+  if (Buffer.byteLength(candidate.framedBody, "utf8") > MAX_BODY_UTF8_BYTES || (typeof workbench.content === "string" && Buffer.byteLength(workbench.content, "utf8") > MAX_BODY_UTF8_BYTES)) return gap("body-bound");
+  if (Buffer.byteLength(candidate.framedBody, "utf8") !== receipt.emittedUtf8Bytes || bodyDigest !== receipt.emittedSha256 || typeof workbench.content !== "string" || Buffer.byteLength(workbench.content, "utf8") !== workbench.emittedUtf8Bytes || workbenchDigest !== workbench.emittedSha256) return gap("receipt-mismatch");
+  if (!sameReceipt(receipt, workbench) || workbench.audience !== "codex:" + receipt.nativeSessionId || workbench.checkpointTurnId !== receipt.turnId || terminal.turnId !== receipt.turnId || meta.identities.nativeSessionId !== receipt.nativeSessionId || meta.workbench.storeInstance !== receipt.storeInstance || meta.workbench.generation !== receipt.generation) return gap("receipt-mismatch");
+  const workbenchFence: Locator = { source: "workbench", ref: "wb:fence", redacted: true };
+  const workbenchObservation: Locator = { source: "workbench", ref: "wb:observation", redacted: true };
+  const workbenchSelection: Locator = { source: "workbench", ref: "wb:selection", redacted: true };
+  const workbenchReceipt: Locator = { source: "workbench", ref: "wb:receipt", redacted: true };
+  const rolloutReceipt: Locator = { source: "rollout", ref: candidate.locator, redacted: true };
+  const keys = { nonce: receipt.nonce, nativeSessionId: receipt.nativeSessionId, turnId: receipt.turnId ?? null, storeInstance: receipt.storeInstance, generation: receipt.generation, generationKeys: receipt.generationKeys, recordKeys: receipt.recordKeys, contributionKeys: receipt.contributionKeys, executableIdentity: receipt.executableIdentity, sourceIdentity: receipt.sourceIdentity };
+  events.push(event(2, "source-fence", "workbench", "wb:fence", { generation: workbench.generation }, [association({ storeInstance: receipt.storeInstance, generation: receipt.generation }, "fence/v1", [bbLocator, workbenchFence])]));
+  events.push(event(3, "workbench-observed", "workbench", "wb:observation", { contributionCount: workbench.contributionCount }, [association(keys, "workbench-observation/v1", [bbLocator, workbenchFence, workbenchObservation])]));
+  events.push(event(4, "workbench-selection", "workbench", "wb:selection", { contributionCount: workbench.contributionCount }, [association(keys, "workbench-selection/v1", [bbLocator, workbenchObservation, workbenchSelection])]));
+  events.push(event(5, "workbench-emission", "workbench", "wb:receipt", { byteCount: workbench.emittedUtf8Bytes, digest: workbench.emittedSha256 }, [association(keys, "workbench-emission/v1", [bbLocator, workbenchSelection, workbenchReceipt])]));
+  events.push(event(6, "persisted-rollout-receipt", "rollout", candidate.locator, { nonce: receipt.nonce, digest: receipt.emittedSha256 }, [association(keys, "native-receipt/v1", [bbLocator, workbenchReceipt, rolloutReceipt])]));
+  events.push(event(7, "context-admission", "workbench", "wb:observation", { body: workbench.content }, [association(keys, "admission/v1", [bbLocator, workbenchFence, workbenchObservation, workbenchReceipt, rolloutReceipt])]));
+  return finish(meta, events);
+}
+
+function scenario(data: any, change: any = {}): any {
+  const duplicateNative = change.nativeRecords === "duplicate-valid";
+  const ordinaryOnly = change.nativeRecords === "ordinary-only";
+  const input = structuredClone({ meta: data.meta, ...data.validUniqueAdmission });
+  Object.assign(input, change);
+  if (change.workbench) Object.assign(input.workbench, change.workbench);
+  if (change.rollout) input.rollout = change.rollout;
+  if (change.identities) input.meta.identities = change.identities;
+  if (change.terminal) input.terminal = change.terminal;
+  if (change.native) input.nativeRecords = [{ locator: "rollout:malformed:1", record: change.native }];
+  if (duplicateNative) input.nativeRecords = [structuredClone(data.validUniqueAdmission.nativeRecords[0]), structuredClone(data.validUniqueAdmission.nativeRecords[0])];
+  if (ordinaryOnly) input.nativeRecords = [{ locator: "rollout:ordinary:1", record: data.cases.ordinaryDeveloper.native }];
+  return input;
+}
+
+function mutateNativeReceipt(input: any, field: string, value: unknown): void {
+  const text = input.nativeRecords[0].record.payload.content[0].text as string;
+  const prefix = "context-magnet.hook-text/v1\n";
+  const delimiter = "\n\n--context-magnet-body--\n";
+  const boundary = text.indexOf(delimiter, prefix.length);
+  const receipt = JSON.parse(text.slice(prefix.length, boundary));
+  receipt[field] = value;
+  input.nativeRecords[0].record.payload.content[0].text = prefix + JSON.stringify(receipt) + delimiter + text.slice(boundary + delimiter.length);
+}
+
+function appendNativeBody(input: any, suffix: string): void {
+  input.nativeRecords[0].record.payload.content[0].text += suffix;
+}
+
+function outputIsSafe(value: unknown): void {
+  const forbidden = /(?:payload|raw|provider.*record|path|home|account|message|reasoning|tool|credential)/i;
+  if (Array.isArray(value)) return void value.forEach(outputIsSafe);
+  if (!isDict(value)) return;
+  for (const [key, nested] of Object.entries(value)) {
+    assert.equal(forbidden.test(key), false, "unsafe output field: " + key);
+    outputIsSafe(nested);
+  }
+}
+
+test("normalizes a deterministic framed hook receipt and admits only the Workbench body", async () => {
+  const data = await load();
+  const result = project(scenario(data));
+  outputIsSafe(result);
+  assert.deepEqual(result.meta, data.meta, "the validated leading meta record remains canonical");
+  assert.deepEqual(result.events.map(({ kind }) => kind), ["source-lifecycle", "source-fence", "workbench-observed", "workbench-selection", "workbench-emission", "persisted-rollout-receipt", "context-admission"]);
+  const admission = result.events.at(-1)!;
+  assert.equal(admission.details.body, data.validUniqueAdmission.workbench.content);
+  assert.equal(result.events.filter(({ kind }) => kind === "context-admission").length, 1);
+  for (const derived of result.events.slice(1)) {
+    assert.equal(derived.associations.length, 1, derived.kind);
+    const association = derived.associations[0]!;
+    assert.ok(Object.keys(association.keys).length > 0, derived.kind + " keys");
+    assert.match(association.derivationVersion, /\/v1$/);
+    assert.ok(association.supportingLocators.length > 0, derived.kind + " locators");
+  }
+  const admissionAssociation = admission.associations[0]!;
+  assert.deepEqual(admissionAssociation.keys.generationKeys, ["generation-key-1"]);
+  assert.deepEqual(new Set(admissionAssociation.supportingLocators.map(({ source }) => source)), new Set(["bb", "workbench", "rollout"]));
+  assert.deepEqual(result.projection.map(({ seq, locator }) => [seq, locator.ref]), [[1, "bb:checkpoint"], [2, "wb:fence"], [3, "wb:observation"], [4, "wb:selection"], [5, "wb:receipt"], [6, "rollout:receipt:1"], [7, "wb:observation"]]);
+});
+
+test("validates full carrier alignment and every claimed hook part", async () => {
+  const data = await load();
+  const malformed = project(scenario(data, data.cases.malformedCarrier));
+  outputIsSafe(malformed);
+  assert.equal(malformed.events.at(-1)?.details.reason, "malformed-carrier");
+  const twoParts = scenario(data);
+  twoParts.nativeRecords[0].record.payload.content.push({ type: "text", text: "not-input-text" });
+  twoParts.nativeRecords[0].record.payload.internal_chat_message_metadata_passthrough.content_item_kinds.push("hooks.additional_context");
+  const malformedPart = project(twoParts);
+  outputIsSafe(malformedPart);
+  assert.equal(malformedPart.events.at(-1)?.details.reason, "malformed-carrier");
+  const ordinary = project(scenario(data, { nativeRecords: "ordinary-only" }));
+  outputIsSafe(ordinary);
+  assert.equal(ordinary.events.at(-1)?.details.reason, "unbound-workbench-emission");
+  for (const [field, value] of [["nonce", ""], ["emittedSha256", "not-a-sha256"], ["recordKeys", [""]], ["generationKeys", []]] as const) {
+    const input = scenario(data);
+    mutateNativeReceipt(input, field, value);
+    assert.equal(project(input).events.at(-1)?.details.reason, "malformed-carrier", field);
+  }
+});
+
+test("executes every exact receipt mismatch against a mutated source field", async () => {
+  const data = await load();
+  for (const mutation of data.cases.mismatches) {
+    const input = scenario(data);
+    if (mutation.source === "workbench") input.workbench[mutation.field] = mutation.value;
+    else if (mutation.source === "native") mutateNativeReceipt(input, mutation.field, mutation.value);
+    else input.meta.workbench[mutation.field] = mutation.value;
+    const result = project(input);
+    outputIsSafe(result);
+    assert.equal(result.events.at(-1)?.details.reason, "receipt-mismatch", mutation.source + "." + mutation.field);
+  }
+});
+
+test("projects lifecycle and failure states from source facts without inventing admission", async () => {
+  const data = await load();
+  const expected: readonly [string, string][] = [["unbound", "unbound-workbench-emission"], ["multiple", "multiple-or-duplicate-receipts"], ["zeroConflict", "zero-contribution-conflict"], ["partial", "partial-workbench-page"], ["fenceChanged", "source-fence-changed"], ["unauthorized", "unauthorized"], ["compacted", "compacted"], ["unsupported", "unsupported-dialect"]];
+  for (const [name, reason] of expected) {
+    const result = project(scenario(data, data.cases[name]));
+    outputIsSafe(result);
+    assert.equal(result.events.at(-1)?.details.reason, reason, name);
+  }
+  for (const name of ["failed", "interrupted"]) {
+    const result = project(scenario(data, data.cases[name]));
+    outputIsSafe(result);
+    assert.equal(result.events[0]?.details.state, data.cases[name].terminal.state);
+    assert.equal(result.events.some(({ kind }) => kind === "context-admission"), false);
+  }
+  const zeroResult = project(scenario(data, data.cases.zeroContribution));
+  outputIsSafe(zeroResult);
+  assert.deepEqual(zeroResult.events.map(({ kind }) => kind), ["source-lifecycle", "workbench-observed", "workbench-no-contribution"]);
+  const oversizedWorkbench = scenario(data);
+  oversizedWorkbench.workbench.content = data.cases.oversizedWorkbench.body;
+  assert.equal(project(oversizedWorkbench).events.at(-1)?.details.reason, "body-bound");
+  const oversizedNative = scenario(data);
+  appendNativeBody(oversizedNative, data.cases.oversizedNative.body);
+  assert.equal(project(oversizedNative).events.at(-1)?.details.reason, "body-bound");
+  const tooManyNative = scenario(data);
+  tooManyNative.nativeRecords = Array.from({ length: data.cases.tooManyNative.count }, () => structuredClone(data.validUniqueAdmission.nativeRecords[0]));
+  assert.equal(project(tooManyNative).events.at(-1)?.details.reason, "collection-bound");
+});
+
+test("preserves distinct identities and exposes only safe canonical output", async () => {
+  const data = await load();
+  const result = project(scenario(data, data.cases.divergence));
+  assert.notEqual(data.meta.identities.bbProviderThreadId, data.meta.identities.nativeSessionId);
+  assert.equal(result.events.some(({ kind }) => kind === "context-admission"), true);
+  assert.equal((result.meta.bb as Dict).providerThreadId, "bb-provider-thread-redacted", "the leading BB source fence is retained separately from the native session");
+  assert.equal(JSON.stringify(result).includes("context-magnet.hook-text/v1"), false, "the raw native record cannot escape");
+  assert.equal(JSON.stringify(result).includes("native-item-redacted"), false, "native item identity is not a canonical body source");
+  outputIsSafe(result);
+  assert.ok(result.events.length <= MAX_EVENTS, "canonical event count is bounded");
+  const eventBound = finish(result.meta, Array.from({ length: MAX_EVENTS + 1 }, (_, index) => event(index + 1, "gap", "bb", "bb:synthetic", { reason: "synthetic" })));
+  assert.equal(eventBound.events[0]?.details.reason, "event-bound");
+  assert.deepEqual(data.projection, { kind: "session-etl-digest/v1", retains: ["seq", "locator"], never: ["provider-dialect-reparse", "provider-body", "inferred-join"] });
+});

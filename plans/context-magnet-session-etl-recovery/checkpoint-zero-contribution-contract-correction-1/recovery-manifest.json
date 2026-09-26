@@ -1,0 +1,30 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/context-magnet.ts",
+    "plugins/plugins/context-magnet-inspector/test/session-etl-projection.test.ts",
+    "plugins/plugins/context-magnet-inspector/test/workbench-adapter-v2.test.ts",
+    "plugins/plugins/context-magnet-inspector/workbench-adapter.ts",
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.mjs",
+    "plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+  ],
+  "grantSha256": "cdb52433f2cbabb697c743ec318b455a04c8151066db66776e0186a39da9d042",
+  "node": "checkpoint-zero-contribution-contract-correction-1",
+  "reversePatches": [
+    {
+      "bytes": 3888,
+      "path": "plugins/plugins/context-magnet-inspector/context-magnet.ts",
+      "reversePatch": "checkpoint-zero-contribution-contract-correction-1/reverse/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.patch",
+      "sha256": "2d188f6ab7ccf44e10dfa90a8bfa51b4ad5b063303a94c0ebcc6d9b3dc4a0239",
+      "tracked": true
+    },
+    {
+      "bytes": 0,
+      "path": "plugins/plugins/context-magnet-inspector/workbench-adapter.ts",
+      "reversePatch": "checkpoint-zero-contribution-contract-correction-1/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tracked": true
+    }
+  ],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

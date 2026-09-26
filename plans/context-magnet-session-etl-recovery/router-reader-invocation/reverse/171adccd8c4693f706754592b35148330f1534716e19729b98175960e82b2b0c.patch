@@ -1,0 +1,25 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/subscription-router/test/deployment.test.ts b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/router-reader-invocation/files/171adccd8c4693f706754592b35148330f1534716e19729b98175960e82b2b0c.bin
+index ae9b4cf7f3e5fcea92900ee4e62e90a8916cab26..111039f5f09294309df61fb20dad31e86942a32c 100644
+--- a/home/ubuntu/bb/plugins/plugins/subscription-router/test/deployment.test.ts
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/router-reader-invocation/files/171adccd8c4693f706754592b35148330f1534716e19729b98175960e82b2b0c.bin
+@@ -113,8 +113,7 @@ describe("remote deployment commands", () => {
+       "chmod 700 '/home/pal ani/.codex-subscription-router/lib/router.mjs'"
+         + " && chmod 600 '/home/pal ani/.codex-subscription-router/lib/accounts.mjs'"
+         + " '/home/pal ani/.codex-subscription-router/lib/routing.mjs'"
+-        + " '/home/pal ani/.codex-subscription-router/lib/state.mjs'"
+-        + " '/home/pal ani/.codex-subscription-router/lib/context-magnet-session-reader.mjs'",
++        + " '/home/pal ani/.codex-subscription-router/lib/state.mjs'",
+     );
+   });
+ 
+@@ -205,10 +204,6 @@ describe("remote deployment commands", () => {
+     assert.equal(await readlink(stableRouter), "router-command");
+   });
+ 
+-  it("ships the readonly Context Magnet reader in every attested generation", () => {
+-    assert.ok(HOST_FILES.includes("context-magnet-session-reader.mjs"));
+-  });
+-
+   it("keeps the launcher and aliases intact when real activation finds missing authority", async () => {
+     const home = await mkdtemp(join(tmpdir(), "csr-activation-missing-state-"));
+     const root = join(home, ".codex-subscription-router");

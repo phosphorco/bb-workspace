@@ -1,0 +1,35 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/app.css",
+    "plugins/plugins/context-magnet-inspector/app.tsx",
+    "plugins/plugins/context-magnet-inspector/server.ts",
+    "plugins/plugins/context-magnet-inspector/test/host-free-boundary.test.ts"
+  ],
+  "grantSha256": "1d6b6abefc071111fba3bf38069d8e4562a6c96e9fc36b43f246feaa2acea391",
+  "node": "legacy-disconnection",
+  "reversePatches": [
+    {
+      "bytes": 17678,
+      "path": "plugins/plugins/context-magnet-inspector/app.css",
+      "reversePatch": "legacy-disconnection/reverse/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.patch",
+      "sha256": "e7f5543fd6cf549fdfd5a2d517b3a1f9ec48917956f148bfb68b15788833a917",
+      "tracked": true
+    },
+    {
+      "bytes": 71512,
+      "path": "plugins/plugins/context-magnet-inspector/app.tsx",
+      "reversePatch": "legacy-disconnection/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch",
+      "sha256": "25cbc9fbbbbaa2f7335fa80b65411eb12745ade8d70dc45b7e29cfa83c9d43b0",
+      "tracked": true
+    },
+    {
+      "bytes": 4168,
+      "path": "plugins/plugins/context-magnet-inspector/server.ts",
+      "reversePatch": "legacy-disconnection/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch",
+      "sha256": "9fcc0c688280070d4b1b91904422a20421caf75b3ba66fe319c933d49bef2299",
+      "tracked": true
+    }
+  ],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

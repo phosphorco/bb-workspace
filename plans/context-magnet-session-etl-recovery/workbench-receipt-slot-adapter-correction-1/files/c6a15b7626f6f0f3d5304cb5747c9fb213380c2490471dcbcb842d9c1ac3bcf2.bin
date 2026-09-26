@@ -1,0 +1,152 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import test from "node:test";
+import {
+  inspectWorkbenchDecision,
+  type WorkbenchDecisionRequest,
+  type WorkbenchFixedProcess,
+  type WorkbenchDecisionResult,
+} from "../workbench-adapter.ts";
+
+const slot = (value: string) => `sha256:${createHash("sha256").update(value, "utf8").digest("hex")}`;
+const digest = (value: string) => createHash("sha256").update(value, "utf8").digest("hex");
+const SESSION_SLOT = slot("native-session");
+const TURN_SLOT = slot("native-terminal-turn");
+const NONCE_SLOT = slot("receipt-nonce");
+const STORE_SLOT = slot("receipt-store");
+const GENERATION_SLOT = slot("receipt-generation");
+const EXECUTABLE_ID = `sha256:${"e".repeat(64)}`;
+const SOURCE_ID = `vcs:${"a".repeat(40)}`;
+const ENV = Object.freeze({ LANG: "C", LC_ALL: "C", PATH: "/opt/workbench/bin", HOME: "/home/fixed", XDG_CONFIG_HOME: "/home/fixed/.config", XDG_RUNTIME_DIR: "/run/user/1000", XDG_CACHE_HOME: "/home/fixed/.cache" });
+const BODY = "bounded evidence ✓";
+
+const request = (overrides: Partial<WorkbenchDecisionRequest> = {}): WorkbenchDecisionRequest => ({
+  nativeSessionSlot: SESSION_SLOT,
+  nativeTurnSlot: TURN_SLOT,
+  bbCheckpointTurnSlot: TURN_SLOT,
+  nonceSlot: NONCE_SLOT,
+  sourceFence: { storeInstanceSlot: STORE_SLOT, generationSlot: GENERATION_SLOT },
+  ...overrides,
+});
+
+function complete(overrides: Record<string, unknown> = {}) {
+  return {
+    status: "complete",
+    receiptVersion: "context-magnet.receipt/v1",
+    nonceSlot: NONCE_SLOT,
+    nativeSessionIdSlot: SESSION_SLOT,
+    turnIdSlot: TURN_SLOT,
+    storeInstanceSlot: STORE_SLOT,
+    generationSlot: GENERATION_SLOT,
+    generationKeySlots: [slot("generation-key-1"), slot("generation-key-2")],
+    recordKeySlots: [slot("record-key-10"), slot("record-key-11")],
+    contributionKeySlots: [slot("contribution-key-1")],
+    emittedUtf8Bytes: Buffer.byteLength(BODY, "utf8"),
+    emittedSha256: digest(BODY),
+    executableIdentitySlot: slot(EXECUTABLE_ID),
+    sourceIdentitySlot: slot(SOURCE_ID),
+    body: BODY,
+    ...overrides,
+  };
+}
+
+function fixedProcess(output: unknown, options: Readonly<{ stderr?: string; stdout?: string; reject?: boolean; driftAfter?: number }> = {}) {
+  const calls: Array<{ argv: readonly string[]; options: unknown }> = [];
+  const attestation = { realpath: "/opt/workbench/bin/workbench", version: `workbench 0.8.0 (${"a".repeat(40)})`, executableIdentity: EXECUTABLE_ID, sourceIdentity: SOURCE_ID } as const;
+  let fences = 0;
+  const fixed: WorkbenchFixedProcess = {
+    attestation,
+    environment: ENV,
+    recheckIdentity: async () => {
+      fences += 1;
+      return options.driftAfter !== undefined && fences >= options.driftAfter ? { ...attestation, executableIdentity: `sha256:${"d".repeat(64)}` } : attestation;
+    },
+    invoke: async (argv, invocation) => {
+      calls.push({ argv, options: invocation });
+      if (options.reject) throw new Error("ETIMEDOUT");
+      return { stdout: options.stdout ?? JSON.stringify(output), stderr: options.stderr ?? "" };
+    },
+  };
+  return { fixed, calls };
+}
+
+test("uses only the decision-slots producer argv and returns a redacted complete receipt", async () => {
+  const fake = fixedProcess(complete());
+  const result = await inspectWorkbenchDecision(request(), fake.fixed);
+
+  assert.equal(result.state, "ready");
+  assert.equal(result.reason, "complete-unique-receipt");
+  assert.equal(result.authority?.body, BODY);
+  assert.equal(result.authority?.bodyUtf8Bytes, Buffer.byteLength(BODY, "utf8"));
+  assert.equal(result.authority?.bodySha256, digest(BODY));
+  assert.deepEqual(result.authority?.receipt.recordKeySlots, [slot("record-key-10"), slot("record-key-11")], "producer order is retained");
+  assert.equal(result.process?.executableSlot, slot(EXECUTABLE_ID));
+  assert.equal(result.process?.sourceSlot, slot(SOURCE_ID));
+  assert.deepEqual(fake.calls.map((call) => call.argv), [["context", "inspect", "decision-slots", SESSION_SLOT, TURN_SLOT, NONCE_SLOT, "--json"]]);
+  assert.deepEqual(fake.calls[0]?.options, { cwd: "/home/ubuntu/phosphor/monorepo", env: ENV, timeoutMs: 1_500, maxOutputBytes: 262_144, maxStderrBytes: 4_096 });
+  const visible = JSON.stringify(result);
+  for (const raw of ["native-session", "native-terminal-turn", "receipt-nonce", "receipt-store", "receipt-generation", "/home/ubuntu/phosphor/monorepo"]) assert.ok(!visible.includes(raw), `result leaked ${raw}`);
+});
+
+test("omits an optional nonce from argv, while a supplied nonce narrows the complete result", async () => {
+  const noNonce = fixedProcess(complete());
+  const result = await inspectWorkbenchDecision(request({ nonceSlot: undefined }), noNonce.fixed);
+  assert.equal(result.state, "ready");
+  assert.deepEqual(noNonce.calls[0]?.argv, ["context", "inspect", "decision-slots", SESSION_SLOT, TURN_SLOT, "--json"]);
+
+  const mismatch = await inspectWorkbenchDecision(request({ nonceSlot: slot("other-nonce") }), fixedProcess(complete()).fixed);
+  assert.equal(mismatch.state, "gap");
+  assert.equal(mismatch.reason, "receipt-store-generation-or-producer-fence-mismatch");
+});
+
+test("distinguishes explicit zero, not-found, invalid, ambiguous, incomplete, and malformed producer evidence", async () => {
+  const cases: Array<readonly [object, WorkbenchDecisionResult["state"], string]> = [
+    [{ status: "zero-contribution" }, "no-contribution", "complete-zero-contribution"],
+    [{ status: "not-found" }, "gap", "producer-not-found"],
+    [{ status: "invalid" }, "unavailable", "producer-invalid-request"],
+    [{ status: "ambiguous" }, "gap", "producer-ambiguous"],
+    [{ status: "incomplete" }, "gap", "producer-incomplete"],
+    [{ status: "incomplete", gaps: [{ Kind: 4, Generation: 7, FromRecordID: 0, ToRecordID: 0, BlockSequence: 1, Detail: "receipt store unavailable" }] }, "gap", "producer-incomplete-with-gaps"],
+    [{ status: "partial" }, "gap", "invalid-or-bounded-producer-response"],
+  ];
+  for (const [response, state, reason] of cases) {
+    const result = await inspectWorkbenchDecision(request(), fixedProcess(response).fixed);
+    assert.equal(result.state, state);
+    assert.equal(result.reason, reason);
+    assert.equal(result.authority, null);
+  }
+});
+
+test("fails closed for all producer fences, digest/bytes, order/duplicate evidence, and malformed slots", async () => {
+  const cases: Array<readonly [string, WorkbenchDecisionRequest, object, string]> = [
+    ["checkpoint", request({ bbCheckpointTurnSlot: slot("other-turn") }), complete(), "terminal-checkpoint-slot-mismatch"],
+    ["session", request(), complete({ nativeSessionIdSlot: slot("other-session") }), "receipt-store-generation-or-producer-fence-mismatch"],
+    ["turn", request(), complete({ turnIdSlot: slot("other-turn") }), "receipt-store-generation-or-producer-fence-mismatch"],
+    ["store", request(), complete({ storeInstanceSlot: slot("other-store") }), "receipt-store-generation-or-producer-fence-mismatch"],
+    ["generation", request(), complete({ generationSlot: slot("other-generation") }), "receipt-store-generation-or-producer-fence-mismatch"],
+    ["producer", request(), complete({ executableIdentitySlot: slot(`sha256:${"b".repeat(64)}`) }), "receipt-store-generation-or-producer-fence-mismatch"],
+    ["digest", request(), complete({ emittedSha256: digest("altered") }), "body-byte-or-digest-mismatch"],
+    ["bytes", request(), complete({ emittedUtf8Bytes: 1 }), "invalid-or-bounded-producer-response"],
+    ["ordered duplicate", request(), complete({ recordKeySlots: [slot("repeat"), slot("repeat")] }), "invalid-or-bounded-producer-response"],
+    ["extra field", request(), { ...complete(), EnvelopeKeys: ["forbidden"] }, "invalid-or-bounded-producer-response"],
+    ["bad request slot", request({ nativeSessionSlot: "SHA256:" + "a".repeat(64) }), complete(), "invalid-slot-binding-or-process"],
+  ];
+  for (const [label, input, response, reason] of cases) {
+    const fake = fixedProcess(response);
+    const result = await inspectWorkbenchDecision(input, fake.fixed);
+    assert.equal(result.reason, reason, label);
+    if (label === "checkpoint" || label === "bad request slot") assert.equal(fake.calls.length, 0, label);
+  }
+});
+
+test("enforces output, stderr, body, record/key, timeout, and executable-drift bounds", async () => {
+  const valid = complete();
+  const bodyOverflow = complete({ body: "x".repeat(65_537), emittedUtf8Bytes: 65_537, emittedSha256: digest("x".repeat(65_537)) });
+  const recordsOverflow = complete({ recordKeySlots: Array.from({ length: 17 }, (_, index) => slot(`key-${index}`)) });
+  for (const response of [bodyOverflow, recordsOverflow]) assert.equal((await inspectWorkbenchDecision(request(), fixedProcess(response).fixed)).reason, "invalid-or-bounded-producer-response");
+  assert.equal((await inspectWorkbenchDecision(request(), fixedProcess(valid, { stdout: "x".repeat(262_145) }).fixed)).reason, "invalid-or-bounded-producer-response");
+  assert.equal((await inspectWorkbenchDecision(request(), fixedProcess(valid, { stderr: "x".repeat(4_097) }).fixed)).reason, "invalid-or-bounded-producer-response");
+  assert.equal((await inspectWorkbenchDecision(request(), fixedProcess(valid, { reject: true }).fixed)).reason, "workbench-process-unavailable");
+  const drifted = await inspectWorkbenchDecision(request(), fixedProcess(valid, { driftAfter: 2 }).fixed);
+  assert.equal(drifted.reason, "executable-attestation-drift");
+});

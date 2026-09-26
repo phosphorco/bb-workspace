@@ -1,0 +1,573 @@
+import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
+import { readFile, realpath } from "node:fs/promises";
+import { dirname, isAbsolute } from "node:path";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
+const MAX_OUTPUT_BYTES = 256 * 1024;
+const TIMEOUT_MS = 2_000;
+const PROJECT_ROOT = "/home/ubuntu/phosphor/monorepo";
+const MAX_RECORDS = 48;
+const MAX_COLLECTION = 64;
+const MAX_TEXT = 10_000;
+const SAFE_AUDIENCE = /^[A-Za-z0-9._:-]{1,200}$/u;
+const SAFE_TURN = /^[A-Za-z0-9._:-]{1,240}$/u;
+
+export type WorkbenchQuery = Readonly<{
+  path: string;
+  audience: string;
+  target?: Readonly<{ kind: "contribution"; id: number } | { kind: "turn"; id: string }>;
+}>;
+export type WorkbenchScalar = string | number | boolean;
+export type WorkbenchEvidence = Readonly<{ key: string; value: WorkbenchScalar }>;
+export type WorkbenchReason = Readonly<{
+  code: number;
+  provider: string;
+  rule: string;
+  parameters: readonly WorkbenchEvidence[];
+}>;
+export type WorkbenchExcerpt = Readonly<{
+  offset: number;
+  bytes: number;
+  omittedBefore: number;
+  omittedAfter: number;
+  text: string;
+}>;
+export type WorkbenchRecord = Readonly<{
+  id: number;
+  at: string;
+  kind: string;
+  outcome: string;
+  scope: string;
+  audience: string;
+  epoch: number;
+  turn: string;
+  profile: string;
+  source: string;
+  contributor: string;
+  contributionId: number;
+  inputs: readonly WorkbenchEvidence[];
+  reasons: readonly WorkbenchReason[];
+  sample: Readonly<{
+    originalBytes: number;
+    omittedBytes: number;
+    excerpts: readonly WorkbenchExcerpt[];
+  }> | null;
+}>;
+export type WorkbenchGap = Readonly<{
+  kind: string;
+  generation: number;
+  fromRecordId: number;
+  toRecordId: number;
+  detail: string;
+}>;
+export type WorkbenchInspection = Readonly<{
+  state: "not-configured" | "ready" | "partial" | "unavailable";
+  detail: string;
+  generation: number;
+  records: readonly WorkbenchRecord[];
+  gaps: readonly WorkbenchGap[];
+  hasMore: boolean;
+  partialPage: boolean;
+  partialScan: boolean;
+  target: WorkbenchQuery["target"] | null;
+}>;
+export type WorkbenchRunner = (args: readonly string[], cwd: string) => Promise<string>;
+
+/** Fixed-argument, shell-free access to Workbench's bounded query channel. */
+export const runWorkbench: WorkbenchRunner = async (args, cwd) => {
+  const result = await execFileAsync("workbench", [...args], {
+    cwd, shell: false, timeout: TIMEOUT_MS, maxBuffer: MAX_OUTPUT_BYTES, windowsHide: true,
+  });
+  return result.stdout;
+};
+
+function safeQuery(query: WorkbenchQuery): boolean {
+  const safeTarget = query.target === undefined
+    || (query.target.kind === "contribution" && Number.isSafeInteger(query.target.id) && query.target.id > 0)
+    || (query.target.kind === "turn" && SAFE_TURN.test(query.target.id));
+  return (query.path === PROJECT_ROOT || query.path.startsWith(`${PROJECT_ROOT}/`))
+    && SAFE_AUDIENCE.test(query.audience)
+    && safeTarget;
+}
+
+function decisionObject(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+function boundedString(value: unknown, maximum = 512): string | null {
+  return typeof value === "string" && value.length <= maximum ? value : null;
+}
+
+function integer(value: unknown): number | null {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
+}
+
+function parseJson(source: string): unknown | null {
+  if (source.length === 0 || source.length > MAX_OUTPUT_BYTES) return null;
+  try { return JSON.parse(source) as unknown; } catch { return null; }
+}
+
+function scalar(value: unknown): WorkbenchScalar | null {
+  const item = object(value);
+  const kind = integer(item?.Kind);
+  if (kind === 1) return boundedString(item?.String, 4_096);
+  if (kind === 2) return typeof item?.Int64 === "number" && Number.isSafeInteger(item.Int64) ? item.Int64 : null;
+  if (kind === 3) return integer(item?.Uint64);
+  if (kind === 4) return typeof item?.Bool === "boolean" ? item.Bool : null;
+  return null;
+}
+
+function evidence(value: unknown): WorkbenchEvidence | null {
+  const item = object(value);
+  const key = boundedString(item?.Key, 256);
+  const decoded = scalar(item?.Value);
+  return key === null || decoded === null ? null : { key, value: decoded };
+}
+
+function boundedArray<T>(value: unknown, decode: (item: unknown) => T | null, maximum = MAX_COLLECTION): T[] | null {
+  if (!Array.isArray(value) || value.length > maximum) return null;
+  const result: T[] = [];
+  for (const item of value) {
+    const decoded = decode(item);
+    if (decoded === null) return null;
+    result.push(decoded);
+  }
+  return result;
+}
+
+function reason(value: unknown): WorkbenchReason | null {
+  const item = object(value);
+  const code = integer(item?.Code);
+  const provider = boundedString(item?.Provider, 256);
+  const rule = boundedString(item?.Rule, 256);
+  const parameters = boundedArray(item?.Params, evidence, 256);
+  return code === null || provider === null || rule === null || parameters === null
+    ? null
+    : { code, provider, rule, parameters };
+}
+
+function excerpt(value: unknown): WorkbenchExcerpt | null {
+  const item = object(value);
+  const offset = integer(item?.Offset);
+  const bytes = integer(item?.Bytes);
+  const omittedBefore = integer(item?.OmittedBefore);
+  const omittedAfter = integer(item?.OmittedAfter);
+  const text = boundedString(item?.Text, MAX_TEXT);
+  if (offset === null || bytes === null || omittedBefore === null || omittedAfter === null || text === null || new TextEncoder().encode(text).length !== bytes) return null;
+  return { offset, bytes, omittedBefore, omittedAfter, text };
+}
+
+const KINDS = ["unknown", "observation", "profile", "contribution", "queued", "offered", "confirmed", "suppressed", "deferred", "rejected", "failed", "withdrawn"] as const;
+const OUTCOMES = ["none", "queued", "offered", "confirmed", "suppressed", "deferred", "rejected", "failed", "withdrawn"] as const;
+const GAP_KINDS = ["unknown", "rotated", "dropped", "corrupt", "unreadable"] as const;
+
+function enumLabel(value: unknown, labels: readonly string[], prefix: string): string | null {
+  const decoded = integer(value);
+  if (decoded === null) return null;
+  return labels[decoded] ?? `${prefix}-${decoded}`;
+}
+
+function record(value: unknown): WorkbenchRecord | null {
+  const item = object(value);
+  if (item === null) return null;
+  const id = integer(item.ID), epoch = integer(item.Epoch), contributionId = integer(item.ContributionID);
+  const at = boundedString(item.At, 128), kind = enumLabel(item.Kind, KINDS, "event"), outcome = enumLabel(item.Outcome, OUTCOMES, "outcome");
+  const scope = boundedString(item.Scope, 1_024), audience = boundedString(item.Audience, 256), turn = boundedString(item.Turn, 256), profile = boundedString(item.Profile, 256), source = boundedString(item.Source, 512), contributor = boundedString(item.Contributor, 256);
+  const inputs = boundedArray(item.Inputs, evidence), reasons = boundedArray(item.Reasons, reason);
+  const sampleValue = object(item.Sample);
+  if ([id, epoch, contributionId, at, kind, outcome, scope, audience, turn, profile, source, contributor, inputs, reasons].some((entry) => entry === null) || sampleValue === null) return null;
+  const originalBytes = integer(sampleValue.OriginalBytes), omittedBytes = integer(sampleValue.OmittedBytes), excerpts = boundedArray(sampleValue.Excerpts, excerpt);
+  if (originalBytes === null || omittedBytes === null || excerpts === null || omittedBytes > originalBytes) return null;
+  const retained = excerpts.reduce((total, entry) => total + entry.bytes, 0);
+  if (retained + omittedBytes !== originalBytes || retained > MAX_TEXT) return null;
+  return {
+    id: id!, at: at!, kind: kind!, outcome: outcome!, scope: scope!, audience: audience!, epoch: epoch!, turn: turn!, profile: profile!, source: source!, contributor: contributor!, contributionId: contributionId!, inputs: inputs!, reasons: reasons!,
+    sample: originalBytes === 0 ? null : { originalBytes, omittedBytes, excerpts },
+  };
+}
+
+function gap(value: unknown): WorkbenchGap | null {
+  const item = object(value);
+  const kind = enumLabel(item?.Kind, GAP_KINDS, "gap");
+  const generation = integer(item?.Generation), fromRecordId = integer(item?.FromRecordID), toRecordId = integer(item?.ToRecordID), detail = boundedString(item?.Detail, 512);
+  return kind === null || generation === null || fromRecordId === null || toRecordId === null || detail === null
+    ? null
+    : { kind, generation, fromRecordId, toRecordId, detail };
+}
+
+type DecodedQueryResult = Readonly<{
+  generation: number;
+  records: readonly WorkbenchRecord[];
+  gaps: readonly WorkbenchGap[];
+  hasMore: boolean;
+  partialPage: boolean;
+  partialScan: boolean;
+}>;
+
+function queryResult(value: unknown): DecodedQueryResult | null {
+  const item = object(value);
+  const generation = integer(item?.Generation);
+  const records = boundedArray(item?.Records, record, MAX_RECORDS);
+  const gaps = boundedArray(item?.Gaps, gap);
+  if (generation === null || records === null || gaps === null || typeof item?.HasMore !== "boolean" || typeof item.PartialPage !== "boolean" || typeof item.PartialScan !== "boolean") return null;
+  return { generation, records, gaps, hasMore: item.HasMore, partialPage: item.PartialPage, partialScan: item.PartialScan };
+}
+
+const unavailable = (detail: string, target: WorkbenchQuery["target"] | null = null): WorkbenchInspection => ({
+  state: "unavailable", detail, generation: 0, records: [], gaps: [], hasMore: false, partialPage: false, partialScan: false, target,
+});
+
+/**
+ * Reads Workbench's public bounded decision trace without reconstructing a
+ * provider payload or BB-private carrier. The exact Workbench records are the
+ * authority for source, reason, outcome, turn, excerpts, and evidence gaps.
+ */
+export async function inspectWorkbenchQuery(query: WorkbenchQuery | null, run: WorkbenchRunner = runWorkbench): Promise<WorkbenchInspection> {
+  if (query === null) return { state: "not-configured", detail: "This thread has no explicit Workbench context binding.", generation: 0, records: [], gaps: [], hasMore: false, partialPage: false, partialScan: false, target: null };
+  if (!safeQuery(query)) return unavailable("The stored Workbench context binding failed validation.", query.target ?? null);
+  const common = ["--path", query.path, "--audience", query.audience, "--limit", String(MAX_RECORDS), "--max-bytes", String(MAX_OUTPUT_BYTES - 16_384), "--json"];
+  try {
+    const history = queryResult(parseJson(await run(["context", "history", ...common], query.path)));
+    if (history === null) return unavailable("Workbench returned an invalid bounded history response.", query.target ?? null);
+    let current = history;
+    if (query.target !== undefined) {
+      const focused = queryResult(parseJson(await run(["context", "inspect", query.target.kind, String(query.target.id), ...common], query.path)));
+      if (focused === null) return unavailable("Workbench returned an invalid focused inspection response.", query.target);
+      current = focused;
+    }
+    const gaps = [...history.gaps, ...(current === history ? [] : current.gaps)];
+    const partialPage = history.partialPage || current.partialPage;
+    const partialScan = history.partialScan || current.partialScan;
+    const partial = gaps.length > 0 || partialPage || partialScan;
+    return {
+      state: partial ? "partial" : "ready",
+      detail: current.records.length === 0
+        ? "Workbench retained no matching records; absence is not evidence that no context activity occurred."
+        : `Workbench retained ${current.records.length} bounded decision record${current.records.length === 1 ? "" : "s"}${query.target === undefined ? "" : ` for this ${query.target.kind}`}.`,
+      generation: current.generation,
+      records: current.records,
+      gaps,
+      hasMore: current.hasMore,
+      partialPage,
+      partialScan,
+      target: query.target ?? null,
+    };
+  } catch {
+    return unavailable("Workbench context inspection is unavailable for this binding.", query.target ?? null);
+  }
+}
+
+// Decision-adapter v2 deliberately has a separate entry point from the legacy
+// inspection projection above.  It is the only path in this module that is
+// allowed to retain a bounded emitted body, and it requires the independent
+// native-session and BB-checkpoint inputs needed for an exact receipt join.
+
+export const WORKBENCH_DECISION_ADAPTER_VERSION = "context-magnet.workbench-decision-adapter/v2";
+
+const DECISION_MAX_OUTPUT_BYTES = 256 * 1024;
+const DECISION_MAX_BODY_BYTES = 64 * 1024;
+const DECISION_MAX_RECORDS = 64;
+const DECISION_MAX_KEYS = 16;
+const DECISION_TIMEOUT_MS = 1_500;
+const STDERR_ACCEPTED_MAX_BYTES = 4 * 1024;
+const SLOT = /^sha256:[a-f0-9]{64}$/u;
+const DIGEST = /^[a-f0-9]{64}$/u;
+const EXECUTABLE_ID = /^sha256:[a-f0-9]{64}$/u;
+const SOURCE_ID = /^vcs:[a-f0-9]{40}$/u;
+const FIXED_ENV = Object.freeze({ LANG: "C", LC_ALL: "C" });
+const SAFE_ENV_KEYS = new Set(["HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "XDG_CACHE_HOME", "PATH", "LANG", "LC_ALL"]);
+
+/**
+ * This capability is an already-attested, absolute executable. Its path and
+ * producer identities remain process-local; every caller-visible identity is
+ * a canonical slot.
+ */
+export type WorkbenchFixedProcess = Readonly<{
+  attestation: Readonly<{ realpath: string; version: string; executableIdentity: string; sourceIdentity: string }>;
+  environment: Readonly<Record<string, string>>;
+  recheckIdentity: () => Promise<Readonly<{ realpath: string; version: string; executableIdentity: string; sourceIdentity: string }>>;
+  invoke: (argv: readonly string[], options: Readonly<{
+    cwd: string; env: Readonly<Record<string, string>>; timeoutMs: number; maxOutputBytes: number; maxStderrBytes: number;
+  }>) => Promise<Readonly<{ stdout: string; stderr: string }>>;
+}>;
+
+/** Slot-only binding facts; raw native IDs, audiences, paths, and content are never inputs. */
+export type WorkbenchDecisionRequest = Readonly<{
+  nativeSessionSlot: string;
+  nativeTurnSlot: string;
+  bbCheckpointTurnSlot: string;
+  nonceSlot?: string;
+  sourceFence: Readonly<{ storeInstanceSlot: string; generationSlot: string }>;
+}>;
+
+export type WorkbenchDecisionReceipt = Readonly<{
+  receiptVersion: "context-magnet.receipt/v1";
+  nonceSlot: string;
+  nativeSessionIdSlot: string;
+  turnIdSlot: string;
+  storeInstanceSlot: string;
+  generationSlot: string;
+  generationKeySlots: readonly string[];
+  recordKeySlots: readonly string[];
+  contributionKeySlots: readonly string[];
+  emittedUtf8Bytes: number;
+  emittedSha256: string;
+  executableIdentitySlot: string;
+  sourceIdentitySlot: string;
+}>;
+
+export type WorkbenchDecisionAuthority = Readonly<{
+  body: string;
+  bodySha256: string;
+  bodyUtf8Bytes: number;
+  receipt: WorkbenchDecisionReceipt;
+  outcome: "offered";
+  reason: "exact-decision-slots-receipt";
+}>;
+
+export type WorkbenchDecisionResult = Readonly<{
+  version: typeof WORKBENCH_DECISION_ADAPTER_VERSION;
+  state: "ready" | "no-contribution" | "gap" | "unavailable";
+  reason: string;
+  audienceSlot: string;
+  nativeTurnSlot: string;
+  bbCheckpointTurnSlot: string;
+  process: Readonly<{ executableSlot: string; sourceSlot: string }> | null;
+  authority: WorkbenchDecisionAuthority | null;
+}>;
+
+type DecisionSlotsComplete = Readonly<{
+  receiptVersion: "context-magnet.receipt/v1";
+  nonceSlot: string;
+  nativeSessionIdSlot: string;
+  turnIdSlot: string;
+  storeInstanceSlot: string;
+  generationSlot: string;
+  generationKeySlots: readonly string[];
+  recordKeySlots: readonly string[];
+  contributionKeySlots: readonly string[];
+  emittedUtf8Bytes: number;
+  emittedSha256: string;
+  executableIdentitySlot: string;
+  sourceIdentitySlot: string;
+  body: string;
+}>;
+
+function slot(value: string): string {
+  return `sha256:${createHash("sha256").update(value, "utf8").digest("hex")}`;
+}
+
+function object(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+function exactKeys(value: Record<string, unknown>, keys: readonly string[]): boolean {
+  const actual = Object.keys(value).sort();
+  const expected = [...keys].sort();
+  return actual.length === expected.length && actual.every((key, index) => key === expected[index]);
+}
+
+function validUtf8(value: string): boolean {
+  return new TextDecoder().decode(new TextEncoder().encode(value)) === value;
+}
+
+function slots(value: unknown): readonly string[] | null {
+  if (!Array.isArray(value) || value.length === 0 || value.length > DECISION_MAX_KEYS) return null;
+  const found = new Set<string>();
+  for (const entry of value) {
+    if (typeof entry !== "string" || !SLOT.test(entry) || found.has(entry)) return null;
+    found.add(entry);
+  }
+  return Object.freeze([...value] as string[]);
+}
+
+function gapArray(value: unknown): boolean {
+  if (!Array.isArray(value) || value.length === 0 || value.length > DECISION_MAX_RECORDS) return false;
+  return value.every((entry) => {
+    const row = decisionObject(entry);
+    return row !== null
+      && exactKeys(row, ["Kind", "Generation", "FromRecordID", "ToRecordID", "BlockSequence", "Detail"])
+      && Number.isSafeInteger(row.Kind) && (row.Kind as number) >= 1 && (row.Kind as number) <= 4
+      && Number.isSafeInteger(row.Generation) && (row.Generation as number) >= 0
+      && Number.isSafeInteger(row.FromRecordID) && (row.FromRecordID as number) >= 0
+      && Number.isSafeInteger(row.ToRecordID) && (row.ToRecordID as number) >= 0
+      && Number.isSafeInteger(row.BlockSequence) && (row.BlockSequence as number) >= 0
+      && typeof row.Detail === "string" && validUtf8(row.Detail) && Buffer.byteLength(row.Detail, "utf8") <= 512;
+  });
+}
+
+function decodeComplete(row: Record<string, unknown>): DecisionSlotsComplete | null {
+  const keys = ["status", "receiptVersion", "nonceSlot", "nativeSessionIdSlot", "turnIdSlot", "storeInstanceSlot", "generationSlot", "generationKeySlots", "recordKeySlots", "contributionKeySlots", "emittedUtf8Bytes", "emittedSha256", "executableIdentitySlot", "sourceIdentitySlot", "body"];
+  if (!exactKeys(row, keys) || row.status !== "complete" || row.receiptVersion !== "context-magnet.receipt/v1") return null;
+  const textSlots = ["nonceSlot", "nativeSessionIdSlot", "turnIdSlot", "storeInstanceSlot", "generationSlot", "executableIdentitySlot", "sourceIdentitySlot"] as const;
+  if (!textSlots.every((key) => typeof row[key] === "string" && SLOT.test(row[key] as string))) return null;
+  const generationKeySlots = slots(row.generationKeySlots);
+  const recordKeySlots = slots(row.recordKeySlots);
+  const contributionKeySlots = slots(row.contributionKeySlots);
+  const bytes = row.emittedUtf8Bytes;
+  const digest = row.emittedSha256;
+  const body = row.body;
+  if (generationKeySlots === null || recordKeySlots === null || contributionKeySlots === null || !Number.isSafeInteger(bytes) || (bytes as number) < 1 || (bytes as number) > DECISION_MAX_BODY_BYTES || typeof digest !== "string" || !DIGEST.test(digest) || typeof body !== "string" || !validUtf8(body) || Buffer.byteLength(body, "utf8") !== bytes) return null;
+  return Object.freeze({
+    receiptVersion: row.receiptVersion, nonceSlot: row.nonceSlot as string, nativeSessionIdSlot: row.nativeSessionIdSlot as string, turnIdSlot: row.turnIdSlot as string,
+    storeInstanceSlot: row.storeInstanceSlot as string, generationSlot: row.generationSlot as string, generationKeySlots, recordKeySlots, contributionKeySlots,
+    emittedUtf8Bytes: bytes as number, emittedSha256: digest, executableIdentitySlot: row.executableIdentitySlot as string, sourceIdentitySlot: row.sourceIdentitySlot as string, body,
+  });
+}
+
+function decodeDecisionSlots(source: string): { status: string; complete?: DecisionSlotsComplete; gaps: boolean } | null {
+  if (source.length === 0 || Buffer.byteLength(source, "utf8") > DECISION_MAX_OUTPUT_BYTES) return null;
+  let parsed: unknown;
+  try { parsed = JSON.parse(source) as unknown; } catch { return null; }
+  const row = decisionObject(parsed);
+  if (row === null || typeof row.status !== "string") return null;
+  if (row.status === "complete") {
+    const complete = decodeComplete(row);
+    return complete === null ? null : { status: "complete", complete, gaps: false };
+  }
+  if (row.status === "incomplete") {
+    if (!exactKeys(row, Object.hasOwn(row, "gaps") ? ["status", "gaps"] : ["status"]) || (Object.hasOwn(row, "gaps") && !gapArray(row.gaps))) return null;
+    return { status: "incomplete", gaps: Object.hasOwn(row, "gaps") };
+  }
+  if (!["zero-contribution", "invalid", "not-found", "ambiguous"].includes(row.status) || !exactKeys(row, ["status"])) return null;
+  return { status: row.status, gaps: false };
+}
+
+function validRequest(request: unknown): request is WorkbenchDecisionRequest {
+  const row = decisionObject(request);
+  if (row === null) return false;
+  const hasNonce = Object.hasOwn(row, "nonceSlot");
+  if (!exactKeys(row, hasNonce
+    ? ["nativeSessionSlot", "nativeTurnSlot", "bbCheckpointTurnSlot", "nonceSlot", "sourceFence"]
+    : ["nativeSessionSlot", "nativeTurnSlot", "bbCheckpointTurnSlot", "sourceFence"])) return false;
+  const sourceFence = decisionObject(row.sourceFence);
+  return sourceFence !== null
+    && exactKeys(sourceFence, ["storeInstanceSlot", "generationSlot"])
+    && typeof row.nativeSessionSlot === "string" && SLOT.test(row.nativeSessionSlot)
+    && typeof row.nativeTurnSlot === "string" && SLOT.test(row.nativeTurnSlot)
+    && typeof row.bbCheckpointTurnSlot === "string" && SLOT.test(row.bbCheckpointTurnSlot)
+    && (!hasNonce || typeof row.nonceSlot === "string" && SLOT.test(row.nonceSlot))
+    && typeof sourceFence.storeInstanceSlot === "string" && SLOT.test(sourceFence.storeInstanceSlot)
+    && typeof sourceFence.generationSlot === "string" && SLOT.test(sourceFence.generationSlot);
+}
+
+function validEnvironment(environment: Readonly<Record<string, string>>): boolean {
+  if (environment.LANG !== "C" || environment.LC_ALL !== "C" || !Object.keys(environment).every((key) => SAFE_ENV_KEYS.has(key))) return false;
+  const path = environment.PATH;
+  if (typeof path !== "string" || path.length === 0 || path.length > 8_192 || !path.split(":").every((part) => isAbsolute(part) && part.length <= 1_024)) return false;
+  return ["HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "XDG_CACHE_HOME"].every((key) => environment[key] === undefined || (isAbsolute(environment[key]!) && environment[key]!.length <= 1_024));
+}
+
+function validAttestation(attestation: WorkbenchFixedProcess["attestation"]): boolean {
+  const version = /^workbench 0\.8\.0 \(([a-f0-9]{40})\)$/u.exec(attestation.version);
+  return isAbsolute(attestation.realpath)
+    && version !== null
+    && attestation.executableIdentity.length === 71
+    && EXECUTABLE_ID.test(attestation.executableIdentity)
+    && SOURCE_ID.test(attestation.sourceIdentity)
+    && attestation.sourceIdentity === `vcs:${version[1]}`;
+}
+
+function sameAttestation(left: WorkbenchFixedProcess["attestation"], right: WorkbenchFixedProcess["attestation"]): boolean {
+  return left.realpath === right.realpath && left.version === right.version && left.executableIdentity === right.executableIdentity && left.sourceIdentity === right.sourceIdentity;
+}
+
+function baseResult(request: WorkbenchDecisionRequest | null, process: WorkbenchFixedProcess | null, state: WorkbenchDecisionResult["state"], reason: string, authority: WorkbenchDecisionAuthority | null = null): WorkbenchDecisionResult {
+  return Object.freeze({
+    version: WORKBENCH_DECISION_ADAPTER_VERSION, state, reason,
+    audienceSlot: request?.nativeSessionSlot ?? slot("unbound"),
+    nativeTurnSlot: request?.nativeTurnSlot ?? slot("unbound"),
+    bbCheckpointTurnSlot: request?.bbCheckpointTurnSlot ?? slot("unbound"),
+    process: process === null ? null : Object.freeze({ executableSlot: slot(process.attestation.executableIdentity), sourceSlot: slot(process.attestation.sourceIdentity) }),
+    authority,
+  });
+}
+
+function argv(request: WorkbenchDecisionRequest): readonly string[] {
+  return Object.freeze(["context", "inspect", "decision-slots", request.nativeSessionSlot, request.nativeTurnSlot, ...(request.nonceSlot === undefined ? [] : [request.nonceSlot]), "--json"]);
+}
+
+async function invoke(process: WorkbenchFixedProcess, request: WorkbenchDecisionRequest): Promise<ReturnType<typeof decodeDecisionSlots>> {
+  const response = await process.invoke(argv(request), Object.freeze({ cwd: PROJECT_ROOT, env: process.environment, timeoutMs: DECISION_TIMEOUT_MS, maxOutputBytes: DECISION_MAX_OUTPUT_BYTES, maxStderrBytes: STDERR_ACCEPTED_MAX_BYTES }));
+  if (Buffer.byteLength(response.stdout, "utf8") > DECISION_MAX_OUTPUT_BYTES || Buffer.byteLength(response.stderr, "utf8") > STDERR_ACCEPTED_MAX_BYTES) return null;
+  return decodeDecisionSlots(response.stdout);
+}
+
+function authority(complete: DecisionSlotsComplete): WorkbenchDecisionAuthority | null {
+  const digest = createHash("sha256").update(complete.body, "utf8").digest("hex");
+  if (digest !== complete.emittedSha256) return null;
+  const receipt: WorkbenchDecisionReceipt = Object.freeze({
+    receiptVersion: complete.receiptVersion, nonceSlot: complete.nonceSlot, nativeSessionIdSlot: complete.nativeSessionIdSlot, turnIdSlot: complete.turnIdSlot,
+    storeInstanceSlot: complete.storeInstanceSlot, generationSlot: complete.generationSlot, generationKeySlots: complete.generationKeySlots, recordKeySlots: complete.recordKeySlots,
+    contributionKeySlots: complete.contributionKeySlots, emittedUtf8Bytes: complete.emittedUtf8Bytes, emittedSha256: complete.emittedSha256,
+    executableIdentitySlot: complete.executableIdentitySlot, sourceIdentitySlot: complete.sourceIdentitySlot,
+  });
+  return Object.freeze({ body: complete.body, bodySha256: digest, bodyUtf8Bytes: complete.emittedUtf8Bytes, receipt, outcome: "offered", reason: "exact-decision-slots-receipt" });
+}
+
+/**
+ * The sole private-body Workbench read. It has no history, contribution, or
+ * turn fallback: only the producer's complete slot decision is authoritative.
+ */
+export async function inspectWorkbenchDecision(request: WorkbenchDecisionRequest | null, process: WorkbenchFixedProcess | null): Promise<WorkbenchDecisionResult> {
+  if (request === null) return baseResult(null, process, "unavailable", "missing-explicit-slot-binding");
+  if (process === null || !validRequest(request)) return baseResult(request, process, "unavailable", "invalid-slot-binding-or-process");
+  if (!validAttestation(process.attestation) || !validEnvironment(process.environment)) return baseResult(request, process, "unavailable", "invalid-executable-attestation");
+  if (request.nativeTurnSlot !== request.bbCheckpointTurnSlot) return baseResult(request, process, "gap", "terminal-checkpoint-slot-mismatch");
+  try {
+    if (!sameAttestation(process.attestation, await process.recheckIdentity())) return baseResult(request, process, "unavailable", "executable-attestation-drift");
+    const decoded = await invoke(process, request);
+    if (!sameAttestation(process.attestation, await process.recheckIdentity())) return baseResult(request, process, "gap", "executable-attestation-drift");
+    if (decoded === null) return baseResult(request, process, "gap", "invalid-or-bounded-producer-response");
+    if (decoded.status === "zero-contribution") return baseResult(request, process, "no-contribution", "complete-zero-contribution");
+    if (decoded.status === "invalid") return baseResult(request, process, "unavailable", "producer-invalid-request");
+    if (decoded.status === "not-found") return baseResult(request, process, "gap", "producer-not-found");
+    if (decoded.status === "ambiguous") return baseResult(request, process, "gap", "producer-ambiguous");
+    if (decoded.status === "incomplete") return baseResult(request, process, "gap", decoded.gaps ? "producer-incomplete-with-gaps" : "producer-incomplete");
+    const complete = decoded.complete!;
+    const expectedExecutableSlot = slot(process.attestation.executableIdentity);
+    const expectedSourceSlot = slot(process.attestation.sourceIdentity);
+    if (complete.nativeSessionIdSlot !== request.nativeSessionSlot || complete.turnIdSlot !== request.nativeTurnSlot || (request.nonceSlot !== undefined && complete.nonceSlot !== request.nonceSlot) || complete.storeInstanceSlot !== request.sourceFence.storeInstanceSlot || complete.generationSlot !== request.sourceFence.generationSlot || complete.executableIdentitySlot !== expectedExecutableSlot || complete.sourceIdentitySlot !== expectedSourceSlot) return baseResult(request, process, "gap", "receipt-store-generation-or-producer-fence-mismatch");
+    const exact = authority(complete);
+    return exact === null ? baseResult(request, process, "gap", "body-byte-or-digest-mismatch") : baseResult(request, process, "ready", "complete-unique-receipt", exact);
+  } catch {
+    return baseResult(request, process, "unavailable", "workbench-process-unavailable");
+  }
+}
+
+function captureFixedEnvironment(executablePath: string): Readonly<Record<string, string>> {
+  const captured: Record<string, string> = { ...FIXED_ENV, PATH: process.env.PATH ?? dirname(executablePath) };
+  for (const key of ["HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "XDG_CACHE_HOME"] as const) if (process.env[key] !== undefined) captured[key] = process.env[key]!;
+  if (!validEnvironment(captured)) throw new Error("Workbench environment is outside the fixed safe allowlist.");
+  return Object.freeze(captured);
+}
+
+async function readExecutableIdentity(configuredPath: string, environment: Readonly<Record<string, string>>): Promise<WorkbenchFixedProcess["attestation"]> {
+  const resolved = await realpath(configuredPath);
+  const bytes = await readFile(resolved);
+  if (bytes.length === 0 || bytes.length > 128 * 1024 * 1024) throw new Error("Workbench executable exceeds the attestation bound.");
+  const executableIdentity = `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
+  const versionResult = await execFileAsync(resolved, ["version"], { cwd: PROJECT_ROOT, env: { ...environment }, shell: false, timeout: DECISION_TIMEOUT_MS, maxBuffer: 4_096, windowsHide: true });
+  const version = versionResult.stdout.trim();
+  const match = /^workbench 0\.8\.0 \(([a-f0-9]{40})\)$/u.exec(version);
+  if (match === null) throw new Error("Workbench version attestation did not match 0.8.0.");
+  return Object.freeze({ realpath: resolved, version, executableIdentity, sourceIdentity: `vcs:${match[1]}` });
+}
+
+/** Attest once, fence before each invocation, and invoke only the fixed absolute executable. */
+export async function attestWorkbenchExecutable(executablePath: string): Promise<WorkbenchFixedProcess> {
+  if (!isAbsolute(executablePath)) throw new Error("Workbench executable must be an absolute configured path.");
+  const environment = captureFixedEnvironment(executablePath);
+  const attestation = await readExecutableIdentity(executablePath, environment);
+  return Object.freeze({
+    attestation, environment,
+    recheckIdentity: async () => readExecutableIdentity(executablePath, environment),
+    invoke: async (args, options) => {
+      if (!sameAttestation(attestation, await readExecutableIdentity(executablePath, environment))) throw new Error("Workbench executable changed before invocation.");
+      const result = await execFileAsync(attestation.realpath, [...args], { cwd: options.cwd, env: { ...options.env }, shell: false, timeout: options.timeoutMs, maxBuffer: options.maxOutputBytes, windowsHide: true });
+      return Object.freeze({ stdout: result.stdout, stderr: result.stderr });
+    },
+  });
+}

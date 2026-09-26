@@ -1,0 +1,70 @@
+amends "workbench:plan"
+
+meta {
+  title = "Analytics performance isolation"
+  goal = "Implement the accepted performance doctrine: declarative additions cannot multiply operational collection, expand aggregate resource limits, or add executable bytes to unopened surfaces. Keep Analytics disabled until integrated evidence supports activation."
+}
+
+local doctrine = new Action {
+  id = "doctrine"
+  owner = "root"
+  grant { "docs/adrs/2026-09-analytics-performance-isolation.md"; "AGENTS.md" }
+  outcome = "Record Cole's accepted direction and distinguish the enforceable target, provisional policies, transitional containment and full acceptance."
+  oracle = module.adjudicated("ADR covers source authority, immutable copies, aggregate OS and execution limits, compulsory caching, no boot cost, honest coverage, hostile-load tests and current implementation limits. Linked from workspace guidance.", "root")
+}
+
+local containment = new Action {
+  id = "skills-containment"
+  owner = "root"
+  needs { module.produced(doctrine); module.verified(doctrine) }
+  grant { "community-plugins/plugins/analytics/**" }
+  outcome = "Remove lifecycle, cold-query and tool-refresh Skills scans. Keep reads cached and retained-only; share bounded admission for explicit transitional collection. Prove no background extraction after query return, cancellation slot retention and cumulative budgets. Preserve authored data and display stale/limited coverage."
+  oracle = module.mechanical("cd community-plugins/plugins/analytics && node --test --experimental-strip-types test/capture-budget.test.ts test/capture-publication.test.ts test/skills-host-containment.test.ts")
+}
+
+local collector = new Action {
+  id = "shared-snapshot-supply"
+  owner = "root"
+  needs { module.produced(containment); module.verified(containment) }
+  grant { "community-plugins/plugins/analytics/extraction/**"; "community-plugins/plugins/analytics/store.ts"; "community-plugins/plugins/analytics/snapshot-provider.ts"; "community-plugins/plugins/analytics/test/collector/**"; "community-plugins/plugins/analytics/docs/isolation/collector/**" }
+  outcome = "Replace feature-owned extraction with one bounded incremental source supply and immutable analytics snapshots. Skills and tool facts consume the same supply. No operational database or general SDK authority reaches feature queries or transformations. Retention, checkpoints, retries, byte limits and stale coverage hold across restarts."
+  oracle = module.adjudicated("Production source-to-snapshot proof includes bounded operational reads, no feature fan-out, failure/backpressure and preserved coverage. No shared SQLite transaction spans analytical work. Existing analytics-delivery foundations are reused with their outstanding integration gaps explicit.", "root")
+}
+
+local execution = new Action {
+  id = "enforced-execution-envelope"
+  owner = "root"
+  needs { module.produced(containment); module.verified(containment) }
+  grant { "community-plugins/plugins/analytics/query-runtime/**"; "community-plugins/plugins/analytics/execution-service.ts"; "community-plugins/plugins/analytics/execution-store.ts"; "community-plugins/plugins/analytics/test/execution/**"; "community-plugins/plugins/analytics/docs/isolation/execution/**" }
+  outcome = "Integrate mandatory query admission, generation caches, global fair scheduling and OS resource controls. Remove legacy query/source escape paths. An unavailable isolation boundary fails closed for analytics. Do not change normal host role or deployment configuration without the applicable authority."
+  oracle = module.adjudicated("Actual production executor survives expensive queries, refresh spam, distinct requests, failures, cancellation, memory pressure and worker crash/recovery within the fixed aggregate resource envelope. Author definitions cannot raise limits. Required OS controls are observed, not inferred from database memory settings.", "root")
+}
+
+local frontend = new Action {
+  id = "lazy-frontend-artifacts"
+  owner = "root"
+  needs { module.produced(containment); module.verified(containment) }
+  grant { "fork/patches/**"; "fork/scripts/**"; "fork/result-tree.lock"; "fork/DOWNSTREAM.md"; "plugins/plugins/plan-graph/**"; "community-plugins/plugins/machine-monitor/**"; "community-plugins/plugins/analytics/app.tsx"; "community-plugins/plugins/analytics/app.css"; "community-plugins/plugins/analytics/frontend/**"; "community-plugins/plugins/analytics/test/frontend/**"; "community-plugins/plugins/analytics/docs/isolation/frontend/**" }
+  outcome = "Implement a verified versioned lazy-artifact boundary and metadata-first registration. Move Mermaid and ECharts closures behind actual surface use; ordinary declarative analytics additions have zero additional executable boot requests. Preserve focus, fallback, reload and CSS behavior."
+  oracle = module.adjudicated("Artifact hashes and cold-browser traces prove absent heavy-module requests on ordinary boot, correct direct-route rendering and first fallback use, bounded late tasks and stable layout. React.lazy inside a single-file artifact does not pass. Respect fork patch ownership and preserve existing dirty patches.", "root")
+}
+
+local integration = new Action {
+  id = "integrate-isolation-lanes"
+  owner = "root"
+  needs { module.produced(collector); module.verified(collector); module.produced(execution); module.verified(execution); module.produced(frontend); module.verified(frontend) }
+  grant { "community-plugins/plugins/analytics/server.ts"; "community-plugins/plugins/analytics/rpc-contract.ts"; "community-plugins/plugins/analytics/execution-contract.ts"; "community-plugins/plugins/analytics/package.json"; "community-plugins/package-lock.json"; "plugins/tools/workspaces-sync/definition.ts"; "plugins/bun.lock"; "community-plugins/plugins/analytics/test/integration/**" }
+  outcome = "Compose the independently verified source, execution and frontend lanes using their existing immutable handoff contracts. Root owns shared RPC, dependency and production entrypoint files. Remove transitional paths only once their replacements pass. Keep Analytics disabled."
+  oracle = module.adjudicated("Real production entrypoints use the shared source and constrained execution services; frontend uses bounded result APIs. No source/caching bypass remains. Dependency and packaging checks pass with exact artifacts and no live activation.", "root")
+}
+
+local acceptance = new Guard {
+  id = "composed-host-acceptance"
+  owner = "root"
+  needs { module.produced(integration); module.verified(integration) }
+  observes { "plans/analytics-isolation.ledger.jsonl"; "community-plugins/plugins/analytics/**"; "fork/**"; "plugins/plugins/plan-graph/**" }
+  outcome = "Prove the whole doctrine with fixed fixtures and saturated analytics load without enabling Analytics on the current host. Complete relevant repository checks and account for every outstanding goal before considering activation."
+  oracle = module.adjudicated("Retain exact revisions, production traces, source-read counts, request/navigation distributions, cache/queue/process resource witnesses and functional results. Measure BB interference, not just query speed. All in-scope gaps resolved; user-requested disabled state remains intact until a subsequent activation decision.", "root")
+}
+
+nodes { doctrine; containment; collector; execution; frontend; integration; acceptance }

@@ -1,0 +1,44 @@
+{
+  "format": "context-magnet-codex-session-access-probe/v1",
+  "schemaReceipt": {
+    "codexVersion": "codex-cli 0.153.2",
+    "source": "test/fixtures/codex-schema-receipt.json"
+  },
+  "limits": {
+    "stdoutBytes": 1048576,
+    "stderrBytes": 65536,
+    "lineBytes": 262144,
+    "turns": 128,
+    "items": 4096,
+    "fragments": 4096,
+    "wallMs": 15000,
+    "concurrency": 1
+  },
+  "cases": [
+    "routed-success", "native", "missing", "archived", "disabled", "divergent", "unauthorized",
+    "forked-thread-id-not-session-id", "compacted", "interrupted", "failed", "subagent", "zero-work",
+    "unknown-server-request", "oversized-stdout", "oversized-stderr", "oversized-line", "oversized-turn",
+    "oversized-item", "oversized-fragment", "timeout", "process-teardown", "route-revision-race", "ambiguous-ownership"
+  ],
+  "routedSuccess": {
+    "bbThreadId": "thr_fixture",
+    "providerId": "codex",
+    "providerThreadId": "01a0c52f-0ef7-7af3-9d3f-c56ee9221330",
+    "highWatermark": 57,
+    "terminalCheckpointId": "01a0c52f-0f9e-79c1-b63b-f102ebef3a27",
+    "accountSlot": "sha256:4c0a2f4c0e8b0b9e071708ba50a4a7bc5e81c0606f1f74d3e95685d02495cd8b",
+    "routeRevision": 7,
+    "thread": { "id": "019abcde-1111-7000-8000-000000000001", "sessionId": "019abcde-2222-7000-8000-000000000002" },
+    "receipt": {
+      "turns": [{ "id": "turn_1", "items": [{ "id": "item_1", "fragments": [{ "ordinal": 0, "hookRunId": "hook_1", "bytes": 19, "sha256": "fc1dc5caafa7bb921b2e5420721edc287e8d97fff381d20a38d1682a17d13a6d" }] }] }]
+    },
+    "protectedStateUnchanged": true
+  },
+  "live": {
+    "target": "thr_c9xdr46tjs",
+    "status": "unavailable",
+    "blocker": "No authoritative read-only, unambiguous enabled router-owner snapshot was available; router status is excluded because opening its state can mutate permissions or reap leases.",
+    "rawTurnsRetained": false,
+    "protectedStateChanged": false
+  }
+}

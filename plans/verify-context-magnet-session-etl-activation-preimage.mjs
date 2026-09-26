@@ -1,0 +1,423 @@
+#!/usr/bin/env node
+/**
+ * Captures and checks the bounded, redacted pre-activation state.  This is
+ * deliberately a filesystem/process/service observer: it never asks the
+ * router or plugin host to initialise, reload, or report lifecycle state.
+ */
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { closeSync, constants, existsSync, fsyncSync, fstatSync, lstatSync, openSync, readFileSync, readlinkSync, readSync, readdirSync, renameSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { basename, join, relative, resolve } from "node:path";
+
+const ROOT = "/home/ubuntu/bb";
+const PARENT_THREAD = "thr_6m53rk7vvv";
+const RECEIPT = join(ROOT, "plans/context-magnet-session-etl-activation-preimage.json");
+const BASELINE = join(ROOT, "plans/context-magnet-session-etl-workspace-preimage.json");
+const RECOVERIES = ["activation-preimage", "activation-preimage-correction-1"];
+const CURRENT_RECOVERY = "activation-preimage-correction-2";
+const VALIDATED_RECOVERIES = [...RECOVERIES, CURRENT_RECOVERY];
+const WORKBENCH_RECEIPT = join(ROOT, "plans/context-magnet-workbench-runtime-receipt.json");
+const GRANTS = [
+  "plans/context-magnet-session-etl-activation-preimage.json",
+  "plans/verify-context-magnet-session-etl-activation-preimage.mjs",
+  "plans/verify-context-magnet-session-etl-preimage.mjs",
+];
+const RECOVERY_GRANTS = new Map([
+  ["activation-preimage", GRANTS],
+  ["activation-preimage-correction-1", GRANTS],
+  ["activation-preimage-correction-2", ["plans/verify-context-magnet-session-etl-activation-preimage.mjs"]],
+]);
+const PLAN_LEDGER = "plans/context-magnet-session-etl-refactor.ledger.jsonl";
+const RECOVERY_ROOT = "plans/context-magnet-session-etl-recovery/activation-preimage";
+const MAX_FILE_BYTES = 16 * 1024 * 1024;
+const MAX_TREE_BYTES = 48 * 1024 * 1024;
+const MAX_TREE_FILES = 4_000;
+
+const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
+const stable = (value) => Array.isArray(value) ? value.map(stable) : value && typeof value === "object"
+  ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, stable(value[key])])) : value;
+function fail(message) { throw new Error(message); }
+function run(file, args, { allowFailure = false, maxBuffer = 4 * 1024 * 1024 } = {}) {
+  try { return execFileSync(file, args, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], maxBuffer }); }
+  catch (error) {
+    if (allowFailure) return null;
+    const detail = String(error.stderr ?? error.message).replace(/\s+/g, " ").slice(0, 320);
+    fail(`${basename(file)} observation failed: ${detail}`);
+  }
+}
+function token(stat) { return `${stat.dev}:${stat.ino}:${stat.mode}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`; }
+function regular(path, label, { maxBytes = MAX_FILE_BYTES } = {}) {
+  let fd;
+  try { fd = openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW); }
+  catch (error) { fail(`${label} cannot be opened without following links: ${error.code ?? error.message}`); }
+  try {
+    const before = fstatSync(fd);
+    if (!before.isFile() || before.size > maxBytes) fail(`${label} is not a bounded regular file`);
+    const chunks = []; let total = 0; const buffer = Buffer.allocUnsafe(Math.min(1024 * 1024, Math.max(1, before.size)));
+    for (let count = readSync(fd, buffer, 0, buffer.length, null); count; count = readSync(fd, buffer, 0, buffer.length, null)) {
+      total += count; if (total > maxBytes) fail(`${label} exceeds bounded read limit`); chunks.push(Buffer.from(buffer.subarray(0, count)));
+    }
+    const after = fstatSync(fd);
+    if (token(before) !== token(after) || total !== before.size) fail(`${label} changed during fd read`);
+    const pathStat = lstatSync(path);
+    if (pathStat.isSymbolicLink() || token(pathStat) !== token(after)) fail(`${label} path changed during fd read`);
+    return { bytes: Buffer.concat(chunks, total), stat: after };
+  } finally { closeSync(fd); }
+}
+function fileIdentity(path, label, options) {
+  const { bytes, stat } = regular(path, label, options);
+  return { path, bytes: bytes.length, mode: stat.mode & 0o777, sha256: sha256(bytes) };
+}
+function readJson(path, label, options) {
+  const { bytes } = regular(path, label, options);
+  try { return { bytes, value: JSON.parse(bytes.toString("utf8")) }; }
+  catch { fail(`${label} is not valid JSON`); }
+}
+function sourceTree(root, id) {
+  const rootStat = lstatSync(root);
+  if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) fail(`${id} source root is unsafe`);
+  const files = [];
+  let total = 0;
+  function walk(directory) {
+    for (const name of readdirSync(directory).sort()) {
+      if (name === "node_modules" || name === ".git" || (directory === root && name === "dist")) continue;
+      const path = join(directory, name);
+      const info = lstatSync(path);
+      if (info.isSymbolicLink()) fail(`${id} source tree contains a symlink`);
+      if (info.isDirectory()) walk(path);
+      else if (info.isFile()) {
+        const identity = fileIdentity(path, `${id} source file`);
+        total += identity.bytes;
+        if (++files.length > MAX_TREE_FILES || total > MAX_TREE_BYTES) fail(`${id} source tree exceeds bounded capture`);
+        files.push({ path: relative(root, path), bytes: identity.bytes, sha256: identity.sha256 });
+      } else fail(`${id} source tree contains a special file`);
+    }
+  }
+  walk(root);
+  files.sort((a, b) => a.path.localeCompare(b.path));
+  return { files: files.length, bytes: total, sha256: sha256(Buffer.from(JSON.stringify(files))) };
+}
+function plugin(id) {
+  const root = join(ROOT, "plugins/plugins", id);
+  const app = join(root, "dist/app.js");
+  const server = join(root, "dist/server.js");
+  const appMeta = readJson(join(root, "dist/app.meta.json"), `${id} app metadata`).value;
+  const serverMeta = readJson(join(root, "dist/server.meta.json"), `${id} server metadata`).value;
+  for (const meta of [appMeta, serverMeta]) {
+    if (meta.pluginId !== id || typeof meta.pluginVersion !== "string" || !Number.isInteger(meta.artifactFormatVersion)) fail(`${id} build metadata does not identify its artifact`);
+  }
+  return {
+    id,
+    sourceRoot: root,
+    source: sourceTree(root, id),
+    app: { ...fileIdentity(app, `${id} app artifact`), metadataSha256: sha256(Buffer.from(JSON.stringify(stable(appMeta)))) },
+    server: { ...fileIdentity(server, `${id} server artifact`), metadataSha256: sha256(Buffer.from(JSON.stringify(stable(serverMeta)))) },
+  };
+}
+function hookRecord() {
+  const path = join(homedir(), ".codex-subscription-router/shared-hooks.json");
+  const { bytes, value } = readJson(path, "shared hook record");
+  const forbidden = /(?:secret|token|password|authorization|cookie|account|body)/i;
+  const walk = (candidate, key = "") => {
+    if (forbidden.test(key)) fail("shared hook record has a secret-bearing field");
+    if (Array.isArray(candidate)) candidate.forEach((item) => walk(item));
+    else if (candidate && typeof candidate === "object") Object.entries(candidate).forEach(([name, item]) => walk(item, name));
+  };
+  walk(value);
+  if (Object.keys(value).sort().join(",") !== "codex,definitions,formatVersion,grants,paths,workbench" || !Number.isInteger(value.formatVersion) || !value.workbench || !value.codex || !Array.isArray(value.grants) || !value.definitions) fail("shared hook record has an unexpected or unsafe shape");
+  const textHash = (candidate) => typeof candidate === "string" ? sha256(Buffer.from(candidate)) : fail("shared hook record contains a non-string executable/key");
+  const executable = (candidate, expectedHash, expectedVersion, label) => {
+    if (typeof candidate !== "string" || !candidate.startsWith("/") || candidate.includes("\0")) fail(`${label} executable path is unsafe`);
+    const identity = fileIdentity(candidate, `${label} executable`, { maxBytes: 256 * 1024 * 1024 });
+    if (label === "prior Workbench" ? identity.mode !== 0o755 : (identity.mode & 0o100) === 0) fail(`${label} executable mode is not executable`);
+    if (expectedHash && identity.sha256 !== expectedHash) fail(`${label} executable hash does not match hook record`);
+    const version = run(candidate, [label === "prior Codex" ? "--version" : "version"]).trim();
+    if (expectedVersion && version !== expectedVersion) fail(`${label} executable version does not match hook record`);
+    return { path: candidate, ...identity, version };
+  };
+  if (typeof value.workbench.sha256 !== "string" || typeof value.workbench.version !== "string" || typeof value.codex.version !== "string") fail("shared hook executable contract is incomplete");
+  return {
+    // Base64 is an exact reversible bounded preimage, admitted only after the
+    // strict schema/secret-field scan above.
+    reversibleRecord: { bytes: bytes.length, sha256: sha256(bytes), base64: bytes.toString("base64") },
+    formatVersion: value.formatVersion,
+    workbench: { executableSha256: textHash(value.workbench.executable), sha256: value.workbench.sha256, version: value.workbench.version, executable: executable(value.workbench.executable, value.workbench.sha256, value.workbench.version, "prior Workbench") },
+    codex: { executableSha256: textHash(value.codex.executable), version: value.codex.version, executable: executable(value.codex.executable, null, value.codex.version, "prior Codex") },
+    grants: value.grants.map((entry) => ({ event: entry.event, eventName: entry.eventName, keySha256: textHash(entry.key), currentHash: entry.currentHash }))
+      .sort((a, b) => `${a.event}\0${a.eventName}`.localeCompare(`${b.event}\0${b.eventName}`)),
+    definitionEvents: Object.keys(value.definitions).sort(),
+  };
+}
+function selectedWorkbench() {
+  const { bytes, value } = readJson(WORKBENCH_RECEIPT, "selected Workbench receipt");
+  if (value.schemaVersion !== 1 || value.kind !== "context-magnet-workbench-runtime-receipt" || !value.artifact || !value.source) fail("selected Workbench receipt schema drift");
+  const artifact = value.artifact.path;
+  if (typeof artifact !== "string" || !artifact.startsWith(`${ROOT}/plans/context-magnet-workbench-runtime/`)) fail("selected Workbench artifact path escapes its grant");
+  const identity = fileIdentity(artifact, "selected Workbench executable", { maxBytes: 32 * 1024 * 1024 });
+  if ((identity.mode & 0o777) !== 0o755 || identity.sha256 !== value.artifact.sha256) fail("selected Workbench executable identity drift");
+  return { receipt: { path: WORKBENCH_RECEIPT, sha256: sha256(bytes) }, artifact: identity, sourceDirtyDiffSha256: value.source.dirtyDiffSha256, version: value.identity?.version ?? null };
+}
+function router() {
+  const path = join(homedir(), ".codex-subscription-router/state.db");
+  // The database also contains live cache/usage state.  The selected route
+  // revision is the restoration contract; retaining a whole database digest
+  // would reject unrelated, ongoing read-only activity.
+  const fence = (candidate) => {
+    if (!existsSync(candidate)) return { state: "missing" };
+    let fd;
+    try { fd = openSync(candidate, constants.O_RDONLY | constants.O_NOFOLLOW); const stat = fstatSync(fd); if (!stat.isFile()) fail("router SQLite component is not regular"); const pathStat = lstatSync(candidate); if (pathStat.isSymbolicLink() || token(pathStat) !== token(stat)) fail("router SQLite component raced during fence"); return { state: "present", token: token(stat) }; }
+    finally { if (fd !== undefined) closeSync(fd); }
+  };
+  const before = [path, `${path}-wal`, `${path}-shm`].map(fence);
+  if (before[0].state !== "present") fail("router state is missing");
+  const program = `import { Database } from "bun:sqlite"; const db = new Database(process.argv[1], { readonly: true, create: false }); try { const row = db.query("SELECT coalesce(json_extract(value_json, '$.selectionRevision'), 0) AS revision FROM metadata WHERE key='codexSelection'").get(); const migration = db.query("SELECT max(version) AS version FROM schema_migrations").get(); console.log(JSON.stringify({selectionRevision:Number(row?.revision ?? 0),schemaVersion:Number(migration?.version ?? 0)})); } finally { db.close(); }`;
+  let revision;
+  try { revision = JSON.parse(run("bun", ["-e", program, "--", path])); }
+  catch { fail("router state revision is unavailable"); }
+  const after = [path, `${path}-wal`, `${path}-shm`].map(fence);
+  if (JSON.stringify(before) !== JSON.stringify(after)) fail("router SQLite files raced during readonly query");
+  if (!Number.isSafeInteger(revision.selectionRevision) || !Number.isSafeInteger(revision.schemaVersion)) fail("router state revision is invalid");
+  return revision;
+}
+function processLaunches() {
+  const launches = [];
+  for (const entry of readdirSync("/proc").filter((name) => /^\d+$/.test(name)).sort((a, b) => Number(a) - Number(b))) {
+    // PID 1 is the container's Codex supervisor, not a router-launched
+    // provider process.  Its argv is rewritten as turns are dispatched.
+    if (Number(entry) === 1) continue;
+    const base = join("/proc", entry);
+    let comm;
+    try { comm = readFileSync(join(base, "comm"), "utf8").trim(); } catch { continue; }
+    if (comm !== "codex") continue;
+    try {
+      const procRead = (name, maximum = 512 * 1024) => {
+        const fd = openSync(join(base, name), constants.O_RDONLY); try { const chunks=[]; let total=0; const buffer=Buffer.allocUnsafe(8192); for(let n=readSync(fd,buffer,0,buffer.length,null);n;n=readSync(fd,buffer,0,buffer.length,null)){ total+=n; if(total>maximum) fail(`provider ${name} exceeds bound`); chunks.push(Buffer.from(buffer.subarray(0,n))); } return Buffer.concat(chunks,total); } finally { closeSync(fd); }
+      };
+      const start = () => { const value = procRead("stat", 8192).toString("utf8"); const close = value.lastIndexOf(")"); const fields = value.slice(close + 2).trim().split(/\s+/); if (close < 0 || !fields[19]) fail("provider stat is malformed"); return fields[19]; };
+      const before = start();
+      const commandLine = procRead("cmdline"); const environment = procRead("environ");
+      const cwdSha256 = sha256(Buffer.from(readlinkSync(join(base, "cwd"))));
+      // /proc/PID/exe is opened as the actual executable handle; never resolve
+      // it to a pathname that could subsequently name replacement bytes.
+      const fd = openSync(join(base, "exe"), constants.O_RDONLY); let executableIdentity;
+      try { const stat = fstatSync(fd); if (!stat.isFile() || stat.size > 256 * 1024 * 1024) fail("provider executable is unsafe"); const hash=createHash("sha256"); const buffer=Buffer.allocUnsafe(1024*1024); let total=0; for(let n=readSync(fd,buffer,0,buffer.length,null);n;n=readSync(fd,buffer,0,buffer.length,null)){total+=n;if(total>256*1024*1024)fail("provider executable exceeds bound");hash.update(buffer.subarray(0,n));} const after=fstatSync(fd); if(token(stat)!==token(after)||total!==stat.size)fail("provider executable raced during fd read"); executableIdentity={bytes:total,mode:stat.mode&0o777,sha256:hash.digest("hex"),fdToken:token(after)}; } finally { closeSync(fd); }
+      if (before !== start() || procRead("comm", 1024).toString("utf8").trim() !== comm) fail(`provider process ${entry} raced during observation`);
+      // The command line can carry credentials.  Its digest and argument count
+      // are sufficient to prove exact launch configuration without retaining it.
+      const argv = commandLine.toString("utf8").split("\0").filter(Boolean);
+      // Keep only option names.  Values may include a session, account, or
+      // prompt body; values are deliberately neither printed nor persisted.
+      const flags = argv.filter((value) => /^--?[A-Za-z][A-Za-z0-9-]*$/.test(value)).sort();
+      launches.push({ comm, executable: executableIdentity, argvSha256: sha256(commandLine), argvCount: argv.length, flags, cwdSha256, environmentSha256: sha256(environment) });
+    } catch (error) { fail(`provider process ${entry} is ambiguous or unavailable: ${error.message}`); }
+  }
+  return launches.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+}
+function servicesAndPorts() {
+  const services = run("systemctl", ["list-units", "--type=service", "--all", "--no-legend", "--no-pager"], { allowFailure: true }) ?? "";
+  const ports = run("ss", ["-ltnH"], { allowFailure: true }) ?? "";
+  if (!services || !ports) fail("service or TCP listener observation is unavailable");
+  const serviceLines = services.split("\n").filter(Boolean).map((line) => line.trim().split(/\s+/).slice(0, 4).join(" ")).sort();
+  const portLines = ports.split("\n").filter(Boolean).map((line) => line.trim().split(/\s+/))
+    // Queue depths fluctuate under ordinary traffic and are not launch
+    // configuration.  Keep the protocol/local endpoint only.
+    .map((parts) => `${parts[0] ?? ""} ${parts[3] ?? ""}`)
+    .filter((line) => /:(38886|38887|39886|39887|39888)$/.test(line)).sort();
+  return { services: { count: serviceLines.length, sha256: sha256(Buffer.from(serviceLines.join("\n"))) }, relevantTcpListeners: { count: portLines.length, sha256: sha256(Buffer.from(portLines.join("\n"))) } };
+}
+function activeChildren(excluded) {
+  const raw = JSON.parse(run("bb", ["thread", "list", "--parent-thread", PARENT_THREAD, "--json"]));
+  if (!Array.isArray(raw)) fail("direct-child observation is not an array");
+  return raw.map((thread) => {
+    if (typeof thread.id !== "string" || typeof thread.providerId !== "string") fail("direct child identity is incomplete");
+    const activity = thread.activity ?? {};
+    const active = thread.status === "active" || Number(activity.activeBackgroundAgentCount ?? 0) > 0 || Number(activity.activeBackgroundCommandCount ?? 0) > 0 || Number(activity.activeGoalCount ?? 0) > 0 || Number(activity.activePlanModeCount ?? 0) > 0 || Number(activity.activeWorkflowCount ?? 0) > 0;
+    if (typeof thread.status !== "string" || (thread.environmentPath !== null && thread.environmentPath !== undefined && typeof thread.environmentPath !== "string")) fail("direct child row is malformed");
+    return { id: thread.id, providerId: thread.providerId, status: thread.status, runtimeClass: active ? "active-runtime" : "inactive-historical", environmentPath: thread.environmentPath ?? null, environmentHostId: thread.environmentHostId ?? null };
+  }).filter((thread) => thread.runtimeClass === "active-runtime" && !excluded.has(thread.id)).sort((a, b) => a.id.localeCompare(b.id));
+}
+function loadedPluginProjection() {
+  const raw = JSON.parse(run("bb", ["plugin", "list", "--json"]));
+  if (!Array.isArray(raw.plugins)) fail("plugin list projection is malformed");
+  const selected = raw.plugins.filter((entry) => ["context-magnet-inspector", "subscription-router"].includes(entry.id)).map((entry) => ({
+    id: entry.id, source: entry.source, rootDir: entry.rootDir, provenance: entry.provenance, version: entry.version, enabled: entry.enabled, status: entry.status,
+    app: entry.app?.bundle ? { hash: entry.app.bundle.hash, jsBytes: entry.app.bundle.jsBytes, sdkMajor: entry.app.bundle.sdkMajor, sdkVersion: entry.app.bundle.sdkVersion, compatible: entry.app.bundle.compatible } : null,
+  })).sort((a, b) => a.id.localeCompare(b.id));
+  if (selected.length !== 2 || selected.some((entry) => typeof entry.source !== "string" || typeof entry.version !== "string" || typeof entry.status !== "string" || !entry.app?.hash)) fail("loaded plugin projection is incomplete");
+  return selected;
+}
+function runtime(priorLoadedPlugins) {
+  const appRuntime = readJson(join(homedir(), ".bb/bb-app-runtime.json"), "BB runtime record").value;
+  if (typeof appRuntime.entryPath !== "string" || !Number.isInteger(appRuntime.pid) || typeof appRuntime.surface !== "string" || typeof appRuntime.version !== "string") fail("BB runtime record shape drift");
+  return {
+    bbRuntime: { entryPath: appRuntime.entryPath, pid: appRuntime.pid, surface: appRuntime.surface, version: appRuntime.version, serverUrlSha256: sha256(Buffer.from(String(appRuntime.serverUrl ?? ""))) },
+    plugins: [plugin("context-magnet-inspector"), plugin("subscription-router")],
+    loadedPlugins: (() => { const actual = loadedPluginProjection(); if (JSON.stringify(stable(actual)) !== JSON.stringify(stable(priorLoadedPlugins))) fail("loaded plugin generation drift from preserved baseline"); return actual; })(),
+    sharedHooks: hookRecord(), router: router(), providerLaunches: processLaunches(), services: servicesAndPorts(),
+  };
+}
+function parseStatus(bytes) {
+  const output = [];
+  for (const entry of bytes.split("\0")) if (entry) output.push({ code: entry.slice(0, 2), path: entry.slice(3) });
+  return output.sort((a, b) => `${a.code}\0${a.path}`.localeCompare(`${b.code}\0${b.path}`));
+}
+function currentRepository(repository) {
+  const root = repository.path === "." ? ROOT : join(ROOT, repository.path);
+  const head = run("git", ["-C", root, "rev-parse", "HEAD"]).trim();
+  // `git write-tree` writes an object and an index lock.  A lifecycle observer
+  // must not do that.  The recovery envelope records an initial clean index;
+  // prove that fact and then use Git's read-only cached-diff predicate.
+  const expectedTree = run("git", ["-C", root, "rev-parse", `${previousHead(repository)}^{tree}`]).trim();
+  let cachedIndexClean;
+  try { execFileSync("git", ["-C", root, "diff-index", "--cached", "--quiet", "HEAD", "--"], { cwd: ROOT, stdio: "ignore" }); cachedIndexClean = true; }
+  catch (error) { if (error.status === 1) cachedIndexClean = false; else fail(`git cached-index observation failed: ${error.message}`); }
+  const nested = new Set(Array.isArray(repository.nestedRoots) ? repository.nestedRoots : []);
+  const status = parseStatus(run("git", ["-C", root, "status", "--porcelain=v1", "-z", "--untracked-files=all"])).filter((entry) => !nested.has(entry.path));
+  return { head, expectedTree, cachedIndexClean, status };
+}
+function previousHead(repository) {
+  if (typeof repository.head !== "string" || !/^[0-9a-f]{40}$/.test(repository.head)) fail("activation recovery repository head is invalid");
+  return repository.head;
+}
+function recoveryRoot(node) { return `plans/context-magnet-session-etl-recovery/${node}`; }
+function granted(path) {
+  return GRANTS.includes(path) || VALIDATED_RECOVERIES.some((node) => path === recoveryRoot(node) || path.startsWith(`${recoveryRoot(node)}/`));
+}
+function protectedIdentity(path) {
+  const absolute = join(ROOT, path);
+  if (!existsSync(absolute)) return { path, state: "missing" };
+  const stat = lstatSync(absolute);
+  if (stat.isSymbolicLink()) return { path, state: "symlink" };
+  if (!stat.isFile()) return { path, state: "not-file" };
+  const identity = fileIdentity(absolute, "protected workspace path", { maxBytes: 512 * 1024 * 1024 });
+  return { path, state: "present", bytes: identity.bytes, mode: identity.mode, sha256: identity.sha256 };
+}
+function immutableRecovery(node) {
+  const path = join(ROOT, recoveryRoot(node), "state.json");
+  const { value: state } = readJson(path, `${node} recovery state`, { maxBytes: 8 * 1024 * 1024 });
+  const expectedGrants = RECOVERY_GRANTS.get(node);
+  if (!expectedGrants || state.node !== node || !["active", "finished"].includes(state.state) || state.root !== ROOT || state.artifactRoot !== join(ROOT, "plans/context-magnet-session-etl-recovery") || JSON.stringify(state.grants) !== JSON.stringify(expectedGrants) || !Array.isArray(state.repositories) || !Array.isArray(state.preimage?.repositories)) fail(`${node} recovery envelope schema or grant drift`);
+  const topology = state.repositories.map(({ name, path: repositoryPath, relative: repositoryRelative, nestedRoots }) => ({ name, path: repositoryPath, relative: repositoryRelative, nestedRoots })).sort((a, b) => a.name.localeCompare(b.name));
+  if (state.state === "finished") {
+    if (!state.postimage?.grants || !Array.isArray(state.postimage.changedPaths) || !Array.isArray(state.postimage.reversePatches)) fail(`${node} finished recovery postimage is incomplete`);
+    const manifest = join(ROOT, recoveryRoot(node), "recovery-manifest.json");
+    const { value: receipt } = readJson(manifest, `${node} recovery manifest`, { maxBytes: 8 * 1024 * 1024 });
+    if (receipt.node !== node || !Array.isArray(receipt.changedPaths)) fail(`${node} recovery manifest is invalid`);
+  }
+  return { state, capture: stable({ node: state.node, root: state.root, artifactRoot: state.artifactRoot, grants: state.grants, limits: state.limits, repositories: topology, preimage: state.preimage }) };
+}
+function workspaceFence() {
+  const recoveries = VALIDATED_RECOVERIES.map(immutableRecovery);
+  const state = recoveries.at(-1).state;
+  const findings = [];
+  for (const previous of state.preimage.repositories) {
+    if (!previous || typeof previous.path !== "string" || !Array.isArray(previous.protectedPaths)) fail("activation recovery repository snapshot is invalid");
+    const descriptor = state.repositories.find((entry) => entry?.name === previous.name);
+    if (!descriptor || !Array.isArray(descriptor.nestedRoots)) fail("activation recovery repository topology is invalid");
+    const fresh = currentRepository({ ...previous, nestedRoots: descriptor.nestedRoots });
+    if (fresh.head !== previous.head) findings.push(`${previous.name}:HEAD`);
+    // A pre-existing staged index cannot be proven without a Git object write;
+    // reject it rather than weakening the no-mutation observer.
+    if (previous.index !== fresh.expectedTree || !fresh.cachedIndexClean) findings.push(`${previous.name}:index`);
+    const outside = new Set();
+    for (const status of fresh.status) {
+      const path = previous.path === "." ? status.path : `${previous.path}/${status.path}`;
+      // The plan CLI appends artifact/evidence facts to this exact ledger
+      // between `land` and the node oracle.  It is campaign evidence, not
+      // protected runtime/source state; every other plan path stays fenced.
+      if (path !== PLAN_LEDGER && !granted(path)) outside.add(path);
+    }
+    const expected = new Map(previous.protectedPaths.map((entry) => [entry.path, entry]));
+    for (const path of [...outside].sort()) {
+      const actual = protectedIdentity(path);
+      if (JSON.stringify(stable(actual)) !== JSON.stringify(stable(expected.get(path)))) findings.push(`${previous.name}:${path}`);
+    }
+    for (const path of expected.keys()) {
+      if (path !== PLAN_LEDGER && !granted(path) && !outside.has(path)) findings.push(`${previous.name}:${path}:status`);
+    }
+  }
+  if (findings.length) fail(`protected workspace drift: ${[...new Set(findings)].slice(0, 24).join(", ")}`);
+  // `capture` intentionally excludes mutable state/postimage fields.  Each
+  // call above still validates a finished postimage and manifest when present.
+  return { recoveryCaptures: recoveries.filter((entry) => RECOVERIES.includes(entry.state.node)).map((entry) => entry.capture) };
+}
+function validateBaseline() {
+  const { bytes, value } = readJson(BASELINE, "workspace baseline");
+  if (value.schemaVersion !== 1 || value.kind !== "context-magnet-session-etl-workspace-preimage" || !value.observation?.runtime?.sharedHooks?.source?.sha256) fail("workspace baseline is invalid");
+  const priorLoadedPlugins = value.observation.runtime.loadedPlugins?.filter((entry) => ["context-magnet-inspector", "subscription-router"].includes(entry.id)).map((entry) => ({
+    id: entry.id, source: entry.source, rootDir: entry.rootDir, provenance: entry.provenance, version: entry.version, enabled: entry.enabled, status: entry.status,
+    app: entry.app ? { hash: entry.app.hash, jsBytes: entry.app.jsBytes, sdkMajor: entry.app.sdkMajor, sdkVersion: entry.app.sdkVersion, compatible: entry.app.compatible } : null,
+  })).sort((a, b) => a.id.localeCompare(b.id));
+  if (priorLoadedPlugins?.length !== 2 || priorLoadedPlugins.some((entry) => !entry.app?.hash)) fail("workspace baseline lacks the prior loaded plugin generation");
+  return { path: BASELINE, sha256: sha256(bytes), capturedWorkerThreadId: value.capturedWorkerThreadId, priorLoadedPlugins };
+}
+function observe(excluded) {
+  const baseline = validateBaseline();
+  return stable({ schemaVersion: 2, workspaceFence: workspaceFence(), baseline, selectedWorkbench: selectedWorkbench(), runtime: runtime(baseline.priorLoadedPlugins), directChildren: activeChildren(excluded) });
+}
+function validateReceipt(receipt) {
+  if (!receipt || receipt.schemaVersion !== 2 || receipt.kind !== "context-magnet-session-etl-activation-preimage" || typeof receipt.capturedWorkerThreadId !== "string" || !receipt.observation) fail("activation preimage receipt schema drift");
+  if (JSON.stringify(receipt.grants) !== JSON.stringify(GRANTS)) fail("activation preimage grant list drift");
+}
+function differencePaths(expected, actual, path = "observation") {
+  if (JSON.stringify(expected) === JSON.stringify(actual)) return [];
+  if (!expected || !actual || typeof expected !== "object" || typeof actual !== "object") return [path];
+  const paths = [];
+  for (const key of [...new Set([...Object.keys(expected), ...Object.keys(actual)])].sort()) paths.push(...differencePaths(expected[key], actual[key], `${path}.${key}`));
+  return paths.slice(0, 24);
+}
+function freshObservation(receipt) {
+  const excluded = new Set([process.env.BB_THREAD_ID, receipt?.capturedWorkerThreadId].filter(Boolean));
+  return observe(excluded);
+}
+function check() {
+  const { value: receipt } = readJson(RECEIPT, "activation preimage receipt", { maxBytes: 8 * 1024 * 1024 });
+  validateReceipt(receipt);
+  const actual = freshObservation(receipt);
+  const differences = differencePaths(stable(receipt.observation), actual);
+  if (differences.length) fail(`activation preimage drift: ${differences.join(", ")}`);
+  return receipt;
+}
+function capture() {
+  if (existsSync(RECEIPT)) {
+    const existing = readJson(RECEIPT, "existing activation preimage receipt", { maxBytes: 8 * 1024 * 1024 }).value;
+    if (existing.schemaVersion === 2) { check(); console.log("capture: existing exact bounded activation preimage remains current"); return; }
+    if (existing.schemaVersion !== 1 || existing.kind !== "context-magnet-session-etl-activation-preimage") fail("existing activation receipt is not an authorized migration input");
+  }
+  const capturedWorkerThreadId = process.env.BB_THREAD_ID;
+  if (!capturedWorkerThreadId?.startsWith("thr_")) fail("BB_THREAD_ID is required for an unambiguous child exclusion");
+  const receipt = { schemaVersion: 2, kind: "context-magnet-session-etl-activation-preimage", capturedWorkerThreadId, grants: GRANTS, observation: observe(new Set([capturedWorkerThreadId])) };
+  // The recovery envelope grants this exact previously-absent regular file.
+  const bytes = Buffer.from(`${JSON.stringify(receipt, null, 2)}\n`);
+  if (bytes.length > 8 * 1024 * 1024) fail("activation preimage exceeds bounded receipt limit");
+  writeReceipt(RECEIPT, bytes);
+  check();
+  console.log(`capture: recorded exact bounded activation preimage sha256=${sha256(bytes)}`);
+}
+function writeReceipt(path, bytes) {
+  // A single exclusive creation prevents an accidental overwrite of a receipt
+  // produced by another observer; capture is otherwise idempotent via check().
+  let descriptor;
+  try { descriptor = openSync(path, existsSync(path) ? (constants.O_WRONLY | constants.O_TRUNC | constants.O_NOFOLLOW) : (constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW), 0o600); writeFileSync(descriptor, bytes); fsyncSync(descriptor); }
+  finally { if (descriptor !== undefined) closeSync(descriptor); }
+}
+function targetOptions() {
+  const receipt = check();
+  const proof = join(ROOT, "fork/build/proof-bb");
+  const proofPresent = existsSync(proof) && lstatSync(proof).isDirectory() && !lstatSync(proof).isSymbolicLink();
+  const normal = receipt.observation.runtime.bbRuntime.entryPath;
+  console.log(JSON.stringify({
+    kind: "context-magnet-session-etl-activation-target-options",
+    isolatedProofRuntime: { available: proofPresent, runtimeRoot: proof, ports: [39886, 39887, 39888], stateRoot: "/home/ubuntu/.local/share/bb-service-preview", blastRadius: "authorized temporary same-machine proof only" },
+    normalBbMachine: { available: normal.startsWith(`${ROOT}/fork/build/bb/`), runtimeEntry: normal, blastRadius: "normal service/runtime mutation requires Cole's explicit selector ruling" },
+  }, null, 2));
+}
+
+try {
+  const mode = process.argv[2];
+  if (mode === "capture") capture();
+  else if (mode === "check") { check(); console.log("activation preimage matches fresh bounded observation"); }
+  else if (mode === "target-options") targetOptions();
+  else fail("usage: node plans/verify-context-magnet-session-etl-activation-preimage.mjs [capture|check|target-options]");
+} catch (error) { process.stderr.write(`${error.message}\n`); process.exitCode = 1; }

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "context-magnet-workbench-runtime-receipt",
+  "source": {
+    "root": "/home/ubuntu/.bb/thread-storage/thr_6m53rk7vvv/workbench-context/repos/workbench-go",
+    "branch": "cole/context-magnet-receipts",
+    "baseRevision": "65f62403b31126431c8098d986dbba90d2fbdddd",
+    "sourceRevision": "65f62403b31126431c8098d986dbba90d2fbdddd",
+    "dirtyDiffSha256": "bd9e7818cb2f4c7cbb6144544339b303df7c68e845d8d944cd825e4e2cb881f9",
+    "changedFileCount": 16
+  },
+  "artifact": {
+    "path": "/home/ubuntu/bb/plans/context-magnet-workbench-runtime/bd9e7818cb2f4c7cbb6144544339b303df7c68e845d8d944cd825e4e2cb881f9/workbench",
+    "sha256": "d72d04b219c9cbb8c35989a84d6d87dba776aef5e42636b4a8c8e5dc54fa4f28",
+    "mode": "0755",
+    "platform": "linux",
+    "architecture": "amd64"
+  },
+  "identity": {
+    "version": "workbench 0.8.1 (65f62403b31126431c8098d986dbba90d2fbdddd)"
+  },
+  "build": {
+    "command": [
+      "go",
+      "build",
+      "-trimpath",
+      "-ldflags",
+      "-X github.com/phosphorco/workbench-go/internal/version.release=0.8.1 -X github.com/phosphorco/workbench-go/internal/version.revision=65f62403b31126431c8098d986dbba90d2fbdddd",
+      "-o",
+      "/home/ubuntu/bb/plans/context-magnet-workbench-runtime/bd9e7818cb2f4c7cbb6144544339b303df7c68e845d8d944cd825e4e2cb881f9/workbench",
+      "./cmd/workbench"
+    ],
+    "toolchain": "go version go1.26.6 linux/amd64"
+  },
+  "witness": {
+    "decisionSlotsHelp": "workbench context --help contains: inspect decision-slots SESSION_SLOT TURN_SLOT [NONCE_SLOT]"
+  }
+}

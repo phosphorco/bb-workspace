@@ -1,0 +1,21 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/subscription-router/deployment.ts b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/router-reader-invocation/files/a48bac74b467073b601560567d61e2c81ed7aa1fee17b15de22786ee7a7a42cc.bin
+index 806456a170a0cb4d7d0678f6edf0c084ce113d44..275728bfde4246287d47f224d1373cb3a5127f9e 100644
+--- a/home/ubuntu/bb/plugins/plugins/subscription-router/deployment.ts
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/router-reader-invocation/files/a48bac74b467073b601560567d61e2c81ed7aa1fee17b15de22786ee7a7a42cc.bin
+@@ -115,7 +115,7 @@ export const preinstallDoctorCommand = (home: string): string =>
+ export const hostFileModesCommand = (home: string): string => {
+   const lib = join(home, ".codex-subscription-router", "lib");
+   return `chmod 700 ${shellQuote(join(lib, "router.mjs"))}`
+-    + ` && chmod 600 ${["accounts.mjs", "routing.mjs", "state.mjs", "context-magnet-session-reader.mjs"]
++    + ` && chmod 600 ${["accounts.mjs", "routing.mjs", "state.mjs"]
+       .map((name) => shellQuote(join(lib, name))).join(" ")}`;
+ };
+ 
+@@ -128,7 +128,6 @@ export const hostFileModesCommand = (home: string): string => {
+  */
+ export const HOST_FILES = [
+   "router.mjs", "accounts.mjs", "routing.mjs", "state.mjs",
+-  "context-magnet-session-reader.mjs",
+   "backend.mjs", "backend-config.mjs", "sqlite-state.mjs", "process-identity.mjs", "migration.mjs",
+   "session-migration.mjs", "shared-hooks.mjs",
+   // Homed algebras. Capitalized and eponymous: the module is named for the

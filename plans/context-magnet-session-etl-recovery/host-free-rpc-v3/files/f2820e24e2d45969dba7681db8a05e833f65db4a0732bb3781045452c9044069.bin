@@ -1,0 +1,632 @@
+import { randomUUID } from "node:crypto";
+import { defineRpcContract, type BbPluginApi } from "@get-bb/plugin-sdk";
+import { z } from "zod";
+import { descriptorsFromStoredEvents } from "./context-magnet.ts";
+import { readAgentCliCarrier } from "./agent-cli-adapter.ts";
+import { HostTraceProjectionError, readHostTracePage } from "./host-trace-adapter.ts";
+import { inspectWorkbenchQuery } from "./workbench-adapter.ts";
+import { contextMagnetTraceConfiguration } from "./trace-producer.ts";
+import {
+  armWitness,
+  consumeWitness,
+  consumptionEvidence,
+  WITNESS_METADATA_KEY,
+  WITNESS_TOOL_NAME,
+  armWitnessForTrace,
+  witnessStepSelectionFromPluginMetadata,
+  witnessFromPluginMetadata,
+  linkWitnessToExactOperation,
+  type HostContributionTracePage,
+} from "./witness.ts";
+
+const CHANNEL = "context-magnet-changed";
+const WORKBENCH_METADATA_KEY = "context-magnet-inspector.workbench";
+const WORKBENCH_PROJECT_ROOT = "/home/ubuntu/phosphor/monorepo";
+const HOST_PAGE_SIZE = 100;
+const START_DELAY_MS = 60_000;
+const START_PROMPT = "How hard would it be to implement a small Context Magnet contributor in this Monorepo? Give a concise, evidence-based implementation approach and inspect only files necessary to ground the answer.";
+const START_FAILURE_STAGES = [
+  "spawn",
+  "child-binding",
+  "arm",
+  "stale-list",
+  "stale-delete",
+  "postarm-send",
+] as const;
+type StartFailureStage = (typeof START_FAILURE_STAGES)[number];
+const threadIdSchema = z.string().min(1).max(200).regex(/^[A-Za-z0-9._:-]+$/u);
+const witnessInputSchema = z.object({ proof: z.string().min(1).max(160) }).strict();
+const traceEventSchema = z.object({
+  at: z.number().finite(),
+  event: z.enum(["magnet:contributed", "magnet:suppressed", "magnet:contributor-failed", "magnet:contributor-diagnostic", "magnet:empty"]),
+  contributorId: z.string(),
+  dedupKey: z.string().optional(),
+  sourceKind: z.enum(["File", "AgentInbox", "ReviewFinding", "FrameOutput"]).optional(),
+  sourcePath: z.string().optional(),
+  debugLabel: z.string().optional(),
+  reason: z.enum(["deduped", "empty-body"]).optional(),
+  message: z.string().optional(),
+  errorTag: z.string().optional(),
+  mappingState: z.enum(["exact", "derived", "partial", "unmatched"]).optional(),
+  rawEvidence: z.enum(["available", "unavailable", "withheld"]).optional(),
+  rawLocator: z.string().optional(),
+}).strict();
+const workbenchBindingSchema = z.object({
+  version: z.literal(1),
+  path: z.literal(WORKBENCH_PROJECT_ROOT),
+  audience: z.string().min(1).max(200).regex(/^[A-Za-z0-9._:-]+$/u),
+  target: z.union([
+    z.object({ kind: z.literal("contribution"), id: z.number().int().positive() }).strict(),
+    z.object({ kind: z.literal("turn"), id: z.string().min(1).max(240).regex(/^[A-Za-z0-9._:-]+$/u) }).strict(),
+  ]).optional(),
+}).strict();
+
+const operationKeySchema = z.object({
+  threadId: threadIdSchema,
+  operationId: z.string().min(1).max(200),
+  eventSeq: z.number().int().nonnegative(),
+  turnId: z.string().min(1).max(200).optional(),
+}).strict();
+const contributionKeySchema = z.object({ threadId: threadIdSchema, id: z.string().min(1).max(200) }).strict();
+const safeEvidenceSchema = z.json();
+const safeEvidenceRecordSchema = z.record(z.string().min(1).max(256), safeEvidenceSchema);
+const placementSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("exact"), target: operationKeySchema, renderedAnchor: operationKeySchema }).strict(),
+  z.object({ kind: z.literal("nearest-rendered"), target: operationKeySchema, renderedAnchor: operationKeySchema, direction: z.enum(["before", "after", "containing-turn"]) }).strict(),
+  z.object({ kind: z.literal("unmatched"), target: operationKeySchema.nullable(), reason: z.enum(["target-not-retained", "target-not-renderable", "unknown"]) }).strict(),
+]);
+const admissionObservationSchema = z.discriminatedUnion("kind", [
+  z.object({ admissionObservationSequence: z.number().int().positive(), at: z.string().min(1).max(128), kind: z.enum(["constructed", "accepted"]) }).strict(),
+  z.object({ admissionObservationSequence: z.number().int().positive(), at: z.string().min(1).max(128), kind: z.literal("failed-settlement"), settlement: z.enum(["bridge-unavailable", "malformed-response", "transport-not-accepted"]) }).strict(),
+]);
+const admissionGapSchema = z.object({
+  kind: z.enum(["authorization", "bridge", "instrumentation", "retention", "unknown"]),
+  scope: z.enum(["declaration", "constructed", "accepted", "association", "consumption"]),
+  reason: z.string().min(1).max(256),
+}).strict();
+const providerAdmissionSchema = z.object({
+  version: z.literal("context-magnet.provider-admission/v1"),
+  contributionKey: contributionKeySchema,
+  admissionKey: contributionKeySchema,
+  declaration: z.enum(["declared", "unavailable"]),
+  attempt: z.object({
+    id: z.string().min(1).max(200),
+    requestKind: z.enum(["start", "resume", "fork"]),
+    providerKind: z.string().regex(/^[\x20-\x7E]{1,64}$/u),
+    instructionMode: z.enum(["append", "replace", "none", "unknown"]),
+    selectedToolSummary: z.enum(["one-or-more", "none", "unknown"]),
+  }).strict(),
+  observations: z.array(admissionObservationSchema).max(3),
+  gaps: z.array(admissionGapSchema).max(64),
+}).strict();
+const admissionRetentionGapSchema = z.object({
+  kind: z.literal("retention"),
+  scope: z.literal("admissions"),
+  reason: z.string().min(1).max(256),
+}).strict();
+const contributionSchema = z.object({
+  contributionKey: contributionKeySchema,
+  placement: placementSchema,
+  trigger: z.object({
+    factKey: contributionKeySchema.nullable(),
+    renderState: z.enum(["rendered", "unrendered", "withheld", "unknown"]),
+    renderedAnchor: operationKeySchema.optional(),
+    locator: z.enum(["host-fact", "host-policy", "unknown"]),
+  }).strict(),
+  inclusionReason: z.object({
+    category: z.enum(["relevant-tool-result", "relevant-thread-fact", "policy-required", "explicit-user-context", "deduplication", "other-safe"]),
+    detail: z.string().min(1).max(256).optional(),
+  }).strict(),
+  outcome: z.discriminatedUnion("kind", [
+    z.object({ kind: z.literal("rejected"), rejection: z.enum(["policy", "validation", "capacity", "other-safe"]) }).strict(),
+    z.object({ kind: z.literal("delivered") }).strict(),
+    z.object({ kind: z.literal("deduplicated"), against: contributionKeySchema.nullable() }).strict(),
+    z.object({ kind: z.literal("failed"), failure: z.enum(["host", "contributor", "other-safe"]) }).strict(),
+    z.object({ kind: z.literal("unavailable"), unavailable: z.enum(["not-retained", "not-authorized", "carrier", "unknown"]) }).strict(),
+  ]),
+  consumption: z.discriminatedUnion("state", [
+    z.object({ state: z.literal("consumed"), kind: z.enum(["model-owned-receipt", "host-observed"]), observedAt: z.string().min(1).max(128).optional() }).strict(),
+    z.object({ state: z.literal("not-observed") }).strict(),
+    z.object({ state: z.literal("unknown") }).strict(),
+    z.object({ state: z.literal("unavailable"), reason: z.enum(["not-retained", "not-authorized", "carrier"]) }).strict(),
+  ]),
+  evidence: z.object({
+    source: z.literal("context-magnet-host"),
+    sourceSchemaVersion: z.string().min(1).max(128),
+    original: safeEvidenceSchema,
+    unknownFields: safeEvidenceRecordSchema,
+    redactions: z.array(z.object({ path: z.string().min(1).max(512), reason: z.enum(["authorization", "privacy", "retention", "unsafe-body"]) }).strict()).max(64),
+    rawLocators: z.array(z.string().min(1).max(1_024)).max(64).optional(),
+  }).strict(),
+  admissions: z.array(providerAdmissionSchema).max(16).optional(),
+  admissionGaps: z.array(admissionRetentionGapSchema).max(16).optional(),
+}).strict();
+const gapSchema = z.object({
+  kind: z.enum(["retention", "authorization", "carrier", "redaction", "unknown"]),
+  scope: z.enum(["contributions", "operations", "trigger-provenance", "consumption"]),
+  afterEventSeq: z.number().int().nonnegative().optional(),
+  beforeEventSeq: z.number().int().nonnegative().optional(),
+  reason: z.string().min(1).max(256),
+  unknownFields: safeEvidenceRecordSchema.optional(),
+}).strict();
+const hostPageSchema = z.object({
+  cursor: z.string().min(1).max(2_048).nullable(),
+  nextCursor: z.string().min(1).max(2_048).nullable(),
+  retainedFrom: z.object({
+    contributionEventSeq: z.number().int().nonnegative().nullable(),
+    operationEventSeq: z.number().int().nonnegative().nullable(),
+    state: z.enum(["known", "unknown", "unavailable"]),
+  }).strict(),
+  completeness: z.enum(["complete", "partial", "unavailable"]),
+  gaps: z.array(gapSchema),
+  contributions: z.array(contributionSchema).max(HOST_PAGE_SIZE),
+}).strict();
+const hostProjectionSchema = z.object({
+  version: z.literal("context-magnet.trace-carrier/v1"),
+  threadId: threadIdSchema,
+  snapshot: z.object({
+    id: z.string().min(1).max(200),
+    capturedAt: z.string().min(1).max(128),
+    operationSeqHighWatermark: z.number().int().nonnegative(),
+    admissionAttemptSeqHighWatermark: z.number().int().nonnegative().optional(),
+    admissionObservationSeqHighWatermark: z.number().int().nonnegative().optional(),
+    admissionRetentionHighWatermark: z.number().int().nonnegative().optional(),
+  }).strict(),
+  operations: z.array(z.object({ anchor: operationKeySchema, contributions: z.array(contributionSchema).max(HOST_PAGE_SIZE) }).strict()).max(HOST_PAGE_SIZE),
+  unmatched: z.array(z.object({ contribution: contributionSchema, state: z.literal("carrier-unmatched") }).strict()).max(HOST_PAGE_SIZE),
+  page: hostPageSchema,
+  gaps: z.array(z.object({ pageCursor: z.string().min(1).max(2_048).nullable(), gap: gapSchema }).strict()),
+  completeness: z.enum(["complete", "partial", "unavailable"]),
+  nextCursor: z.string().min(1).max(2_048).nullable(),
+}).strict();
+const witnessLinkSchema = z.object({
+  state: z.enum(["absent", "invalid", "selected", "delivered", "consumed"]),
+  detail: z.string(),
+  selectionId: z.string().min(1).max(160).optional(),
+  contributionId: z.string().min(1).max(160).optional(),
+  operation: operationKeySchema.optional(),
+  kind: z.literal("model-owned-receipt").optional(),
+}).strict();
+const hostInspectionSchema = z.object({
+  state: z.enum(["ready", "partial", "unavailable"]),
+  detail: z.string().min(1).max(512),
+  projection: hostProjectionSchema.nullable(),
+  cursor: z.string().min(1).max(2_048).nullable(),
+  nextCursor: z.string().min(1).max(2_048).nullable(),
+  gaps: z.array(z.object({ pageCursor: z.string().min(1).max(2_048).nullable(), gap: gapSchema }).strict()),
+  witness: witnessLinkSchema,
+}).strict();
+
+const workbenchEvidenceSchema = z.object({
+  key: z.string().max(256),
+  value: z.union([z.string().max(4_096), z.number().int().safe(), z.boolean()]),
+}).strict();
+const workbenchReasonSchema = z.object({
+  code: z.number().int().nonnegative(),
+  provider: z.string().max(256),
+  rule: z.string().max(256),
+  parameters: z.array(workbenchEvidenceSchema).max(256),
+}).strict();
+const workbenchRecordSchema = z.object({
+  id: z.number().int().nonnegative(),
+  at: z.string().max(128),
+  kind: z.string().min(1).max(64),
+  outcome: z.string().min(1).max(64),
+  scope: z.string().max(1_024),
+  audience: z.string().max(256),
+  epoch: z.number().int().nonnegative(),
+  turn: z.string().max(256),
+  profile: z.string().max(256),
+  source: z.string().max(512),
+  contributor: z.string().max(256),
+  contributionId: z.number().int().nonnegative(),
+  inputs: z.array(workbenchEvidenceSchema).max(64),
+  reasons: z.array(workbenchReasonSchema).max(64),
+  sample: z.object({
+    originalBytes: z.number().int().nonnegative(),
+    omittedBytes: z.number().int().nonnegative(),
+    excerpts: z.array(z.object({
+      offset: z.number().int().nonnegative(),
+      bytes: z.number().int().nonnegative(),
+      omittedBefore: z.number().int().nonnegative(),
+      omittedAfter: z.number().int().nonnegative(),
+      text: z.string().max(10_000),
+    }).strict()).max(64),
+  }).strict().nullable(),
+}).strict();
+const workbenchInspectionSchema = z.object({
+  state: z.enum(["not-configured", "ready", "partial", "unavailable"]),
+  detail: z.string().max(512),
+  generation: z.number().int().nonnegative(),
+  records: z.array(workbenchRecordSchema).max(48),
+  gaps: z.array(z.object({
+    kind: z.string().min(1).max(64),
+    generation: z.number().int().nonnegative(),
+    fromRecordId: z.number().int().nonnegative(),
+    toRecordId: z.number().int().nonnegative(),
+    detail: z.string().max(512),
+  }).strict()).max(128),
+  hasMore: z.boolean(),
+  partialPage: z.boolean(),
+  partialScan: z.boolean(),
+  target: z.union([
+    z.object({ kind: z.literal("contribution"), id: z.number().int().positive() }).strict(),
+    z.object({ kind: z.literal("turn"), id: z.string().min(1).max(240) }).strict(),
+  ]).nullable(),
+}).strict();
+
+export const rpcContract = defineRpcContract({
+  inspect: {
+    input: z.object({ threadId: threadIdSchema, hostCursor: z.string().min(1).max(2_048).optional() }).strict(),
+    output: z.object({
+      state: z.enum(["ready", "inactive", "partial", "unavailable"]),
+      detail: z.string(),
+      trace: z.array(traceEventSchema).max(48),
+      consumption: z.object({
+        state: z.enum(["not-selected", "awaiting-consumption", "consumed", "invalid"]),
+        detail: z.string(),
+        contributionId: z.string().optional(),
+        selectedAt: z.number().optional(),
+        consumedAt: z.number().optional(),
+      }).strict(),
+      workbench: workbenchInspectionSchema,
+      host: hostInspectionSchema,
+    }).strict(),
+  },
+});
+
+/**
+ * Read and validate exactly one host-owned page. A continuation's opaque
+ * cursor is passed through unchanged; this function never restarts or follows
+ * the cursor chain on behalf of the caller.
+ */
+async function readHostInspection(
+  threads: BbPluginApi["sdk"]["threads"],
+  threadId: string,
+  metadata: unknown,
+  hostCursor: string | undefined,
+) {
+  if (typeof threads.experimental_contextMagnetContributions !== "function") {
+    return {
+      state: "unavailable" as const,
+      detail: "The authoritative Context Magnet host trace API is unavailable; the legacy agent-cli and Workbench disclosures remain fallback evidence only.",
+      projection: null,
+      cursor: hostCursor ?? null,
+      nextCursor: null,
+      gaps: [{ pageCursor: null, gap: { kind: "carrier" as const, scope: "contributions" as const, reason: "The host trace API is not available on this BB host." } }],
+      witness: linkWitnessToExactOperation(metadata, []),
+    };
+  }
+  try {
+    const projection = await readHostTracePage(threads, {
+      threadId,
+      cursor: hostCursor ?? null,
+      limit: HOST_PAGE_SIZE,
+    });
+    const witnessPage: HostContributionTracePage = {
+      // This is a field-for-field carrier projection, not a reconstructed
+      // join: the adapter already validated every supplied placement.
+      version: projection.version,
+      threadId: projection.threadId,
+      contributions: projection.page.contributions.map(({ placement, ...contribution }) => ({
+        ...contribution,
+        operation: placement,
+      })),
+    } as HostContributionTracePage;
+    const state: "ready" | "partial" | "unavailable" = projection.completeness === "complete"
+      ? "ready"
+      : projection.completeness;
+    return {
+      state,
+      detail: state === "ready"
+        ? "Authoritative host trace page is complete for its declared retained range."
+        : state === "partial"
+          ? "Authoritative host trace page is partial; retained gaps are included explicitly."
+          : "Authoritative host trace page is unavailable; its carrier or authorization gaps are included explicitly.",
+      projection,
+      cursor: projection.page.cursor,
+      nextCursor: projection.nextCursor,
+      gaps: projection.gaps,
+      witness: linkWitnessToExactOperation(metadata, [witnessPage]),
+    };
+  } catch (error) {
+    // Do not turn malformed or inaccessible host data into an empty trace.
+    const reason = error instanceof HostTraceProjectionError
+      ? "The host trace response failed validation."
+      : "The host trace could not be read.";
+    return {
+      state: "unavailable" as const,
+      detail: `${reason} The legacy agent-cli and Workbench disclosures remain fallback evidence only.`,
+      projection: null,
+      cursor: hostCursor ?? null,
+      nextCursor: null,
+      gaps: [{ pageCursor: null, gap: { kind: "carrier" as const, scope: "contributions" as const, reason } }],
+      witness: linkWitnessToExactOperation(metadata, []),
+    };
+  }
+}
+
+function safeRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function workbenchBindingFromMetadata(metadata: unknown) {
+  const candidate = safeRecord(metadata)?.[WORKBENCH_METADATA_KEY];
+  const parsed = workbenchBindingSchema.safeParse(candidate);
+  if (!parsed.success) return null;
+  const { version: _version, ...query } = parsed.data;
+  return query;
+}
+
+/** The v2 selection is not consumption evidence; only the host trace can say that. */
+function currentWitnessEvidence(metadata: unknown) {
+  const selection = witnessStepSelectionFromPluginMetadata(metadata);
+  if (selection !== null) {
+    return {
+      state: "awaiting-consumption" as const,
+      detail: "A thread-bound Context Magnet selection is armed; only the authoritative host trace can establish a model-owned receipt.",
+    };
+  }
+  return consumptionEvidence(metadata);
+}
+
+function isScheduledStartMessage(value: unknown, childThreadId: string, sendAt: number): value is Readonly<{ id: string }> {
+  const row = safeRecord(value);
+  const content = Array.isArray(row?.content) ? row.content : null;
+  const item = content?.length === 1 ? safeRecord(content[0]) : null;
+  return row?.threadId === childThreadId
+    && row.sendAt === sendAt
+    && typeof row.id === "string"
+    && row.id.length > 0
+    && item?.type === "text"
+    && item.text === START_PROMPT;
+}
+
+function isPostarmQueuedMessage(value: unknown, childThreadId: string): value is Readonly<{ id: string }> {
+  const row = safeRecord(value);
+  const content = Array.isArray(row?.content) ? row.content : null;
+  const item = content?.length === 1 ? safeRecord(content[0]) : null;
+  return row?.threadId === childThreadId
+    && typeof row.id === "string"
+    && row.id.length > 0
+    && item?.type === "text"
+    && item.text === START_PROMPT;
+}
+
+async function cleanupUndispatchedChild(
+  threads: BbPluginApi["sdk"]["threads"],
+  childThreadId: string,
+  queuedMessageIds: readonly string[],
+): Promise<boolean> {
+  let completed = true;
+  for (const queuedMessageId of new Set(queuedMessageIds)) {
+    try {
+      await threads.queuedMessages.delete({ threadId: childThreadId, queuedMessageId });
+    } catch {
+      completed = false;
+    }
+  }
+  try {
+    await threads.delete({ threadId: childThreadId, childThreadsConfirmed: false });
+  } catch {
+    completed = false;
+  }
+  return completed;
+}
+
+export default function plugin(bb: BbPluginApi) {
+  bb.agents.configure(({ pluginMetadata, thread }) =>
+    contextMagnetTraceConfiguration({ pluginMetadata, threadId: thread.id }));
+
+  bb.agents.registerTool({
+    name: WITNESS_TOOL_NAME,
+    description: "Record the test-only receipt defined by the currently selected Context Magnet witness skill.",
+    instructions: "Use only when the selected Context Magnet witness skill instructs you to do so. Do not guess the proof value.",
+    presentation: { label: { pending: "Verifying Context Magnet witness", completed: "Verified Context Magnet witness" }, icon: { glyph: "Magnet" }, suppress: true },
+    parameters: witnessInputSchema,
+    async execute({ proof }, context) {
+      const metadata = await bb.sdk.threads.getPluginMetadata({ threadId: context.threadId });
+      const selection = witnessStepSelectionFromPluginMetadata(metadata);
+      if (selection !== null) {
+        if (selection.threadId !== context.threadId || proof !== selection.proof) {
+          return { content: [{ type: "text", text: "The Context Magnet witness proof was not accepted." }], isError: true };
+        }
+        // The receipt seam records the operation and consumption state in the
+        // host carrier. Replacing this selection would sever that exact link.
+        bb.realtime.publish(CHANNEL, { threadId: context.threadId, witness: "receipt-submitted" });
+        return { content: [{ type: "text", text: "Context Magnet witness accepted. Continue the task normally." }] };
+      }
+
+      // Existing v1 records predate the explicit host-trace declaration. Keep
+      // their behavior only so previously armed demo threads do not regress.
+      const witness = witnessFromPluginMetadata(metadata);
+      if (witness?.state !== "armed") {
+        return { content: [{ type: "text", text: "No armed Context Magnet witness is available for this thread." }], isError: true };
+      }
+      if (proof !== witness.proof) {
+        return { content: [{ type: "text", text: "The Context Magnet witness proof was not accepted." }], isError: true };
+      }
+      const consumed = consumeWitness(witness, Date.now());
+      await bb.sdk.threads.updatePluginMetadata({
+        threadId: context.threadId,
+        set: { [WITNESS_METADATA_KEY]: consumed },
+      });
+      bb.realtime.publish(CHANNEL, { threadId: context.threadId, witness: "consumed" });
+      return { content: [{ type: "text", text: "Context Magnet witness accepted. Continue the task normally." }] };
+    },
+  });
+
+  bb.cli.register({
+    name: "context-magnet-demo",
+    summary: "Arm or inspect the explicit Context Magnet consumption witness.",
+    commands: [
+      { name: "arm", summary: "Arm the next provider session for a thread", usage: "bb context-magnet-demo arm <thread-id>" },
+      { name: "start", summary: "Start a fresh, pre-armed child in a thread's environment", usage: "bb context-magnet-demo start <thread-id>" },
+      { name: "status", summary: "Read the recorded witness status for a thread", usage: "bb context-magnet-demo status <thread-id>" },
+      { name: "bind-workbench", summary: "Bind a thread to an explicit Workbench audience and optional target", usage: "bb context-magnet-demo bind-workbench <thread-id> <audience> [turn <turn-id>|contribution <id>]" },
+    ],
+    async run(argv) {
+      const [command, threadId, ...extra] = argv;
+      if (!threadIdSchema.safeParse(threadId).success) {
+        return { exitCode: 2, stderr: "Usage: bb context-magnet-demo <arm|start|status|bind-workbench> <thread-id> [...]\n" };
+      }
+      const thread = await bb.sdk.threads.get({ threadId });
+      if (command === "bind-workbench") {
+        const [audience, targetKind, targetValue, ...bindingExtra] = extra;
+        const target = targetKind === undefined
+          ? undefined
+          : targetKind === "turn" && typeof targetValue === "string"
+            ? { kind: "turn" as const, id: targetValue }
+            : targetKind === "contribution" && typeof targetValue === "string" && /^[1-9][0-9]*$/u.test(targetValue)
+              ? { kind: "contribution" as const, id: Number(targetValue) }
+              : null;
+        const binding = workbenchBindingSchema.safeParse({ version: 1, path: WORKBENCH_PROJECT_ROOT, audience, ...(target === undefined ? {} : { target }) });
+        if (!binding.success || target === null || bindingExtra.length > 0) {
+          return { exitCode: 2, stderr: "Usage: bb context-magnet-demo bind-workbench <thread-id> <audience> [turn <turn-id>|contribution <id>]\n" };
+        }
+        await bb.sdk.threads.updatePluginMetadata({ threadId, set: { [WORKBENCH_METADATA_KEY]: binding.data } });
+        bb.realtime.publish(CHANNEL, { threadId, workbench: "bound" });
+        return { exitCode: 0, stdout: `${JSON.stringify({ state: "bound", audience: binding.data.audience, target: binding.data.target ?? null })}\n` };
+      }
+      if ((command !== "arm" && command !== "start" && command !== "status") || extra.length > 0) {
+        return { exitCode: 2, stderr: "Usage: bb context-magnet-demo <arm|start|status|bind-workbench> <thread-id> [...]\n" };
+      }
+      if (command === "status") {
+        const metadata = await bb.sdk.threads.getPluginMetadata({ threadId });
+        return { exitCode: 0, stdout: `${JSON.stringify(currentWitnessEvidence(metadata))}\n` };
+      }
+      if (command === "start") {
+        if (thread.environmentId === null) {
+          return { exitCode: 2, stderr: "The source thread has no ready environment to reuse.\n" };
+        }
+        const sendAt = Date.now() + START_DELAY_MS;
+        let childThreadId: string | null = null;
+        const ownedQueuedMessageIds: string[] = [];
+        let failureStage: StartFailureStage = "spawn";
+        try {
+          // `threads.spawn` constructs its initial command before returning.
+          // Keep that row delayed solely long enough to discover the exact
+          // child, then replace it after the child-bound metadata is armed.
+          const spawned = await bb.sdk.threads.spawn({
+            projectId: thread.projectId,
+            environment: { type: "reuse", environmentId: thread.environmentId },
+            parentThreadId: thread.id,
+            providerId: "codex",
+            model: "gpt-5.6-terra",
+            reasoningLevel: "high",
+            serviceTier: "fast",
+            permissionMode: "accept-edits",
+            title: "Context Magnet: pre-armed witness",
+            prompt: START_PROMPT,
+            sendAt,
+          });
+          childThreadId = spawned.id;
+          failureStage = "child-binding";
+          const child = await bb.sdk.threads.get({ threadId: childThreadId });
+          if (child.id !== childThreadId || child.parentThreadId !== thread.id || child.projectId !== thread.projectId) {
+            throw new Error("The delayed child binding could not be verified.");
+          }
+          failureStage = "arm";
+          const selection = armWitnessForTrace(childThreadId, `cmw:${randomUUID()}`, `cmw:${randomUUID()}`);
+          await bb.sdk.threads.updatePluginMetadata({
+            threadId: childThreadId,
+            set: { [WITNESS_METADATA_KEY]: selection },
+          });
+          failureStage = "stale-list";
+          const staleCandidates = (await bb.sdk.threads.queuedMessages.list({ threadId: childThreadId }))
+            .filter((message) => isScheduledStartMessage(message, childThreadId!, sendAt));
+          if (staleCandidates.length !== 1) throw new Error("The stale spawn-time dispatch could not be identified exactly.");
+          const staleQueuedMessageId = staleCandidates[0]!.id;
+          ownedQueuedMessageIds.push(staleQueuedMessageId);
+          failureStage = "stale-delete";
+          await bb.sdk.threads.queuedMessages.delete({ threadId: childThreadId, queuedMessageId: staleQueuedMessageId });
+          ownedQueuedMessageIds.pop();
+
+          failureStage = "postarm-send";
+          const result = await bb.sdk.threads.send({
+            threadId: childThreadId,
+            input: [{ type: "text", text: START_PROMPT, mentions: [] }],
+            model: "gpt-5.6-terra",
+            reasoningLevel: "high",
+            serviceTier: "fast",
+            permissionMode: "accept-edits",
+            executionInputSources: {
+              model: "explicit",
+              reasoningLevel: "explicit",
+              serviceTier: "explicit",
+              permissionMode: "explicit",
+            },
+            mode: "start",
+          });
+          if (result.delivery === "queued") {
+            if (!isPostarmQueuedMessage(result.queuedMessage, childThreadId)) {
+              throw new Error("The post-arm queued result could not be identified exactly.");
+            }
+            return { exitCode: 0, stdout: `${JSON.stringify({ threadId: childThreadId, state: "awaiting-host-receipt", delivery: "queued" })}\n` };
+          }
+          return { exitCode: 0, stdout: `${JSON.stringify({ threadId: childThreadId, state: "awaiting-host-receipt", delivery: "sent" })}\n` };
+        } catch {
+          const cleanupCompleted = childThreadId === null
+            ? true
+            : await cleanupUndispatchedChild(bb.sdk.threads, childThreadId, ownedQueuedMessageIds);
+          const cleanup = cleanupCompleted ? "" : "; cleanup=failed";
+          return { exitCode: 1, stderr: `Unable to safely start a pre-armed Context Magnet witness child (stage=${failureStage}${cleanup}).\n` };
+        }
+      }
+      const selection = armWitnessForTrace(threadId, `cmw:${randomUUID()}`, `cmw:${randomUUID()}`);
+      await bb.sdk.threads.updatePluginMetadata({
+        threadId,
+        set: { [WITNESS_METADATA_KEY]: selection },
+      });
+      bb.realtime.publish(CHANNEL, { threadId, witness: "armed" });
+      return { exitCode: 0, stdout: `${JSON.stringify({ state: "awaiting-host-receipt" })}\n` };
+    },
+  });
+
+  bb.rpc.register(rpcContract, {
+    async inspect({ threadId, hostCursor }) {
+      // Authoritative existence validation occurs before any event or external read.
+      await bb.sdk.threads.get({ threadId });
+      const metadata = await bb.sdk.threads.getPluginMetadata({ threadId });
+      const hostPromise = readHostInspection(bb.sdk.threads, threadId, metadata, hostCursor);
+      const legacy = hostCursor === undefined
+        ? (async () => {
+          const events = await bb.sdk.threads.events.list({ threadId, order: "desc", limit: "64" });
+          const descriptors = descriptorsFromStoredEvents(events);
+          const workbenchQuery = workbenchBindingFromMetadata(metadata) ?? descriptors.workbench;
+          const [carrier, workbench] = await Promise.all([
+            readAgentCliCarrier(descriptors.agentCli),
+            inspectWorkbenchQuery(workbenchQuery),
+          ]);
+          return { carrier, workbench };
+        })()
+        : Promise.resolve({
+          carrier: { state: "inactive" as const, detail: "Legacy agent-cli disclosure is not re-read for a host-trace continuation page.", trace: [] },
+          workbench: { state: "not-configured" as const, detail: "Workbench is not re-read for a host continuation page.", generation: 0, records: [], gaps: [], hasMore: false, partialPage: false, partialScan: false, target: null },
+        });
+      const [{ carrier, workbench }, host] = await Promise.all([legacy, hostPromise]);
+      // This is the final boundary before RPC serialization.  The host adapter
+      // validates carrier semantics; this schema validates the public payload.
+      const hostPayload = hostInspectionSchema.parse(host);
+      const workbenchPayload = workbenchInspectionSchema.parse(workbench);
+      return {
+        // The one returned host page is authoritative. Legacy data is read only
+        // on the first page and remains disclosure rather than a second carrier.
+        state: hostPayload.projection === null ? carrier.state : hostPayload.state,
+        detail: hostPayload.projection === null ? `${hostPayload.detail} ${carrier.detail}` : hostPayload.detail,
+        trace: [...carrier.trace],
+        consumption: currentWitnessEvidence(metadata),
+        workbench: workbenchPayload,
+        host: hostPayload,
+      };
+    },
+  });
+
+  // BB debounces this event per thread. It merely notifies visible panels; the
+  // panel decides whether it needs one bounded refresh, so idle threads stay quiet.
+  bb.events.on("experimental_thread.events", ({ thread, sequence }) => {
+    bb.realtime.publish(CHANNEL, { threadId: thread.id, sequence });
+  });
+}

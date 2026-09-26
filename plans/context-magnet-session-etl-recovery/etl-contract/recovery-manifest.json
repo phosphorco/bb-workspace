@@ -1,0 +1,12 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/docs/session-etl-contract.md",
+    "plugins/plugins/context-magnet-inspector/test/fixtures/session-etl.json",
+    "plugins/plugins/context-magnet-inspector/test/session-etl-contract.test.ts"
+  ],
+  "grantSha256": "b332523a7c4d33e4e866bf0a2c4ce2862476c04cd99f0652166aed90680694c3",
+  "node": "etl-contract",
+  "reversePatches": [],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

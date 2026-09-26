@@ -1,0 +1,20 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/app.tsx",
+    "plugins/plugins/context-magnet-inspector/test/session-etl-performance.test.ts",
+    "plugins/plugins/context-magnet-inspector/test/session-etl-renderer.test.ts"
+  ],
+  "grantSha256": "30b899506e938f8cb4c9106824f2891b5e29b41688714b50e3662f9ed332e722",
+  "node": "checkpoint-zero-renderer-schema",
+  "reversePatches": [
+    {
+      "bytes": 13465,
+      "path": "plugins/plugins/context-magnet-inspector/app.tsx",
+      "reversePatch": "checkpoint-zero-renderer-schema/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch",
+      "sha256": "6ebbc25a71808d111cce7d455f4d17f0c2006563bb189e007d3552bf4e1665a1",
+      "tracked": true
+    }
+  ],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

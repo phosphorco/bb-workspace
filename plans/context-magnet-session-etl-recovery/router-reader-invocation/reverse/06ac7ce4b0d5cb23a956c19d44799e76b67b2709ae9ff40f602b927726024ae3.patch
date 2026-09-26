@@ -1,0 +1,74 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/subscription-router/host/router.mjs b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/router-reader-invocation/files/06ac7ce4b0d5cb23a956c19d44799e76b67b2709ae9ff40f602b927726024ae3.bin
+old mode 100755
+new mode 100644
+index a6ce2c424476d360fff73e6df28b983a93cd0fd1..59a20caf89c47310b72131e97dcd90d70483935f
+--- a/home/ubuntu/bb/plugins/plugins/subscription-router/host/router.mjs
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/router-reader-invocation/files/06ac7ce4b0d5cb23a956c19d44799e76b67b2709ae9ff40f602b927726024ae3.bin
+@@ -14,7 +14,6 @@ import { openRouterStateStore } from "./backend.mjs";
+ import { canAcceptThread, copyThreadRollout, discoverThreadRollout, ensureDurableThreadRollout, findMigratedThreadRollout, findUnassignedThreadRollout, linkAccount, loginMachineAccount, migrateAccountThreads, moveThread, probeAccount, recoverUnassignedThread, refreshAccounts, resumeThreadFromRollout } from "./accounts.mjs";
+ import { recoverMalformedNativeRollout } from "./session-migration.mjs";
+ import { installSharedHooks, removeSharedHooks, sharedHookArgs, sharedHooksStatus } from "./shared-hooks.mjs";
+-import { READER_ATTESTATION, assertSafeReaderProjection, readOriginalRolloutSession, readReadonlyOriginalOwner } from "./context-magnet-session-reader.mjs";
+ 
+ const ROOT = process.env.CODEX_SUBSCRIPTION_ROUTER_HOME
+   ?? join(homedir(), ".codex-subscription-router");
+@@ -70,47 +69,6 @@ function writeMessage(message) {
+   process.stdout.write(`${JSON.stringify(message)}\n`);
+ }
+ 
+-const sessionReadSlot = (value) => `sha256:${createHash("sha256").update(String(value)).digest("hex")}`;
+-const sessionReadText = (value, max = 512) => typeof value === "string" && value.length > 0 && value.length <= max;
+-const sessionReadDigest = (value) => typeof value === "string" && /^[a-f0-9]{64}$/u.test(value);
+-
+-/**
+- * The explicit, non-lifecycle host command.  Its dependency injection is for
+- * unit proof only; the executable path always uses strict SQLite readonly
+- * access and the loaded reducer from this exact router generation.
+- */
+-export async function runContextMagnetSessionRead(args, options = {}) {
+-  const unavailable = (code) => ({
+-    version: "context-magnet.session-read-command/v1", state: "unavailable", code,
+-  });
+-  try {
+-    if (!Array.isArray(args) || args.length !== 3 || !sessionReadText(args[0]) || !sessionReadDigest(args[1]) || !sessionReadDigest(args[2])) return unavailable("invalid-arguments");
+-    const [providerThreadId, expectedGeneration, expectedReaderDigest] = args;
+-    const identity = options.deploymentIdentity ?? deploymentIdentity;
+-    const started = identity();
+-    if (!started.generationDigest || started.generationDigest !== expectedGeneration || expectedReaderDigest !== READER_ATTESTATION) return unavailable("attestation-mismatch");
+-    const readonlyState = await (options.readonlyState ?? readReadonlyOriginalOwner)(options.root ?? ROOT, providerThreadId, options.sqliteOptions);
+-    const result = await (options.reader ?? readOriginalRolloutSession)({
+-      providerThreadId, readonlyState, readerAttestation: READER_ATTESTATION, expectedReaderDigest,
+-      sourceFence: `${started.generationDigest}:${READER_ATTESTATION}`,
+-      postSourceFence: `${identity().generationDigest}:${READER_ATTESTATION}`,
+-    });
+-    assertSafeReaderProjection(result);
+-    const finished = identity();
+-    if (finished.generationDigest !== started.generationDigest || finished.generationDigest !== expectedGeneration) return unavailable("source-fence-changed");
+-    return {
+-      version: "context-magnet.session-read-command/v1", state: "ok",
+-      generationDigest: started.generationDigest, readerAttestation: READER_ATTESTATION,
+-      providerThreadSlot: sessionReadSlot(providerThreadId),
+-      startedFence: sessionReadSlot(`${started.generationDigest}:${READER_ATTESTATION}`),
+-      finishedFence: sessionReadSlot(`${finished.generationDigest}:${READER_ATTESTATION}`),
+-      result,
+-    };
+-  } catch {
+-    return unavailable("readonly-unavailable");
+-  }
+-}
+-
+ // Requests that open or create a thread session. The request-side routing
+ // (#handle) and the response-side ownership commit (#handleRoutedResponse)
+ // must agree on exactly this set, or the two halves of the flow desync.
+@@ -1758,11 +1716,6 @@ async function runStateCommand(args) {
+ 
+ async function main() {
+   const args = process.argv.slice(2);
+-  // This dispatch must stay ahead of all router state/lifecycle construction.
+-  if (args[0] === "context-magnet" && args[1] === "session-read") {
+-    process.stdout.write(`${JSON.stringify(await runContextMagnetSessionRead(args.slice(2)))}\n`);
+-    return;
+-  }
+   if (args[0] === "hooks" && args[1] !== "install") {
+     await runManagementCommand(args);
+     return;

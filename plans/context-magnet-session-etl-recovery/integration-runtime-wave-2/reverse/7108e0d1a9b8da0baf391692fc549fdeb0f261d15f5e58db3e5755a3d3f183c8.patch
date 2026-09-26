@@ -1,0 +1,46 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/test/working-block-performance.test.ts b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/7108e0d1a9b8da0baf391692fc549fdeb0f261d15f5e58db3e5755a3d3f183c8.bin
+index 2a1f34305b18f633ed4959795932f4449b4c3c1c..4aa0a62a2d7d9bfd2e3338ded485749e41805357 100644
+--- a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/test/working-block-performance.test.ts
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/7108e0d1a9b8da0baf391692fc549fdeb0f261d15f5e58db3e5755a3d3f183c8.bin
+@@ -5,20 +5,31 @@ import test from "node:test";
+ const source = await readFile(new URL("../app.tsx", import.meta.url), "utf8");
+ const css = await readFile(new URL("../app.css", import.meta.url), "utf8");
+ 
+-test("canonical ETL uses one local selected-row inspector without restoring trace lanes", () => {
+-  assert.match(source, /const \[selection, setSelection\] = useState<SessionEtlSelection \| null>\(null\)/u);
+-  assert.match(source, /selected !== null && <SessionEtlDetails row=\{selected\} onClose=\{close\} \/>/u);
+-  assert.match(source, /activeSessionEtlSelection\(selection, projection, state\)/u);
+-  assert.doesNotMatch(source, /ContributionPopover|WorkbenchRecordPopover|TraceContributionDetails|context-magnet-working|context-magnet-operation|experimental_contextMagnetContributions/u);
+-  assert.doesNotMatch(source, /createPortal|document\.addEventListener|setInterval|setTimeout|IntersectionObserver/u);
++test("closed Working blocks and the Workbench lane each own one shared native popover, not per-row overlay work", () => {
++  assert.match(source, /const \[renderRows, setRenderRows\] = useState\(false\)/u);
++  assert.match(source, /\{renderRows && <div className="context-magnet-working-body">/u);
++  assert.match(source, /<ContributionPopover contribution=\{selectedContribution\} popoverId=\{popoverId\} \/>/u);
++  assert.match(source, /<WorkbenchRecordPopover record=\{selected\} popoverId=\{popoverId\} \/>/u);
++  assert.equal((source.match(/popover="auto"/gu) ?? []).length, 2, "each lane has one shared native popover surface");
++  assert.match(source, /popoverTargetAction="show"/u);
++  assert.match(source, /Declaration: \$\{declaration\.label\}/u);
++  assert.match(source, /Provider: \{admission\.label\}/u);
++  assert.match(source, /Model: \{consumption\.label\}/u);
++  assert.match(source, /Provider accepted; model use not observed/u);
++  assert.match(source, /Consumed \(model-owned receipt\)/u);
++  assert.match(source, /Host observed; model use not verified/u);
++  assert.match(source, /context-magnet-declaration/u);
++  assert.match(source, /context-magnet-admission/u);
++  assert.match(source, /context-magnet-consumption/u);
++  assert.doesNotMatch(source, /createPortal|document\.addEventListener|setInterval|setTimeout|IntersectionObserver|TraceContributionDetails/u);
+ });
+ 
+-test("canonical ETL rows remain bounded, responsive, and theme-token based", () => {
+-  assert.match(css, /\.context-magnet-etl-row \{ display: grid; grid-template-columns: minmax\(0, 1fr\) auto;/u);
+-  assert.match(css, /\.context-magnet-etl-context \{ max-height: 14rem; overflow: auto;/u);
++test("trace rows remain lane-aligned, offscreen-contained, responsive, and theme-token based", () => {
++  assert.match(css, /\.context-magnet-working-columns, \.context-magnet-operation \{ display: grid; grid-template-columns:/u);
++  assert.match(css, /content-visibility: auto/u);
++  assert.match(css, /contain-intrinsic-size/u);
+   assert.match(css, /@media \(max-width: 560px\)/u);
+   assert.doesNotMatch(css, /#[0-9a-f]{3,8}\b/iu);
+   assert.match(css, /var\(--background\)/u);
+   assert.match(css, /var\(--ring\)/u);
+-  assert.doesNotMatch(css, /context-magnet-(working|operation|declaration|admission|consumption)/u);
+ });

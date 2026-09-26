@@ -1,0 +1,592 @@
+import type { WorkbenchInspection } from "./workbench-adapter.ts";
+
+/**
+ * A deliberately lossy projection of the agent-cli Context Magnet trace.
+ * Contribution payloads and rendered context are intentionally never retained.
+ */
+
+export const MAX_TRACE_EVENTS = 48;
+const MAX_TEXT = 240;
+const MAX_LOG_LINES = 2_048;
+const MAX_TIMESTAMP_SECONDS = 32_503_680_000; // 3000-01-01, keeps UI Date values valid.
+const PROJECT_ROOT = "/home/ubuntu/phosphor/monorepo";
+const SAFE_SESSION_ID = /^[A-Za-z0-9._:-]{1,200}$/u;
+const SAFE_AUDIENCE = /^[A-Za-z0-9._:-]{1,80}$/u;
+
+export type TraceState = "ready" | "inactive" | "partial" | "unavailable";
+
+export type MagnetTraceEvent = Readonly<{
+  /** Agent-cli's recorded event time, in epoch seconds. */
+  at: number;
+  event: "magnet:contributed" | "magnet:suppressed" | "magnet:contributor-failed" | "magnet:contributor-diagnostic" | "magnet:empty";
+  contributorId: string;
+  dedupKey?: string;
+  sourceKind?: "File" | "AgentInbox" | "ReviewFinding" | "FrameOutput";
+  sourcePath?: string;
+  debugLabel?: string;
+  reason?: "deduped" | "empty-body";
+  message?: string;
+  errorTag?: string;
+  /** Optional future mapping report, accepted only when present in this trace row. */
+  mappingState?: "exact" | "derived" | "partial" | "unmatched";
+  rawEvidence?: "available" | "unavailable" | "withheld";
+  rawLocator?: string;
+}>;
+
+export type InspectorResult = Readonly<{
+  state: TraceState;
+  detail: string;
+  trace: MagnetTraceEvent[];
+  consumption: Readonly<{
+    state: "not-selected" | "awaiting-consumption" | "consumed" | "invalid";
+    detail: string;
+    contributionId?: string;
+    selectedAt?: number;
+    consumedAt?: number;
+  }>;
+  workbench: WorkbenchInspection;
+}>;
+
+export type StoredContextDescriptors = Readonly<{
+  agentCli: Readonly<{ workspacePath: string; harness: "claude" | "codex"; sessionId: string }> | null;
+  workbench: Readonly<{ path: string; audience: string; target?: Readonly<{ kind: "contribution"; id: number } | { kind: "turn"; id: string }> }> | null;
+}>;
+
+type RecordValue = Record<string, unknown>;
+
+function record(value: unknown): RecordValue | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? value as RecordValue : null;
+}
+
+function text(value: unknown, maximum = MAX_TEXT): string | undefined {
+  return typeof value === "string" && value.length > 0 && value.length <= maximum ? value : undefined;
+}
+
+function source(value: unknown): Pick<MagnetTraceEvent, "sourceKind" | "sourcePath"> {
+  const item = record(value);
+  const tag = text(item?._tag, 32);
+  if (tag !== "File" && tag !== "AgentInbox" && tag !== "ReviewFinding" && tag !== "FrameOutput") return {};
+  const path = tag === "File" ? text(item?.path, 512) : undefined;
+  return { sourceKind: tag, ...(path === undefined ? {} : { sourcePath: path }) };
+}
+
+function mapping(value: unknown): Pick<MagnetTraceEvent, "mappingState" | "rawEvidence" | "rawLocator"> {
+  const item = record(value);
+  const state = text(item?.state, 16);
+  const rawEvidence = text(item?.rawEvidence, 16);
+  const candidateLocator = text(item?.rawLocator, 1_024);
+  let rawLocator: string | undefined;
+  if (candidateLocator !== undefined) {
+    try {
+      const parsed = new URL(candidateLocator);
+      if (parsed.protocol === "https:") rawLocator = parsed.toString();
+    } catch { /* Unrecognised locators stay absent. */ }
+  }
+  return {
+    ...(state === "exact" || state === "derived" || state === "partial" || state === "unmatched" ? { mappingState: state } : {}),
+    ...(rawEvidence === "available" || rawEvidence === "unavailable" || rawEvidence === "withheld" ? { rawEvidence } : {}),
+    ...(rawLocator === undefined ? {} : { rawLocator }),
+  };
+}
+
+function traceEvent(value: unknown): MagnetTraceEvent | null {
+  const item = record(value);
+  if (item === null || typeof item.ts !== "number" || !Number.isFinite(item.ts) || item.ts < 0 || item.ts > MAX_TIMESTAMP_SECONDS) return null;
+  const event = text(item.event, 48);
+  const contributorId = text(item.contributorId, 160);
+  if (!event || !contributorId) return null;
+
+  switch (event) {
+    case "magnet:contributed":
+      return { at: item.ts, event, contributorId, ...(text(item.dedupKey) === undefined ? {} : { dedupKey: text(item.dedupKey)! }), ...source(item.sourceRef), ...mapping(item.mapping), ...(text(item.debugLabel) === undefined ? {} : { debugLabel: text(item.debugLabel)! }) };
+    case "magnet:suppressed": {
+      const reason = text(item.reason, 32);
+      if (reason !== "deduped" && reason !== "empty-body") return null;
+      return { at: item.ts, event, contributorId, reason, ...(text(item.dedupKey) === undefined ? {} : { dedupKey: text(item.dedupKey)! }), ...source(item.sourceRef), ...mapping(item.mapping), ...(text(item.debugLabel) === undefined ? {} : { debugLabel: text(item.debugLabel)! }) };
+    }
+    case "magnet:contributor-failed":
+    case "magnet:contributor-diagnostic":
+      return { at: item.ts, event, contributorId, ...(text(item.message) === undefined ? {} : { message: text(item.message)! }), ...(text(item.errorTag, 96) === undefined ? {} : { errorTag: text(item.errorTag, 96)! }), ...mapping(item.mapping) };
+    case "magnet:empty":
+      return { at: item.ts, event, contributorId, ...mapping(item.mapping) };
+    default:
+      // Includes magnet:contribution, whose body/text must never enter the inspector.
+      return null;
+  }
+}
+
+/** Parses a bounded agent-cli JSONL carrier, retaining only recognised trace rows. */
+export function traceFromAgentCliLog(source: string): MagnetTraceEvent[] {
+  const latest: MagnetTraceEvent[] = [];
+  for (const line of source.split(/\r?\n/u).slice(-MAX_LOG_LINES)) {
+    if (line.length === 0 || line.length > 16 * 1024) continue;
+    try {
+      const parsed = traceEvent(JSON.parse(line) as unknown);
+      if (parsed !== null) {
+        latest.push(parsed);
+        if (latest.length > MAX_TRACE_EVENTS) latest.shift();
+      }
+    } catch { /* A malformed log row does not invalidate the bounded projection. */ }
+  }
+  return latest;
+}
+
+function agentCliDescriptor(value: unknown): StoredContextDescriptors["agentCli"] {
+  const item = record(value);
+  const workspacePath = text(item?.workspacePath, 512);
+  const sessionId = text(item?.sessionId, 200);
+  const harness = text(item?.harness, 16);
+  if (!workspacePath || !sessionId || !SAFE_SESSION_ID.test(sessionId) || (harness !== "claude" && harness !== "codex")) return null;
+  if (!(workspacePath === PROJECT_ROOT || workspacePath.startsWith(`${PROJECT_ROOT}/`))) return null;
+  return { workspacePath, sessionId, harness };
+}
+
+function workbenchDescriptor(value: unknown): StoredContextDescriptors["workbench"] {
+  const item = record(value);
+  if (item === null) return null;
+  const path = text(item?.path, 512);
+  const audience = text(item?.audience, 80);
+  if (!path || !audience || !SAFE_AUDIENCE.test(audience)) return null;
+  const target = record(item.target);
+  if (target === null) return { path, audience };
+  const kind = target.kind;
+  const id = target.id;
+  if (kind === "contribution" && typeof id === "number" && Number.isSafeInteger(id) && id > 0) return { path, audience, target: { kind, id } };
+  if (kind === "turn" && typeof id === "string" && SAFE_SESSION_ID.test(id)) return { path, audience, target: { kind, id } };
+  return null;
+}
+
+/**
+ * Reads only explicit, feature-owned descriptors from stored BB event data.
+ * It does not discover generic provider sessions or bridge an agent-cli session
+ * to a Workbench audience.
+ */
+export function descriptorsFromStoredEvents(events: readonly unknown[]): StoredContextDescriptors {
+  let agentCli: StoredContextDescriptors["agentCli"] = null;
+  let workbench: StoredContextDescriptors["workbench"] = null;
+  for (const event of events.slice(0, 64)) {
+    const data = record(record(event)?.data);
+    if (data === null) continue;
+    if (agentCli === null) agentCli = agentCliDescriptor(data.contextMagnetAgentCli);
+    if (workbench === null) workbench = workbenchDescriptor(data.contextMagnetWorkbench);
+    if (agentCli !== null && workbench !== null) break;
+  }
+  return { agentCli, workbench };
+}
+
+/**
+ * The host trace carrier is deliberately separate from agent-cli's legacy log
+ * projection above. It models only explicit host links: callers must not fill
+ * in an operation, trigger, receipt, or placement from timestamps or text.
+ */
+export const TRACE_CARRIER_VERSION = "context-magnet.trace-carrier/v1";
+
+export type TraceOperationKey = Readonly<{
+  threadId: string;
+  operationId: string;
+  eventSeq: number;
+  turnId?: string;
+}>;
+
+export type TraceContributionKey = Readonly<{ threadId: string; id: string }>;
+
+export type TracePlacement =
+  | Readonly<{ kind: "exact"; target: TraceOperationKey; renderedAnchor: TraceOperationKey }>
+  | Readonly<{
+      kind: "nearest-rendered";
+      target: TraceOperationKey;
+      renderedAnchor: TraceOperationKey;
+      direction: "before" | "after" | "containing-turn";
+    }>
+  | Readonly<{
+      kind: "unmatched";
+      target: TraceOperationKey | null;
+      reason: "target-not-retained" | "target-not-renderable" | "unknown";
+    }>;
+
+export type TraceTrigger = Readonly<{
+  factKey: TraceContributionKey | null;
+  renderState: "rendered" | "unrendered" | "withheld" | "unknown";
+  renderedAnchor?: TraceOperationKey;
+  locator: "host-fact" | "host-policy" | "unknown";
+}>;
+
+export type TraceInclusionReason = Readonly<{
+  category: "relevant-tool-result" | "relevant-thread-fact" | "policy-required" | "explicit-user-context" | "deduplication" | "other-safe";
+  detail?: string;
+}>;
+
+export type TraceDeliveryOutcome =
+  | Readonly<{ kind: "rejected"; rejection: "policy" | "validation" | "capacity" | "other-safe" }>
+  | Readonly<{ kind: "delivered" }>
+  | Readonly<{ kind: "deduplicated"; against: TraceContributionKey | null }>
+  | Readonly<{ kind: "failed"; failure: "host" | "contributor" | "other-safe" }>
+  | Readonly<{ kind: "unavailable"; unavailable: "not-retained" | "not-authorized" | "carrier" | "unknown" }>;
+
+export type TraceConsumptionEvidence =
+  | Readonly<{ state: "consumed"; kind: "model-owned-receipt" | "host-observed"; observedAt?: string }>
+  | Readonly<{ state: "not-observed" }>
+  | Readonly<{ state: "unknown" }>
+  | Readonly<{ state: "unavailable"; reason: "not-retained" | "not-authorized" | "carrier" }>;
+
+/** Host-approved, bounded JSON evidence. It is opaque to this projection. */
+export type SafeTraceEvidence = null | boolean | number | string | readonly SafeTraceEvidence[] | Readonly<{ [key: string]: SafeTraceEvidence }>;
+
+export type TraceEvidence = Readonly<{
+  source: "context-magnet-host";
+  sourceSchemaVersion: string;
+  original: SafeTraceEvidence;
+  unknownFields: Readonly<Record<string, SafeTraceEvidence>>;
+  redactions: readonly Readonly<{
+    path: string;
+    reason: "authorization" | "privacy" | "retention" | "unsafe-body";
+  }>[];
+  /** A supplied locator remains evidence; it is never resolved or joined here. */
+  rawLocators?: readonly string[];
+}>;
+
+/** Provider-admission facts are host observations, not delivery or consumption evidence. */
+export type TraceAdmissionObservation =
+  | Readonly<{ admissionObservationSequence: number; at: string; kind: "constructed" | "accepted" }>
+  | Readonly<{ admissionObservationSequence: number; at: string; kind: "failed-settlement"; settlement: "bridge-unavailable" | "malformed-response" | "transport-not-accepted" }>;
+
+export type TraceAdmissionAttempt = Readonly<{
+  id: string;
+  requestKind: "start" | "resume" | "fork";
+  providerKind: string;
+  instructionMode: "append" | "replace" | "none" | "unknown";
+  selectedToolSummary: "one-or-more" | "none" | "unknown";
+}>;
+
+export type TraceAdmissionGap = Readonly<{
+  kind: "authorization" | "bridge" | "instrumentation" | "retention" | "unknown";
+  scope: "declaration" | "constructed" | "accepted" | "association" | "consumption";
+  reason: string;
+}>;
+
+export type TraceProviderAdmission = Readonly<{
+  version: "context-magnet.provider-admission/v1";
+  contributionKey: TraceContributionKey;
+  admissionKey: TraceContributionKey;
+  declaration: "declared" | "unavailable";
+  attempt: TraceAdmissionAttempt;
+  observations: readonly TraceAdmissionObservation[];
+  gaps: readonly TraceAdmissionGap[];
+}>;
+
+export type TraceAdmissionRetentionGap = Readonly<{ kind: "retention"; scope: "admissions"; reason: string }>;
+
+export type TraceContribution = Readonly<{
+  contributionKey: TraceContributionKey;
+  placement: TracePlacement;
+  trigger: TraceTrigger;
+  inclusionReason: TraceInclusionReason;
+  outcome: TraceDeliveryOutcome;
+  consumption: TraceConsumptionEvidence;
+  evidence: TraceEvidence;
+  /** Present only when the host retained provider-admission observations. */
+  admissions?: readonly TraceProviderAdmission[];
+  admissionGaps?: readonly TraceAdmissionRetentionGap[];
+}>;
+
+export type TraceGap = Readonly<{
+  kind: "retention" | "authorization" | "carrier" | "redaction" | "unknown";
+  scope: "contributions" | "operations" | "trigger-provenance" | "consumption";
+  afterEventSeq?: number;
+  beforeEventSeq?: number;
+  reason: string;
+  /** Additive metadata remains opaque and available to a later adapter. */
+  unknownFields?: Readonly<Record<string, SafeTraceEvidence>>;
+}>;
+
+export type TracePage = Readonly<{
+  cursor: string | null;
+  nextCursor: string | null;
+  retainedFrom: Readonly<{
+    contributionEventSeq: number | null;
+    operationEventSeq: number | null;
+    state: "known" | "unknown" | "unavailable";
+  }>;
+  completeness: "complete" | "partial" | "unavailable";
+  gaps: readonly TraceGap[];
+  contributions: readonly TraceContribution[];
+}>;
+
+export type TranscriptRole = "user" | "assistant" | "system" | "tool" | "unknown";
+
+/** Host-supplied transcript identity; never reconstructed from content or time. */
+export type TranscriptSpineMessage = Readonly<{
+  threadId: string;
+  id: string;
+  role: TranscriptRole;
+  /** Deliberately metadata-only: transcript rendering continues to be host-owned. */
+  sequence: number;
+}>;
+
+/** A block's place in the native transcript is supplied by the carrier. */
+export type WorkingBlockPlacement =
+  | Readonly<{ kind: "before" | "after" | "within"; anchor: TranscriptSpineMessage }>
+  | Readonly<{ kind: "unmatched"; reason: "anchor-not-retained" | "unknown" }>
+  | Readonly<{ kind: "unavailable"; reason: "not-retained" | "not-authorized" | "carrier" | "unknown" }>;
+
+export type WorkingOperation = Readonly<{
+  key: TraceOperationKey;
+  rendered: boolean;
+  kind: string;
+  /** `known-empty` is evidence; all other values explicitly say it is not. */
+  contributionEvidence: "known-empty" | "records-retained" | "missing" | "unavailable" | "unknown";
+  unknownFields?: Readonly<Record<string, SafeTraceEvidence>>;
+}>;
+
+export type WorkingBlock = Readonly<{
+  id: string;
+  placement: WorkingBlockPlacement;
+  operations: readonly WorkingOperation[];
+  unknownFields?: Readonly<Record<string, SafeTraceEvidence>>;
+}>;
+
+export type TraceCarrierProjectionInput = Readonly<{
+  version: typeof TRACE_CARRIER_VERSION;
+  threadId: string;
+  snapshot: Readonly<{
+    id: string;
+    capturedAt: string;
+    operationSeqHighWatermark: number;
+    admissionAttemptSeqHighWatermark?: number;
+    admissionObservationSeqHighWatermark?: number;
+    admissionRetentionHighWatermark?: number;
+  }>;
+  transcript: readonly TranscriptSpineMessage[];
+  workingBlocks: readonly WorkingBlock[];
+  pages: readonly TracePage[];
+  /** Unknown top-level carrier fields are additive evidence, never display semantics. */
+  unknownFields?: Readonly<Record<string, SafeTraceEvidence>>;
+}>;
+
+export type ProjectedOperation = Readonly<{
+  operation: WorkingOperation;
+  contributions: readonly TraceContribution[];
+}>;
+
+export type ProjectedWorkingBlock = Readonly<{
+  id: string;
+  /** Retained verbatim so a renderer never guesses transcript nesting. */
+  placement: WorkingBlockPlacement;
+  operations: readonly ProjectedOperation[];
+  unknownFields?: Readonly<Record<string, SafeTraceEvidence>>;
+}>;
+
+export type UnmatchedTraceContribution = Readonly<{
+  contribution: TraceContribution;
+  /** Source metadata explains this status; projection never chooses a replacement anchor. */
+  state: "carrier-unmatched" | "anchor-not-projected";
+}>;
+
+export type TraceProjection = Readonly<{
+  version: typeof TRACE_CARRIER_VERSION;
+  threadId: string;
+  snapshot: TraceCarrierProjectionInput["snapshot"];
+  transcript: readonly TranscriptSpineMessage[];
+  workingBlocks: readonly ProjectedWorkingBlock[];
+  unmatched: readonly UnmatchedTraceContribution[];
+  pages: readonly TracePage[];
+  /** Flattened with page identity retained so pagination loss cannot disappear. */
+  gaps: readonly Readonly<{ pageCursor: string | null; gap: TraceGap }>[];
+  unknownFields?: Readonly<Record<string, SafeTraceEvidence>>;
+}>;
+
+export class TraceProjectionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "TraceProjectionError";
+  }
+}
+
+const UNSAFE_PROVIDER_EVIDENCE_KEYS = new Set([
+  "body", "requestbody", "providerrequest", "prompt", "messages", "contextblocks", "toolarguments",
+  "embeddings", "attachments", "rawproviderevent", "rawprovidereventjson",
+]);
+
+function operationIdentity(key: TraceOperationKey): string {
+  return `${key.threadId}\u0000${key.operationId}\u0000${key.eventSeq}`;
+}
+
+function contributionIdentity(key: TraceContributionKey): string {
+  return `${key.threadId}\u0000${key.id}`;
+}
+
+function sameOperation(left: TraceOperationKey, right: TraceOperationKey): boolean {
+  return left.threadId === right.threadId
+    && left.operationId === right.operationId
+    && left.eventSeq === right.eventSeq
+    && left.turnId === right.turnId;
+}
+
+function sameTranscriptMessage(left: TranscriptSpineMessage, right: TranscriptSpineMessage): boolean {
+  return left.threadId === right.threadId
+    && left.id === right.id
+    && left.role === right.role
+    && left.sequence === right.sequence;
+}
+
+function assertOperationThread(key: TraceOperationKey, threadId: string, description: string): void {
+  if (key.threadId !== threadId) throw new TraceProjectionError(`${description} belongs to another thread.`);
+}
+
+function contributionOrder(left: TraceContribution, right: TraceContribution): number {
+  const leftSeq = left.placement.target?.eventSeq ?? Number.POSITIVE_INFINITY;
+  const rightSeq = right.placement.target?.eventSeq ?? Number.POSITIVE_INFINITY;
+  return leftSeq - rightSeq || left.contributionKey.id.localeCompare(right.contributionKey.id);
+}
+
+function assertSafeEvidence(value: SafeTraceEvidence, path = "evidence"): void {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => assertSafeEvidence(item, `${path}[${index}]`));
+    return;
+  }
+  if (value === null || typeof value !== "object") return;
+  for (const [key, nested] of Object.entries(value)) {
+    if (UNSAFE_PROVIDER_EVIDENCE_KEYS.has(key.replace(/[^a-z0-9]/giu, "").toLowerCase())) {
+      throw new TraceProjectionError(`Provider request evidence is not accepted at ${path}.${key}.`);
+    }
+    assertSafeEvidence(nested, `${path}.${key}`);
+  }
+}
+
+function assertContributionIsSafe(contribution: TraceContribution): void {
+  assertSafeEvidence(contribution.evidence.original, `contribution ${contribution.contributionKey.id}.original`);
+  assertSafeEvidence(contribution.evidence.unknownFields, `contribution ${contribution.contributionKey.id}.unknownFields`);
+}
+
+function renderedOperation(operations: ReadonlyMap<string, ProjectedOperation>, key: TraceOperationKey, description: string): ProjectedOperation {
+  const operation = operations.get(operationIdentity(key));
+  if (operation === undefined || !operation.operation.rendered) {
+    throw new TraceProjectionError(`${description} must resolve to a rendered working-block operation.`);
+  }
+  return operation;
+}
+
+function assertTriggerIsValid(trigger: TraceTrigger, operations: ReadonlyMap<string, ProjectedOperation>, threadId: string): void {
+  if (trigger.factKey !== null && trigger.factKey.threadId !== threadId) {
+    throw new TraceProjectionError("Trigger fact belongs to another thread.");
+  }
+  if (trigger.renderedAnchor !== undefined) {
+    assertOperationThread(trigger.renderedAnchor, threadId, "Trigger rendered anchor");
+    renderedOperation(operations, trigger.renderedAnchor, "Trigger rendered anchor");
+  }
+  if (trigger.renderState === "rendered" && trigger.renderedAnchor === undefined) {
+    throw new TraceProjectionError("A rendered trigger must supply its rendered anchor.");
+  }
+}
+
+function assertGapIsSafe(gap: TraceGap): void {
+  if (gap.unknownFields !== undefined) assertSafeEvidence(gap.unknownFields, "gap.unknownFields");
+}
+
+function transcriptMessages(input: TraceCarrierProjectionInput): ReadonlyMap<string, TranscriptSpineMessage> {
+  const messages = new Map<string, TranscriptSpineMessage>();
+  for (const message of input.transcript) {
+    if (message.threadId !== input.threadId) throw new TraceProjectionError("Transcript message belongs to another thread.");
+    if (messages.has(message.id)) throw new TraceProjectionError("Transcript message IDs must be unique.");
+    messages.set(message.id, message);
+  }
+  return messages;
+}
+
+function assertBlockPlacementIsValid(
+  placement: WorkingBlockPlacement,
+  messages: ReadonlyMap<string, TranscriptSpineMessage>,
+  threadId: string,
+): void {
+  if (placement.kind === "unmatched" || placement.kind === "unavailable") return;
+  const { anchor } = placement;
+  if (anchor.threadId !== threadId) throw new TraceProjectionError("Working-block transcript anchor belongs to another thread.");
+  const retained = messages.get(anchor.id);
+  if (retained === undefined) throw new TraceProjectionError("Working-block transcript anchor is not retained.");
+  if (!sameTranscriptMessage(anchor, retained)) throw new TraceProjectionError("Working-block transcript anchor identity does not match the retained message.");
+  if (placement.kind === "within" && anchor.role !== "assistant") {
+    throw new TraceProjectionError("A working block can be within only a retained assistant message.");
+  }
+}
+
+/**
+ * Projects a host-supplied trace into a deterministic tree without changing its
+ * evidence. The transcript stays the primary spine; all work stays in blocks.
+ */
+export function projectTraceCarrier(input: TraceCarrierProjectionInput): TraceProjection {
+  if (input.version !== TRACE_CARRIER_VERSION) throw new TraceProjectionError("Unsupported Context Magnet trace carrier version.");
+  if (input.unknownFields !== undefined) assertSafeEvidence(input.unknownFields, "carrier.unknownFields");
+  const messages = transcriptMessages(input);
+  const blockIds = new Set<string>();
+  for (const block of input.workingBlocks) {
+    if (blockIds.has(block.id)) throw new TraceProjectionError("Working-block IDs must be unique.");
+    blockIds.add(block.id);
+    assertBlockPlacementIsValid(block.placement, messages, input.threadId);
+    if (block.unknownFields !== undefined) assertSafeEvidence(block.unknownFields, "working-block.unknownFields");
+  }
+
+  const operations = new Map<string, ProjectedOperation>();
+  const projectedBlocks = input.workingBlocks
+    .map((block) => ({
+      id: block.id,
+      placement: block.placement,
+      unknownFields: block.unknownFields,
+      operations: [...block.operations]
+        .sort((left, right) => left.key.eventSeq - right.key.eventSeq || left.key.operationId.localeCompare(right.key.operationId))
+        .map((operation) => {
+          if (operation.key.threadId !== input.threadId) throw new TraceProjectionError("Working-block operation belongs to another thread.");
+          if (operation.unknownFields !== undefined) assertSafeEvidence(operation.unknownFields, "operation.unknownFields");
+          const projected: ProjectedOperation = { operation, contributions: [] };
+          const identity = operationIdentity(operation.key);
+          if (operations.has(identity)) throw new TraceProjectionError("Working-block operation keys must be unique.");
+          operations.set(identity, projected);
+          return projected;
+        }),
+    }));
+
+  for (const page of input.pages) for (const gap of page.gaps) assertGapIsSafe(gap);
+
+  const unmatched: UnmatchedTraceContribution[] = [];
+  const seenContributionKeys = new Set<string>();
+  const contributions = input.pages.flatMap((page) => page.contributions).sort(contributionOrder);
+  for (const contribution of contributions) {
+    if (contribution.contributionKey.threadId !== input.threadId) throw new TraceProjectionError("Contribution belongs to another thread.");
+    const contributionKey = contributionIdentity(contribution.contributionKey);
+    if (seenContributionKeys.has(contributionKey)) throw new TraceProjectionError("Contribution keys must be unique across the snapshot.");
+    seenContributionKeys.add(contributionKey);
+    assertContributionIsSafe(contribution);
+    assertTriggerIsValid(contribution.trigger, operations, input.threadId);
+    if (contribution.placement.kind === "unmatched") {
+      if (contribution.placement.target !== null) assertOperationThread(contribution.placement.target, input.threadId, "Unmatched contribution target");
+      unmatched.push({ contribution, state: "carrier-unmatched" });
+      continue;
+    }
+    assertOperationThread(contribution.placement.target, input.threadId, "Contribution target");
+    assertOperationThread(contribution.placement.renderedAnchor, input.threadId, "Contribution rendered anchor");
+    if (contribution.placement.kind === "exact" && !sameOperation(contribution.placement.target, contribution.placement.renderedAnchor)) {
+      throw new TraceProjectionError("An exact contribution must use an identical target and rendered anchor.");
+    }
+    const anchor = renderedOperation(operations, contribution.placement.renderedAnchor, "Contribution rendered anchor");
+    // The supplied anchor is the only allowed relation. This intentionally does
+    // not compare timestamps, provider IDs, session IDs, transcript text, or logs.
+    (anchor.contributions as TraceContribution[]).push(contribution);
+  }
+
+  for (const block of projectedBlocks) {
+    for (const operation of block.operations) {
+      (operation.contributions as TraceContribution[]).sort(contributionOrder);
+    }
+  }
+
+  return {
+    version: input.version,
+    threadId: input.threadId,
+    snapshot: input.snapshot,
+    transcript: [...input.transcript],
+    workingBlocks: projectedBlocks,
+    unmatched,
+    pages: input.pages,
+    gaps: input.pages.flatMap((page) => page.gaps.map((gap) => ({ pageCursor: page.cursor, gap }))),
+    ...(input.unknownFields === undefined ? {} : { unknownFields: input.unknownFields }),
+  };
+}

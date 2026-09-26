@@ -1,0 +1,72 @@
+import { createHash } from "node:crypto";
+import { isAbsolute } from "node:path";
+import { defineRpcContract, type BbPluginApi } from "@get-bb/plugin-sdk";
+import { z } from "zod";
+import { readBbEventIdentity, type BbEventIdentityPort, type BbEventIdentitySnapshot } from "./bb-event-adapter.ts";
+import { adaptCodexSessionProjection, type SafeReaderProjection } from "./codex-session-adapter.ts";
+import { projectSessionEtl, type SessionEtlProjection } from "./context-magnet.ts";
+import { readRouterOriginalSession, type RouterReaderPorts } from "./router-reader-client.ts";
+import { attestWorkbenchExecutable, inspectWorkbenchDecision, type WorkbenchDecisionRequest, type WorkbenchFixedProcess, type WorkbenchDecisionResult } from "./workbench-adapter.ts";
+
+const CHANNEL = "context-magnet-changed";
+const threadId = z.string().min(1).max(200).regex(/^[A-Za-z0-9._:-]+$/u);
+const diagnostic = z.enum(["bb-unavailable", "thread-host-unavailable", "router-unavailable", "router-partial", "router-invalid", "binding-unavailable", "workbench-unavailable", "workbench-gap", "source-fence-drift"]);
+
+// These inert compatibility fields are deliberately empty: ThreadChat is host-owned
+// and the already-landed renderer reads only sessionEtl/sessionEtlState.
+export const rpcContract = defineRpcContract({ inspect: { input: z.object({ threadId }).strict(), output: z.object({
+  state: z.enum(["ready", "partial", "unavailable"]), detail: z.string().max(256), sessionEtl: z.unknown().nullable(), sessionEtlState: z.enum(["ready", "partial", "unavailable", "timeout"]), diagnostics: z.array(diagnostic).max(8),
+  trace: z.array(z.never()).max(0), consumption: z.object({ state: z.literal("not-selected"), detail: z.literal("Canonical session ETL does not report model consumption.") }).strict(),
+  workbench: z.object({ state: z.literal("not-configured"), detail: z.literal("Canonical session ETL owns the bounded Workbench decision read."), generation: z.literal(0), records: z.array(z.never()).max(0), gaps: z.array(z.never()).max(0), hasMore: z.literal(false), partialPage: z.literal(false), partialScan: z.literal(false), target: z.null() }).strict(),
+}).strict() } });
+
+type Output = z.infer<typeof rpcContract.inspect.output>;
+type Runtime = Readonly<{ router: Readonly<{ generation: string; readerAttestation: string }> | null; workbench: () => Promise<WorkbenchFixedProcess | null> }>;
+type Ports = Readonly<{ getThread(id: string): Promise<unknown>; getEnvironment(id: string): Promise<unknown>; bb: BbEventIdentityPort; router: RouterReaderPorts }>;
+type Row = Record<string, unknown>;
+const row = (value: unknown): Row | null => value !== null && typeof value === "object" && !Array.isArray(value) ? value as Row : null;
+const slot = (value: string) => `sha256:${createHash("sha256").update(value, "utf8").digest("hex")}`;
+const same = (left: BbEventIdentitySnapshot, right: BbEventIdentitySnapshot) => JSON.stringify(left) === JSON.stringify(right);
+function neutral() { return { trace: [] as never[], consumption: { state: "not-selected" as const, detail: "Canonical session ETL does not report model consumption." as const }, workbench: { state: "not-configured" as const, detail: "Canonical session ETL owns the bounded Workbench decision read." as const, generation: 0 as const, records: [] as never[], gaps: [] as never[], hasMore: false as const, partialPage: false as const, partialScan: false as const, target: null } }; }
+function output(state: Output["state"], etlState: Output["sessionEtlState"], detail: string, diagnostics: Output["diagnostics"], sessionEtl: SessionEtlProjection | null): Output { return rpcContract.inspect.output.parse({ state, sessionEtlState: etlState, detail, diagnostics, sessionEtl, ...neutral() }); }
+function unavailableDecision(): WorkbenchDecisionResult { return { version: "context-magnet.workbench-decision-adapter/v2", state: "unavailable", reason: "missing-explicit-slot-binding", audienceSlot: slot("unbound"), nativeTurnSlot: slot("unbound"), bbCheckpointTurnSlot: slot("unbound"), process: null, authority: null }; }
+function failureProjection(bb: BbEventIdentitySnapshot): SessionEtlProjection { return projectSessionEtl({ bb, native: { version: "context-magnet.session-reader-projection/v1", state: "unavailable", meta: null, events: [], omittedEventCount: 0 }, workbench: unavailableDecision(), source: { authorized: true, sourceFenceStable: false, workbenchStoreInstanceSlot: slot("unavailable"), workbenchGenerationSlot: slot("unavailable"), sourceBounds: "router=32KiB/4chunks/8polls;workbench=256KiB/64records", truncation: "reject" } }); }
+function project(bb: BbEventIdentitySnapshot, native: SafeReaderProjection, workbench: WorkbenchDecisionResult, stable: boolean): SessionEtlProjection { return projectSessionEtl({ bb, native, workbench, source: { authorized: true, sourceFenceStable: stable, workbenchStoreInstanceSlot: workbench.authority?.receipt.storeInstanceSlot ?? slot("unavailable"), workbenchGenerationSlot: workbench.authority?.receipt.generationSlot ?? slot("unavailable"), sourceBounds: "router=32KiB/4chunks/8polls;workbench=256KiB/64records", truncation: "reject" } }); }
+function threadHost(thread: unknown, environment: unknown): string | null { const t = row(thread), e = row(environment); return typeof t?.environmentId === "string" && e?.id === t.environmentId && typeof e.hostId === "string" && /^[A-Za-z0-9._:-]{1,200}$/u.test(e.hostId) ? e.hostId : null; }
+async function metadataFence(port: BbEventIdentityPort, thread: string): Promise<string> {
+  const value = row(await port.getThreadMetadata(thread));
+  if (value?.id !== thread || value.providerId !== "codex" || value.visibility !== "visible" || value.archivedAt !== null || value.deletedAt !== null || typeof value.status !== "string" || !Number.isFinite(value.updatedAt)) throw new Error("invalid-bodyless-metadata-fence");
+  return JSON.stringify({ id: value.id, providerId: value.providerId, visibility: value.visibility, status: value.status, updatedAt: value.updatedAt });
+}
+type Binding = Readonly<{ session: string; turn: string; nonce: string; store: string; generation: string }>;
+function binding(native: SafeReaderProjection): Binding | null {
+  const value = adaptCodexSessionProjection(native); const meta = row(value.meta); const session = row(meta?.identities)?.nativeSessionId;
+  const receipts = value.events.filter((event) => event.kind === "persisted-rollout-receipt"); const details = receipts.length === 1 ? row(receipts[0]?.details) : null;
+  const values = [session, details?.turnIdSlot, details?.nonceSlot, details?.storeInstanceSlot, details?.generationSlot];
+  return value.state === "ready" && values.every((item) => typeof item === "string" && /^sha256:[a-f0-9]{64}$/u.test(item)) ? { session: session as string, turn: details!.turnIdSlot as string, nonce: details!.nonceSlot as string, store: details!.storeInstanceSlot as string, generation: details!.generationSlot as string } : null;
+}
+
+/** The sole active RPC path. Raw provider identity is held only transiently by the server-filtered event port to address the router command. */
+export async function inspectHostFree(thread: string, ports: Ports, runtime: Runtime): Promise<Output> {
+  let before: BbEventIdentitySnapshot; let beforeMetadata: string; let rawThread: unknown; let provider: string | null = null;
+  const bb: BbEventIdentityPort = { getThreadMetadata: ports.bb.getThreadMetadata, listThreadEvents: async (request) => { const events = await ports.bb.listThreadEvents(request); for (const event of events as unknown[]) { const value = row(event); const data = row(value?.data); if (value?.type === "thread/identity" && typeof data?.providerThreadId === "string") provider = data.providerThreadId; } return events; } };
+  try { rawThread = await ports.getThread(thread); before = await readBbEventIdentity(bb, { threadId: thread }); beforeMetadata = await metadataFence(bb, thread); } catch { return output("unavailable", "unavailable", "The requested Codex thread could not be validated.", ["bb-unavailable"], null); }
+  let host: string | null = null; try { const id = row(rawThread)?.environmentId; host = typeof id === "string" ? threadHost(rawThread, await ports.getEnvironment(id)) : null; } catch {}
+  if (host === null) return output("unavailable", "unavailable", "The thread host is unavailable for a bounded session read.", ["thread-host-unavailable"], failureProjection(before));
+  if (runtime.router === null || provider === null) return output("unavailable", "unavailable", "The attested router reader is not configured.", ["router-unavailable"], failureProjection(before));
+  const reader = await readRouterOriginalSession(ports.router, { hostId: host, providerThreadId: provider, expectedGeneration: runtime.router.generation, expectedReaderAttestation: runtime.router.readerAttestation });
+  if (reader.state !== "available") return output(reader.state, reader.state, "The router-owned original-session reader did not produce a complete snapshot.", [reader.state === "partial" ? "router-partial" : "router-unavailable"], failureProjection(before));
+  let native: SafeReaderProjection; let middle: BbEventIdentitySnapshot; let middleMetadata: string; try { native = reader.projection as SafeReaderProjection; adaptCodexSessionProjection(native); middle = await readBbEventIdentity(bb, { threadId: thread }); middleMetadata = await metadataFence(bb, thread); } catch { return output("unavailable", "unavailable", "The router snapshot was malformed or the BB source changed.", ["router-invalid"], failureProjection(before)); }
+  const exact = binding(native); const checkpoint = before.terminalCheckpoint.turnSlot;
+  if (!same(before, middle) || beforeMetadata !== middleMetadata || exact === null || checkpoint === undefined || exact.turn !== checkpoint) return output("partial", "partial", "The source fence changed or the checkpoint binding was incomplete.", ["source-fence-drift"], project(before, native, unavailableDecision(), false));
+  const request: WorkbenchDecisionRequest = { nativeSessionSlot: exact.session, nativeTurnSlot: exact.turn, bbCheckpointTurnSlot: checkpoint, nonceSlot: exact.nonce, sourceFence: { storeInstanceSlot: exact.store, generationSlot: exact.generation } };
+  const decision = await inspectWorkbenchDecision(request, await runtime.workbench().catch(() => null));
+  let after: BbEventIdentitySnapshot; let afterMetadata: string; try { after = await readBbEventIdentity(bb, { threadId: thread }); afterMetadata = await metadataFence(bb, thread); } catch { return output("partial", "partial", "The BB source changed during the bounded read.", ["source-fence-drift"], project(before, native, decision, false)); }
+  const stable = same(before, middle) && same(middle, after) && beforeMetadata === middleMetadata && middleMetadata === afterMetadata; const sessionEtl = project(before, native, decision, stable);
+  if (!stable) return output("partial", "partial", "The BB source changed during the bounded read.", ["source-fence-drift"], sessionEtl);
+  if (decision.state === "unavailable") return output("unavailable", "unavailable", "The attested Workbench decision reader is unavailable.", ["workbench-unavailable"], sessionEtl);
+  if (decision.state === "gap") return output("partial", "partial", "The Workbench decision evidence is incomplete or ambiguous.", ["workbench-gap"], sessionEtl);
+  return output("ready", "ready", decision.state === "no-contribution" ? "No context contribution was selected." : "Canonical Context Magnet session evidence is ready.", [], sessionEtl);
+}
+function runtimeFromEnvironment(): Runtime { const generation = process.env.CONTEXT_MAGNET_ROUTER_GENERATION, readerAttestation = process.env.CONTEXT_MAGNET_READER_ATTESTATION, executable = process.env.CONTEXT_MAGNET_WORKBENCH_EXECUTABLE; return { router: typeof generation === "string" && /^[a-f0-9]{64}$/u.test(generation) && typeof readerAttestation === "string" && /^[a-f0-9]{64}$/u.test(readerAttestation) ? { generation, readerAttestation } : null, workbench: async () => typeof executable === "string" && isAbsolute(executable) ? attestWorkbenchExecutable(executable).catch(() => null) : null }; }
+export default function plugin(bb: BbPluginApi) { bb.rpc.register(rpcContract, { async inspect({ threadId }) { const get = (id: string) => bb.sdk.threads.get({ threadId: id }); return inspectHostFree(threadId, { getThread: get, getEnvironment: (environmentId) => bb.sdk.environments.get({ environmentId }), bb: { getThreadMetadata: get, listThreadEvents: (request) => bb.sdk.threads.events.list(request) }, router: { hosts: bb.sdk.hosts, terminals: bb.sdk.terminals } as unknown as RouterReaderPorts }, runtimeFromEnvironment()); } }); bb.events.on("experimental_thread.events", ({ thread, sequence }) => bb.realtime.publish(CHANNEL, { threadId: thread.id, sequence })); }

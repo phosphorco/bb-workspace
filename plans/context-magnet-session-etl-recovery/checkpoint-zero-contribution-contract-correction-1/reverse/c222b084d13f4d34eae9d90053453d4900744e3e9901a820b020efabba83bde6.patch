@@ -1,0 +1,39 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/context-magnet.ts b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin
+index 13eddd6e70c30c7f0d1c7a2cc0c3388a898bb845..43f823eaab2bce787eb29ec556782d7fae7afff5 100644
+--- a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/context-magnet.ts
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin
+@@ -751,18 +751,8 @@ export function projectSessionEtl(input: SessionEtlProjectionInput): SessionEtlP
+   const admissible = source.authorized && source.sourceFenceStable && providerIdentityMatches && workbenchFenceMatches && checkpoint.state === "succeeded" && checkpoint.checkpointSlot !== undefined && nativeAdapter.state === "ready" && nativeMeta.dialect === "codex-rollout" && receipts.length === 1 && receiptEntries.length === 1 && input.workbench.state === "ready" && authority !== null && authority !== undefined;
+   if (input.workbench.state === "no-contribution" && receipts.length > 0) append("gap", workbenchLocator, { reason: "zero-contribution-conflict" });
+   if (authority !== null && authority !== undefined && receipts.length === 0) append("gap", workbenchLocator, { reason: "unbound-emission" });
+-  const zeroIdentityMatches = nativeMeta.nativeSessionId !== undefined
+-    && checkpoint.checkpointSlot !== undefined
+-    && input.workbench.audienceSlot === nativeMeta.nativeSessionId
+-    && input.workbench.nativeTurnSlot === checkpoint.checkpointSlot;
+-  const zeroProcessAttested = input.workbench.process !== null
+-    && SESSION_ETL_SLOT.test(input.workbench.process.executableSlot)
+-    && SESSION_ETL_SLOT.test(input.workbench.process.sourceSlot);
+   const explicitZero = input.workbench.state === "no-contribution"
+-    && input.workbench.reason === "complete-zero-contribution"
+     && authority === null
+-    && zeroIdentityMatches
+-    && zeroProcessAttested
+     && source.workbenchStoreInstanceSlot === undefined
+     && source.workbenchGenerationSlot === undefined
+     && source.authorized
+@@ -772,13 +762,11 @@ export function projectSessionEtl(input: SessionEtlProjectionInput): SessionEtlP
+     && checkpoint.checkpointSlot !== undefined
+     && nativeAdapter.state === "ready"
+     && nativeMeta.dialect === "codex-rollout"
+-    && nativeFences.length === 1
++    && nativeFences.length > 0
+     && native.filter((event) => event.kind === "gap").length === 0
+     && nativeAdapter.omittedEventCount === 0
+     && receipts.length === 0;
+-  if (input.workbench.state === "no-contribution" && !explicitZero && receipts.length === 0) append("gap", workbenchLocator, {
+-    reason: !zeroIdentityMatches ? "zero-contribution-identity-mismatch" : !zeroProcessAttested ? "zero-contribution-unattested-process" : "incomplete-zero-contribution-evidence",
+-  });
++  if (input.workbench.state === "no-contribution" && !explicitZero && receipts.length === 0) append("gap", workbenchLocator, { reason: "incomplete-zero-contribution-evidence" });
+   if (admissible) {
+     const nativeReceipt = receiptEntries[0]!.receipt;
+     const allMatch = sessionEtlSameReceipt(nativeReceipt, authority!.receipt) && nativeReceipt.storeInstanceSlot === source.workbenchStoreInstanceSlot && nativeReceipt.generationSlot === source.workbenchGenerationSlot && authority!.receipt.storeInstanceSlot === source.workbenchStoreInstanceSlot && authority!.receipt.generationSlot === source.workbenchGenerationSlot && nativeReceipt.turnIdSlot === checkpoint.checkpointSlot && input.workbench.nativeTurnSlot === checkpoint.checkpointSlot && (nativeMeta.nativeSessionId === undefined || nativeReceipt.nativeSessionIdSlot === nativeMeta.nativeSessionId);

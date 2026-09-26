@@ -1,0 +1,112 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
+import test from "node:test";
+
+async function loadRenderer(): Promise<any> {
+  const source = await readFile(new URL("../app.tsx", import.meta.url), "utf8");
+  const start = source.indexOf("const SESSION_ETL_RENDER_MAXIMUM");
+  const end = source.indexOf("type InspectorResultWithHost");
+  assert.ok(start >= 0 && end > start, "renderer helpers must remain a self-contained pure module");
+  const typescript = createRequire(import.meta.url)("typescript") as typeof import("typescript");
+  const compiled = typescript.transpileModule(source.slice(start, end), { compilerOptions: { module: typescript.ModuleKind.CommonJS, target: typescript.ScriptTarget.ES2022, jsx: typescript.JsxEmit.ReactJSX } }).outputText;
+  const module = { exports: {} as Record<string, unknown> };
+  new Function("exports", "require", "module", compiled)(module.exports, createRequire(import.meta.url), module);
+  return module.exports;
+}
+
+const locator = (ref: string) => ({ source: "workbench", ref, redacted: true as const });
+const slot = (value: string) => `sha256:${value.repeat(64).slice(0, 64)}`;
+const projection = (events: readonly any[]) => ({
+  meta: {
+    kind: "meta", version: "context-magnet.session-etl/v1", normalizerVersion: "router-reader-v1", projectorVersion: "context-magnet.session-etl-projector/v1",
+    bb: { providerThreadId: slot("a"), eventHighWatermark: 9, terminalCheckpoint: { state: "succeeded", turnId: slot("b") } },
+    router: { revision: slot("c"), ownerSlot: slot("d"), readonly: true },
+    rollout: { dialect: "codex-rollout", digest: { algorithm: "sha256", value: "e".repeat(64) }, file: { identity: slot("f"), kind: "rollout" } },
+    identities: { bbProviderThreadId: slot("a"), nativeSessionId: slot("f"), relation: "distinct-identities-recorded" },
+    workbench: { storeInstance: slot("e"), generation: slot("f"), query: { completeness: "complete", sourceBounds: "bounded", truncation: "none" } },
+  },
+  events,
+  projection: events.map(({ seq, kind, locator: eventLocator }) => ({ seq, kind, locator: eventLocator })),
+  omittedEventCount: 0,
+}) as any;
+
+test("renders exact admission as a first-class cited Context added row with its native turn slot", async () => {
+  const { deriveSessionEtlNarrative } = await loadRenderer();
+  const result = deriveSessionEtlNarrative(projection([{ seq: 7, kind: "context-admission", locator: locator("decision:7"), details: { admittedContext: "exact bounded context", semanticUse: "unobserved" }, associations: [] }]));
+  assert.deepEqual(result[0], {
+    key: "7:workbench:decision:7", seq: 7, kind: "context-added", label: "Context added", fact: "Exact admitted context",
+    locator: "workbench:decision:7", turnSlot: slot("b"), admittedContext: "exact bounded context", metadataCount: 2,
+  });
+  assert.doesNotMatch(JSON.stringify(result), /consumed|model-used/u);
+});
+
+test("makes explicit gaps visible and never invents unknown context-bearing semantics", async () => {
+  const { deriveSessionEtlNarrative, sessionEtlGapLabel } = await loadRenderer();
+  const reasons = ["unauthorized", "partial", "unavailable", "compacted", "unsupported", "receipt-or-identity-mismatch", "zero-contribution-conflict", "event-bound"];
+  const events: any[] = [...reasons.map((reason, index) => ({ seq: index + 1, kind: "gap", locator: locator(`gap:${index}`), details: { reason }, associations: [] })), { seq: 9, kind: "future-context-shape", locator: locator("unknown:9"), details: { raw: "must not render" }, associations: [] }];
+  const rows = deriveSessionEtlNarrative(projection(events));
+  assert.ok(rows.every((row: any) => row.kind === "gap"));
+  assert.match(rows.map((row: any) => row.fact).join("\n"), /not authorized|partial|unavailable|compacted|unsupported|does not match|Zero-contribution|displaced|Unsupported/u);
+  assert.equal(JSON.stringify(rows).includes("must not render"), false);
+  assert.equal(sessionEtlGapLabel("unrecognised"), "Unsupported context-bearing evidence");
+});
+
+test("recognizes only a canonical ETL envelope and keeps loading/error/stale states external to evidence", async () => {
+  const { sessionEtlFromResult, sessionEtlNarrativeState, activeSessionEtlSelection } = await loadRenderer();
+  const accepted = projection([]);
+  assert.equal(sessionEtlFromResult({ sessionEtl: accepted }), accepted);
+  assert.equal(sessionEtlFromResult({ projection: accepted }), null, "legacy projection is not reinterpreted as ETL");
+  assert.equal(sessionEtlFromResult({ sessionEtl: { meta: {}, events: "no", projection: [] } }), null);
+  assert.equal(sessionEtlFromResult({ sessionEtl: { meta: {}, events: [], projection: [] } }), null, "an incomplete or raw ETL lookalike is rejected before rendering");
+  assert.equal(sessionEtlFromResult({ sessionEtl: { ...accepted, meta: { ...accepted.meta, projectorVersion: "other" } } }), null, "exact projector version is required");
+  assert.equal(sessionEtlFromResult({ sessionEtl: { ...accepted, projection: [{ seq: 1, kind: "gap", locator: locator("wrong") }] } }), null, "projection rows must exactly correspond to canonical events");
+  assert.equal(sessionEtlNarrativeState({ loading: true, stale: false, projection: accepted }), "loading");
+  assert.equal(sessionEtlNarrativeState({ loading: false, stale: false, projection: null, reported: "timeout" }), "timeout");
+  assert.equal(sessionEtlNarrativeState({ loading: false, stale: true, projection: accepted }), "stale");
+  assert.equal(sessionEtlNarrativeState({ loading: false, stale: false, projection: null }), "error");
+  const sameKey = "1:workbench:decision:1";
+  const replacement = projection([]);
+  const oldSelection = { key: sameKey, projection: accepted };
+  assert.equal(activeSessionEtlSelection(oldSelection, accepted, "loading"), null, "loading cannot reopen a prior selection");
+  assert.equal(activeSessionEtlSelection(oldSelection, accepted, "stale"), null, "stale state cannot reopen a prior selection");
+  assert.equal(activeSessionEtlSelection(oldSelection, replacement, "ready"), null, "a new projection with the same canonical key cannot reopen a prior selection");
+  assert.equal(activeSessionEtlSelection(oldSelection, accepted, "ready"), sameKey);
+});
+
+test("the renderer has one lazy shared inspector and stable seq+locator row keys", async () => {
+  const source = await readFile(new URL("../app.tsx", import.meta.url), "utf8");
+  assert.match(source, /selected !== null && <SessionEtlDetails/u);
+  assert.match(source, /key: `\$\{event\.seq\}:\$\{locator\}`/u);
+  assert.match(source, /aria-haspopup="dialog"/u);
+  assert.match(source, /event\.key === "Escape"/u);
+  assert.match(source, /triggerElementRef\.current = event\.currentTarget/u);
+  assert.match(source, /restoreInspectorTrigger\(trigger\)/u);
+  assert.match(source, /setSelection\(null\);\s*triggerElementRef\.current = null;/u, "projection/state replacement clears both selection and trigger state");
+  assert.match(source, /activeSessionEtlSelection\(selection, projection, state\)/u, "same-key rows are gated by immutable projection identity before rendering");
+  assert.match(source, /trapInspectorFocus\(event\.nativeEvent, event\.currentTarget\)/u);
+  assert.match(source, /event\.target === event\.currentTarget\) onClose\(\)/u, "outside pointer close remains bounded to the shared overlay");
+  assert.match(source, /data-context-magnet-initial-focus/u, "the dialog has a deterministic initial focus target");
+  assert.doesNotMatch(source, /<button ref=/u, "row buttons do not conditionally own the saved trigger reference");
+});
+
+test("shared-inspector focus trap restores the original trigger without remounting a row", async () => {
+  const { restoreInspectorTrigger, trapInspectorFocus } = await loadRenderer();
+  let restored = 0;
+  const trigger = { isConnected: true, focus: () => { restored += 1; } };
+  restoreInspectorTrigger(trigger, (callback: () => void) => callback());
+  assert.equal(restored, 1);
+
+  const first = { offsetParent: {}, focus: () => { firstFocused += 1; } };
+  const last = { offsetParent: {}, focus: () => { lastFocused += 1; } };
+  let firstFocused = 0;
+  let lastFocused = 0;
+  let prevented = 0;
+  const dialog = { querySelectorAll: () => [first, last], ownerDocument: { activeElement: last }, contains: (node: unknown) => node === first || node === last, focus: () => { throw new Error("focusable controls exist"); } };
+  assert.equal(trapInspectorFocus({ key: "Tab", shiftKey: false, preventDefault: () => { prevented += 1; } }, dialog), true);
+  assert.equal(firstFocused, 1);
+  dialog.ownerDocument.activeElement = first;
+  assert.equal(trapInspectorFocus({ key: "Tab", shiftKey: true, preventDefault: () => { prevented += 1; } }, dialog), true);
+  assert.equal(lastFocused, 1);
+  assert.equal(prevented, 2);
+});

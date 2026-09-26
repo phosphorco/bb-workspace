@@ -1,0 +1,39 @@
+{
+  "changedPaths": [
+    "plugins/plugins/context-magnet-inspector/router-reader-client.ts",
+    "plugins/plugins/context-magnet-inspector/test/router-reader-client.test.ts",
+    "plugins/plugins/subscription-router/deployment.ts",
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.mjs",
+    "plugins/plugins/subscription-router/host/router.mjs",
+    "plugins/plugins/subscription-router/test/context-magnet-session-command.test.ts",
+    "plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts",
+    "plugins/plugins/subscription-router/test/deployment.test.ts"
+  ],
+  "grantSha256": "1dca5d1b2820be2aecffaffeaec0bb9c2018a03b22037241d4846e765b9ca621",
+  "node": "router-reader-invocation",
+  "reversePatches": [
+    {
+      "bytes": 1532,
+      "path": "plugins/plugins/subscription-router/deployment.ts",
+      "reversePatch": "router-reader-invocation/reverse/a48bac74b467073b601560567d61e2c81ed7aa1fee17b15de22786ee7a7a42cc.patch",
+      "sha256": "bb248da49e8eba90c4464b40a70ad2a43c8c58084825e3170962b3b5e34dfe23",
+      "tracked": true
+    },
+    {
+      "bytes": 4847,
+      "path": "plugins/plugins/subscription-router/host/router.mjs",
+      "reversePatch": "router-reader-invocation/reverse/06ac7ce4b0d5cb23a956c19d44799e76b67b2709ae9ff40f602b927726024ae3.patch",
+      "sha256": "dd44d96f84b1f94cf485088c5617f11d7d0c1b7266c543401788a27405f53342",
+      "tracked": true
+    },
+    {
+      "bytes": 1709,
+      "path": "plugins/plugins/subscription-router/test/deployment.test.ts",
+      "reversePatch": "router-reader-invocation/reverse/171adccd8c4693f706754592b35148330f1534716e19729b98175960e82b2b0c.patch",
+      "sha256": "35cfe84744115d2a1e3de73f608e893503da820b67a1aa2f978d3f1dfbad63fb",
+      "tracked": true
+    }
+  ],
+  "root": "/home/ubuntu/bb",
+  "schemaVersion": 1
+}

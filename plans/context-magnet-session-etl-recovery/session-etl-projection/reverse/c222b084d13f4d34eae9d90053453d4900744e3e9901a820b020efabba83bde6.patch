@@ -1,0 +1,190 @@
+diff --git a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/context-magnet.ts b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/session-etl-projection/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin
+index 73782b44efa67abc690965d181a5aea25004cab8..c84d54638bf5d7dccc6c967081862bd89ff82d1e 100644
+--- a/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/context-magnet.ts
++++ b/home/ubuntu/bb/plans/context-magnet-session-etl-recovery/session-etl-projection/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin
+@@ -1,7 +1,4 @@
+-import { createHash } from "node:crypto";
+-import type { BbEventIdentitySnapshot } from "./bb-event-adapter.ts";
+-import { adaptCodexSessionProjection, type SafeReaderProjection } from "./codex-session-adapter.ts";
+-import type { WorkbenchDecisionReceipt, WorkbenchDecisionResult, WorkbenchInspection } from "./workbench-adapter.ts";
++import type { WorkbenchInspection } from "./workbench-adapter.ts";
+ 
+ /**
+  * A deliberately lossy projection of the agent-cli Context Magnet trace.
+@@ -593,176 +590,3 @@ export function projectTraceCarrier(input: TraceCarrierProjectionInput): TracePr
+     ...(input.unknownFields === undefined ? {} : { unknownFields: input.unknownFields }),
+   };
+ }
+-
+-// Session ETL is deliberately separate from the legacy host-trace projection
+-// above.  Its inputs are the three normalized adapter outputs; it never sees a
+-// provider record or decodes a hook frame.
+-export const SESSION_ETL_VERSION = "context-magnet.session-etl/v1";
+-export const SESSION_ETL_PROJECTOR_VERSION = "context-magnet.session-etl-projector/v1";
+-const SESSION_ETL_MAX_EVENTS = 16;
+-const SESSION_ETL_MAX_BODY_BYTES = 64 * 1024;
+-const SESSION_ETL_SLOT = /^sha256:[a-f0-9]{64}$/u;
+-const SESSION_ETL_SAFE_REF = /^(?:[a-z][a-z0-9-]{0,31}):[A-Za-z0-9._:-]{1,512}$/u;
+-
+-export type SessionEtlLocator = Readonly<{ source: "bb" | "workbench" | "rollout"; ref: string; redacted: true }>;
+-export type SessionEtlReceipt = WorkbenchDecisionReceipt;
+-export type SessionEtlEventKind = "source-lifecycle" | "source-fence" | "workbench-observed" | "workbench-selection" | "workbench-emission" | "workbench-no-contribution" | "persisted-rollout-receipt" | "context-admission" | "gap";
+-export type SessionEtlAssociation = Readonly<{ keys: Readonly<Record<string, string | readonly string[] | null>>; derivationVersion: string; supportingLocators: readonly SessionEtlLocator[] }>;
+-export type SessionEtlEvent = Readonly<{ seq: number; kind: SessionEtlEventKind; locator: SessionEtlLocator; details: Readonly<Record<string, unknown>>; associations: readonly SessionEtlAssociation[] }>;
+-export type SessionEtlMeta = Readonly<{
+-  kind: "meta";
+-  version: typeof SESSION_ETL_VERSION;
+-  normalizerVersion: string;
+-  projectorVersion: string;
+-  bb: Readonly<{ providerThreadId: string; eventHighWatermark: number; terminalCheckpoint: Readonly<{ state: "succeeded" | "failed" | "interrupted" | "unknown"; turnId?: string }> }>;
+-  router: Readonly<{ revision: string; ownerSlot: string; readonly: true }>;
+-  rollout: Readonly<{ dialect: "codex-rollout" | "unsupported" | "unknown"; digest: Readonly<{ algorithm: "sha256"; value: string }>; file: Readonly<{ identity: string; kind: "rollout" }>; nativeRolloutId?: string }>;
+-  identities: Readonly<{ bbProviderThreadId: string; nativeRolloutId?: string; nativeSessionId?: string; relation: "distinct-identities-recorded" }>;
+-  workbench: Readonly<{ storeInstance: string; generation: string; query: Readonly<{ completeness: "complete" | "partial" | "unavailable"; sourceBounds: string; truncation: string }> }>;
+-}>;
+-export type SessionEtlProjection = Readonly<{ meta: SessionEtlMeta; events: readonly SessionEtlEvent[]; projection: readonly Readonly<{ seq: number; kind: SessionEtlEventKind; locator: SessionEtlLocator }>[]; omittedEventCount: number }>;
+-export type SessionEtlProjectionInput = Readonly<{
+-  bb: BbEventIdentitySnapshot;
+-  native: Readonly<SafeReaderProjection>;
+-  workbench: WorkbenchDecisionResult;
+-  source: Readonly<{
+-    /** Explicit RPC freshness/authorization facts, never native authority. */
+-    authorized: boolean;
+-    sourceFenceStable: boolean;
+-    /** Workbench's independently captured store/generation source fence. */
+-    workbenchStoreInstanceSlot: string;
+-    workbenchGenerationSlot: string;
+-    sourceBounds: string;
+-    truncation: string;
+-  }>;
+-}>;
+-
+-export class SessionEtlProjectionError extends Error {}
+-
+-type NativeEvent = Readonly<{ seq: number; kind: string; locator: SessionEtlLocator; details?: Record<string, unknown> }>;
+-
+-function sessionEtlSlot(value: string): string { return `sha256:${createHash("sha256").update(value, "utf8").digest("hex")}`; }
+-function sessionEtlObject(value: unknown): Record<string, unknown> | null { return value !== null && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : null; }
+-function sessionEtlText(value: unknown, maximum = 512): value is string { return typeof value === "string" && value.length > 0 && value.length <= maximum; }
+-function sessionEtlLocator(value: unknown): value is SessionEtlLocator {
+-  const row = sessionEtlObject(value);
+-  return row !== null && (row.source === "bb" || row.source === "workbench" || row.source === "rollout") && row.redacted === true && sessionEtlText(row.ref) && SESSION_ETL_SAFE_REF.test(row.ref);
+-}
+-function sessionEtlSafe(value: unknown, key = ""): boolean {
+-  if (/(?:path|home|account|message|reasoning|tool|credential|raw|prompt|hooktext)/iu.test(key)) return false;
+-  if (typeof value === "string") return !value.includes("context-magnet.hook-text/v1") && value.length <= SESSION_ETL_MAX_BODY_BYTES;
+-  if (Array.isArray(value)) return value.length <= 16 && value.every((entry) => sessionEtlSafe(entry));
+-  const row = sessionEtlObject(value);
+-  return row === null || Object.entries(row).every(([child, entry]) => sessionEtlSafe(entry, child));
+-}
+-function sessionEtlReceipt(value: unknown): value is SessionEtlReceipt {
+-  const row = sessionEtlObject(value);
+-  const keys = ["receiptVersion", "nonceSlot", "nativeSessionIdSlot", "turnIdSlot", "storeInstanceSlot", "generationSlot", "generationKeySlots", "recordKeySlots", "contributionKeySlots", "emittedUtf8Bytes", "emittedSha256", "executableIdentitySlot", "sourceIdentitySlot"];
+-  if (row === null || Object.keys(row).length !== keys.length || !keys.every((key) => Object.hasOwn(row, key)) || row.receiptVersion !== "context-magnet.receipt/v1" || ![row.nonceSlot, row.nativeSessionIdSlot, row.turnIdSlot, row.storeInstanceSlot, row.generationSlot, row.executableIdentitySlot, row.sourceIdentitySlot].every((slot) => typeof slot === "string" && SESSION_ETL_SLOT.test(slot)) || ![row.generationKeySlots, row.recordKeySlots, row.contributionKeySlots].every((slots) => Array.isArray(slots) && slots.length > 0 && slots.length <= 16 && slots.every((slot) => typeof slot === "string" && SESSION_ETL_SLOT.test(slot))) || !Number.isSafeInteger(row.emittedUtf8Bytes) || (row.emittedUtf8Bytes as number) < 0 || (row.emittedUtf8Bytes as number) > SESSION_ETL_MAX_BODY_BYTES || typeof row.emittedSha256 !== "string" || !/^[a-f0-9]{64}$/u.test(row.emittedSha256)) return false;
+-  return true;
+-}
+-function sessionEtlSameReceipt(left: SessionEtlReceipt, right: SessionEtlReceipt): boolean { return JSON.stringify(left) === JSON.stringify(right); }
+-function sessionEtlRef(source: SessionEtlLocator["source"], ref: string): SessionEtlLocator { return Object.freeze({ source, ref, redacted: true }); }
+-function sessionEtlAssociation(receipt: SessionEtlReceipt, locators: readonly SessionEtlLocator[]): SessionEtlAssociation {
+-  return Object.freeze({ keys: Object.freeze({ nonceSlot: receipt.nonceSlot, nativeSessionIdSlot: receipt.nativeSessionIdSlot, turnIdSlot: receipt.turnIdSlot, storeInstanceSlot: receipt.storeInstanceSlot, generationSlot: receipt.generationSlot, generationKeySlots: receipt.generationKeySlots, recordKeySlots: receipt.recordKeySlots, contributionKeySlots: receipt.contributionKeySlots, executableIdentitySlot: receipt.executableIdentitySlot, sourceIdentitySlot: receipt.sourceIdentitySlot }), derivationVersion: SESSION_ETL_PROJECTOR_VERSION, supportingLocators: Object.freeze([...locators]) });
+-}
+-function sessionEtlNativeMeta(value: unknown): Readonly<{
+-  normalizerVersion: string; routerRevision: string; routerOwnerSlot: string; routerProviderThreadSlot: string;
+-  dialect: "codex-rollout" | "unsupported" | "unknown"; rolloutDigest: string; rolloutFileIdentity: string; nativeRolloutId?: string; nativeSessionId?: string;
+-}> | null {
+-  const meta = sessionEtlObject(value), router = sessionEtlObject(meta?.router), rollout = sessionEtlObject(meta?.rollout), digest = sessionEtlObject(rollout?.digest), file = sessionEtlObject(rollout?.file), identities = sessionEtlObject(meta?.identities);
+-  if (meta === null || meta.kind !== "meta" || meta.version !== "context-magnet.session-reader-projection/v1" || !sessionEtlText(meta.normalizerVersion) || router === null || router.authority !== "router-snapshot" || router.readonly !== true || !SESSION_ETL_SLOT.test(router.providerThreadId as string) || !SESSION_ETL_SLOT.test(router.revision as string) || !SESSION_ETL_SLOT.test(router.ownerSlot as string) || rollout === null || (rollout.dialect !== "codex-rollout" && rollout.dialect !== "unsupported" && rollout.dialect !== "unknown") || digest?.algorithm !== "sha256" || typeof digest.value !== "string" || !/^[a-f0-9]{64}$/u.test(digest.value) || file?.kind !== "rollout" || !SESSION_ETL_SLOT.test(file.identity as string) || identities === null || identities.relation !== "distinct-native-identities-recorded" || (identities.nativeRolloutId !== undefined && !SESSION_ETL_SLOT.test(identities.nativeRolloutId as string)) || (identities.nativeSessionId !== undefined && !SESSION_ETL_SLOT.test(identities.nativeSessionId as string)) || (rollout.nativeRolloutId !== undefined && rollout.nativeRolloutId !== identities.nativeRolloutId)) return null;
+-  return Object.freeze({ normalizerVersion: meta.normalizerVersion as string, routerRevision: router.revision as string, routerOwnerSlot: router.ownerSlot as string, routerProviderThreadSlot: router.providerThreadId as string, dialect: rollout.dialect, rolloutDigest: digest.value, rolloutFileIdentity: file.identity as string, ...(identities.nativeRolloutId === undefined ? {} : { nativeRolloutId: identities.nativeRolloutId as string }), ...(identities.nativeSessionId === undefined ? {} : { nativeSessionId: identities.nativeSessionId as string }) });
+-}
+-
+-/**
+- * Produce the canonical, versioned ETL trace. The only body that may leave
+- * this boundary is `details.admittedContext`, copied from a ready Workbench
+- * authority after one exact persisted native-receipt match.
+- */
+-export function projectSessionEtl(input: SessionEtlProjectionInput): SessionEtlProjection {
+-  const source = input.source;
+-  if (typeof source.authorized !== "boolean" || typeof source.sourceFenceStable !== "boolean" || !SESSION_ETL_SLOT.test(source.workbenchStoreInstanceSlot) || !SESSION_ETL_SLOT.test(source.workbenchGenerationSlot) || !sessionEtlText(source.sourceBounds) || !sessionEtlText(source.truncation)) throw new SessionEtlProjectionError("Invalid explicit RPC fence facts.");
+-  if (input.bb.providerId !== "codex" || !SESSION_ETL_SLOT.test(input.bb.providerThreadSlot) || !Number.isSafeInteger(input.bb.eventHighWatermark) || input.bb.eventHighWatermark < 1) throw new SessionEtlProjectionError("Invalid BB identity adapter output.");
+-  let nativeAdapter: ReturnType<typeof adaptCodexSessionProjection>;
+-  try { nativeAdapter = adaptCodexSessionProjection(input.native); } catch { throw new SessionEtlProjectionError("Invalid native-session adapter output."); }
+-  const parsedNativeMeta = sessionEtlNativeMeta(nativeAdapter.meta);
+-  if (parsedNativeMeta === null && nativeAdapter.state === "ready") throw new SessionEtlProjectionError("A ready native reader result requires validated meta.");
+-  // An unavailable/partial reader has no native authority to repeat.  Retain a
+-  // deterministic sentinel meta rather than accepting caller-supplied router
+-  // or rollout facts, and make it ineligible for admission below.
+-  const nativeMeta = parsedNativeMeta ?? Object.freeze({ normalizerVersion: "unavailable", routerRevision: sessionEtlSlot("unavailable"), routerOwnerSlot: sessionEtlSlot("unavailable"), routerProviderThreadSlot: sessionEtlSlot("unavailable"), dialect: "unknown" as const, rolloutDigest: createHash("sha256").update("unavailable", "utf8").digest("hex"), rolloutFileIdentity: sessionEtlSlot("unavailable"), nativeRolloutId: undefined as string | undefined, nativeSessionId: undefined as string | undefined });
+-  const checkpoint = input.bb.terminalCheckpoint;
+-  const meta: SessionEtlMeta = Object.freeze({ kind: "meta", version: SESSION_ETL_VERSION, normalizerVersion: nativeMeta.normalizerVersion, projectorVersion: SESSION_ETL_PROJECTOR_VERSION,
+-    bb: Object.freeze({ providerThreadId: input.bb.providerThreadSlot, eventHighWatermark: input.bb.eventHighWatermark, terminalCheckpoint: Object.freeze({ state: checkpoint.state, ...(checkpoint.turnSlot === undefined ? {} : { turnId: checkpoint.turnSlot }) }) }),
+-    router: Object.freeze({ revision: nativeMeta.routerRevision, ownerSlot: nativeMeta.routerOwnerSlot, readonly: true }),
+-    rollout: Object.freeze({ dialect: nativeMeta.dialect, digest: Object.freeze({ algorithm: "sha256", value: nativeMeta.rolloutDigest }), file: Object.freeze({ identity: nativeMeta.rolloutFileIdentity, kind: "rollout" }), ...(nativeMeta.nativeRolloutId === undefined ? {} : { nativeRolloutId: nativeMeta.nativeRolloutId }) }),
+-    identities: Object.freeze({ bbProviderThreadId: input.bb.providerThreadSlot, ...(nativeMeta.nativeRolloutId === undefined ? {} : { nativeRolloutId: nativeMeta.nativeRolloutId }), ...(nativeMeta.nativeSessionId === undefined ? {} : { nativeSessionId: nativeMeta.nativeSessionId }), relation: "distinct-identities-recorded" }),
+-    workbench: Object.freeze({ storeInstance: source.workbenchStoreInstanceSlot, generation: source.workbenchGenerationSlot, query: Object.freeze({ completeness: input.workbench.state === "ready" || input.workbench.state === "no-contribution" ? "complete" : input.workbench.state === "unavailable" ? "unavailable" : "partial", sourceBounds: source.sourceBounds, truncation: source.truncation }) }),
+-  });
+-  const events: SessionEtlEvent[] = [];
+-  const append = (kind: SessionEtlEventKind, locator: SessionEtlLocator, details: Record<string, unknown> = {}, associations: readonly SessionEtlAssociation[] = []): void => {
+-    if (!sessionEtlLocator(locator) || !sessionEtlSafe(details) || associations.some((association) => !sessionEtlSafe(association))) throw new SessionEtlProjectionError("Unsafe canonical event.");
+-    events.push(Object.freeze({ seq: events.length + 1, kind, locator, details: Object.freeze({ ...details }), associations: Object.freeze([...associations]) }));
+-  };
+-  const bbLocator = sessionEtlRef("bb", `thread-event:${input.bb.eventHighWatermark}`);
+-  append("source-lifecycle", bbLocator, { state: checkpoint.state, ...(checkpoint.turnSlot === undefined ? {} : { turnSlot: checkpoint.turnSlot }) });
+-  append("source-fence", bbLocator, { eventHighWatermark: input.bb.eventHighWatermark, providerThreadSlot: input.bb.providerThreadSlot });
+-  if (!source.authorized) append("gap", bbLocator, { reason: "unauthorized" });
+-  if (!source.sourceFenceStable) append("gap", bbLocator, { reason: "source-fence-drift" });
+-  if (checkpoint.state !== "succeeded" || checkpoint.turnSlot === undefined) append("gap", bbLocator, { reason: checkpoint.state === "failed" ? "terminal-failed" : checkpoint.state === "interrupted" ? "terminal-interrupted" : "missing-terminal-checkpoint" });
+-  const native: NativeEvent[] = [];
+-  let previousNativeSeq = 0;
+-  for (const event of nativeAdapter.events) {
+-    const row = sessionEtlObject(event);
+-    if (row === null || !Number.isSafeInteger(row.seq) || (row.seq as number) <= previousNativeSeq || typeof row.kind !== "string" || !sessionEtlLocator(row.locator) || !sessionEtlSafe(row)) throw new SessionEtlProjectionError("Unsafe or out-of-order native reader event.");
+-    if (row.kind !== "source-fence" && row.kind !== "persisted-rollout-receipt" && row.kind !== "gap") throw new SessionEtlProjectionError("Unknown context-bearing native event.");
+-    previousNativeSeq = row.seq as number;
+-    native.push({ seq: row.seq as number, kind: row.kind, locator: row.locator, ...(sessionEtlObject(row.details) === null ? {} : { details: row.details as Record<string, unknown> }) });
+-  }
+-  const nativeFences = native.filter((event) => event.kind === "source-fence");
+-  for (const event of nativeFences) append("source-fence", event.locator, event.details ?? {});
+-  for (const event of native.filter((event) => event.kind === "gap")) append("gap", event.locator, { reason: "native-reader-gap" });
+-  if (nativeAdapter.state === "partial" || nativeAdapter.state === "unavailable") append("gap", sessionEtlRef("rollout", `reader:${nativeAdapter.state}`), { reason: nativeAdapter.state === "partial" ? "partial" : "unavailable" });
+-  if (nativeMeta.dialect !== "codex-rollout") append("gap", sessionEtlRef("rollout", `dialect:${nativeMeta.dialect}`), { reason: nativeMeta.dialect === "unsupported" ? "unsupported" : "unavailable" });
+-  if (nativeAdapter.omittedEventCount > 0) append("gap", sessionEtlRef("rollout", "reader:omitted"), { reason: "compacted", omittedEventCount: nativeAdapter.omittedEventCount });
+-  const receipts = native.filter((event) => event.kind === "persisted-rollout-receipt");
+-  // The router reader emits ReceiptProjectionV1 directly in event.details;
+-  // nesting it under `receipt` would be a parallel, incompatible authority.
+-  const receiptEntries = receipts.map((event) => ({ event, receipt: event.details })).filter((entry): entry is { event: NativeEvent; receipt: SessionEtlReceipt } => sessionEtlReceipt(entry.receipt));
+-  if (receipts.length !== receiptEntries.length) append("gap", sessionEtlRef("rollout", "receipt:malformed"), { reason: "malformed-persisted-receipt" });
+-  if (receipts.length > 1) append("gap", sessionEtlRef("rollout", "receipt:duplicate"), { reason: "duplicate-persisted-receipt" });
+-  if (receiptEntries.length === 1) append("persisted-rollout-receipt", receiptEntries[0]!.event.locator, { receipt: receiptEntries[0]!.receipt }, [sessionEtlAssociation(receiptEntries[0]!.receipt, [receiptEntries[0]!.event.locator])]);
+-  const workbenchLocator = sessionEtlRef("workbench", `decision:${input.workbench.audienceSlot}`);
+-  append("workbench-observed", workbenchLocator, { state: input.workbench.state, reason: input.workbench.reason });
+-  const authority = input.workbench.authority;
+-  if (input.workbench.state === "no-contribution") append("workbench-no-contribution", workbenchLocator, { reason: input.workbench.reason });
+-  if (authority !== null && authority !== undefined) {
+-    if (!sessionEtlReceipt(authority.receipt) || Buffer.byteLength(authority.body, "utf8") !== authority.bodyUtf8Bytes || authority.bodyUtf8Bytes > SESSION_ETL_MAX_BODY_BYTES || createHash("sha256").update(authority.body, "utf8").digest("hex") !== authority.bodySha256 || authority.bodySha256 !== authority.receipt.emittedSha256 || authority.bodyUtf8Bytes !== authority.receipt.emittedUtf8Bytes) throw new SessionEtlProjectionError("Workbench authority is not self-consistent.");
+-    append("workbench-selection", workbenchLocator, { outcome: authority.outcome, reason: authority.reason }, [sessionEtlAssociation(authority.receipt, [workbenchLocator])]);
+-    append("workbench-emission", workbenchLocator, { emittedUtf8Bytes: authority.bodyUtf8Bytes, emittedSha256: authority.bodySha256 }, [sessionEtlAssociation(authority.receipt, [workbenchLocator])]);
+-  } else if (input.workbench.state === "gap" || input.workbench.state === "unavailable") append("gap", workbenchLocator, { reason: input.workbench.state === "unavailable" ? "unavailable" : "workbench-gap" });
+-  const providerIdentityMatches = parsedNativeMeta !== null && nativeMeta.routerProviderThreadSlot === input.bb.providerThreadSlot;
+-  if (!providerIdentityMatches) append("gap", bbLocator, { reason: "provider-thread-identity-mismatch" });
+-  const workbenchFenceMatches = authority !== null && authority !== undefined && authority.receipt.storeInstanceSlot === source.workbenchStoreInstanceSlot && authority.receipt.generationSlot === source.workbenchGenerationSlot;
+-  if (authority !== null && authority !== undefined && !workbenchFenceMatches) append("gap", workbenchLocator, { reason: "store-or-generation-fence-mismatch" });
+-  const admissible = source.authorized && source.sourceFenceStable && providerIdentityMatches && workbenchFenceMatches && checkpoint.state === "succeeded" && checkpoint.turnSlot !== undefined && nativeAdapter.state === "ready" && nativeMeta.dialect === "codex-rollout" && receipts.length === 1 && receiptEntries.length === 1 && input.workbench.state === "ready" && authority !== null && authority !== undefined;
+-  if (input.workbench.state === "no-contribution" && receipts.length > 0) append("gap", workbenchLocator, { reason: "zero-contribution-conflict" });
+-  if (authority !== null && authority !== undefined && receipts.length === 0) append("gap", workbenchLocator, { reason: "unbound-emission" });
+-  if (admissible) {
+-    const nativeReceipt = receiptEntries[0]!.receipt;
+-    const allMatch = sessionEtlSameReceipt(nativeReceipt, authority!.receipt) && nativeReceipt.storeInstanceSlot === source.workbenchStoreInstanceSlot && nativeReceipt.generationSlot === source.workbenchGenerationSlot && authority!.receipt.storeInstanceSlot === source.workbenchStoreInstanceSlot && authority!.receipt.generationSlot === source.workbenchGenerationSlot && nativeReceipt.turnIdSlot === checkpoint.turnSlot && input.workbench.nativeTurnSlot === checkpoint.turnSlot && input.workbench.bbCheckpointTurnSlot === checkpoint.turnSlot && (nativeMeta.nativeSessionId === undefined || nativeReceipt.nativeSessionIdSlot === nativeMeta.nativeSessionId);
+-    if (!allMatch) append("gap", workbenchLocator, { reason: "receipt-or-identity-mismatch" });
+-    else append("context-admission", workbenchLocator, { admittedContext: authority!.body, emittedUtf8Bytes: authority!.bodyUtf8Bytes, emittedSha256: authority!.bodySha256, persistedReceipt: true, semanticUse: "unobserved" }, [sessionEtlAssociation(authority!.receipt, [bbLocator, workbenchLocator, receiptEntries[0]!.event.locator])]);
+-  }
+-  const dropped = Math.max(0, events.length - (SESSION_ETL_MAX_EVENTS - 1));
+-  const retained = dropped === 0 ? events : [
+-    ...events.slice(0, SESSION_ETL_MAX_EVENTS - 1),
+-    Object.freeze({ seq: SESSION_ETL_MAX_EVENTS, kind: "gap" as const, locator: sessionEtlRef("rollout", "projection:event-bound"), details: Object.freeze({ reason: "event-bound", droppedEventCount: dropped, droppedKinds: Object.freeze(events.slice(SESSION_ETL_MAX_EVENTS - 1).map((event) => event.kind)) }), associations: Object.freeze([]) }),
+-  ];
+-  const projection = Object.freeze(retained.map(({ seq, kind, locator }) => Object.freeze({ seq, kind, locator })));
+-  return Object.freeze({ meta, events: Object.freeze(retained), projection, omittedEventCount: nativeAdapter.omittedEventCount + dropped });
+-}
+-
+-/** A lossy consumer view: it retains citations, never context or receipt data. */
+-export function projectSessionEtlSummary(result: SessionEtlProjection): SessionEtlProjection["projection"] { return result.projection; }

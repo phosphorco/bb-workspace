@@ -1,0 +1,175 @@
+{
+  "kind": "context-magnet-session-etl-plugin-runtime-rehearsal",
+  "version": 2,
+  "command": "rehearse",
+  "cwd": "/home/ubuntu/bb",
+  "grants": [
+    "plans/context-magnet-session-etl-plugin-runtime.mjs",
+    "plans/context-magnet-session-etl-plugin-preimage.json",
+    "plans/context-magnet-session-etl-plugin-runtime-rehearsal.json"
+  ],
+  "mode": "private-fixture-adapter",
+  "liveMutatorsExecuted": false,
+  "commandAllowlist": [
+    "build-inspector",
+    "build-router",
+    "reload-inspector",
+    "reload-router",
+    "install-router",
+    "install-hooks",
+    "status-hooks"
+  ],
+  "temporaryRoot": {
+    "state": "removed"
+  },
+  "cases": [
+    {
+      "name": "partial-build",
+      "primaryError": "context-magnet dispatch: build-router failed with exit 17",
+      "restorationError": null,
+      "restorationAttempted": true,
+      "backupRestore": {
+        "completed": true,
+        "generation": "e3978f0c57dcc32023639f3a387677edc9851948c8fa58068fa02edf44d41c34",
+        "records": 19
+      },
+      "restorationReceipts": [
+        "reload-inspector",
+        "reload-router"
+      ],
+      "postRollbackEqual": true
+    },
+    {
+      "name": "partial-hook",
+      "primaryError": "context-magnet dispatch: install-hooks failed with exit 17",
+      "restorationError": null,
+      "restorationAttempted": true,
+      "backupRestore": {
+        "completed": true,
+        "generation": "e3978f0c57dcc32023639f3a387677edc9851948c8fa58068fa02edf44d41c34",
+        "records": 19
+      },
+      "restorationReceipts": [
+        "reload-inspector",
+        "reload-router"
+      ],
+      "postRollbackEqual": true
+    },
+    {
+      "name": "dual-failure",
+      "primaryError": "context-magnet dispatch: install-hooks failed with exit 17",
+      "restorationError": "context-magnet dispatch: reload-inspector failed with exit 17",
+      "restorationAttempted": true,
+      "backupRestore": {
+        "completed": true,
+        "generation": "e3978f0c57dcc32023639f3a387677edc9851948c8fa58068fa02edf44d41c34",
+        "records": 19
+      },
+      "restorationReceipts": [],
+      "postRollbackEqual": false
+    },
+    {
+      "name": "proof-stage-drift",
+      "primaryError": "plugin-runtime-contract: loaded app/server attestation for context-magnet-inspector",
+      "restorationError": null,
+      "restorationAttempted": true,
+      "backupRestore": {
+        "completed": true,
+        "generation": "e3978f0c57dcc32023639f3a387677edc9851948c8fa58068fa02edf44d41c34",
+        "records": 19
+      },
+      "restorationReceipts": [
+        "reload-inspector",
+        "reload-router"
+      ],
+      "postRollbackEqual": true
+    },
+    {
+      "name": "hook-status-drift",
+      "primaryError": "plugin-runtime-contract: authoritative hook Workbench mismatch",
+      "restorationError": null,
+      "restorationAttempted": true,
+      "backupRestore": {
+        "completed": true,
+        "generation": "e3978f0c57dcc32023639f3a387677edc9851948c8fa58068fa02edf44d41c34",
+        "records": 19
+      },
+      "restorationReceipts": [
+        "reload-inspector",
+        "reload-router"
+      ],
+      "postRollbackEqual": true
+    },
+    {
+      "name": "hook-record-drift",
+      "primaryError": "plugin-runtime-contract: authoritative hook Workbench mismatch",
+      "restorationError": null,
+      "restorationAttempted": true,
+      "backupRestore": {
+        "completed": true,
+        "generation": "e3978f0c57dcc32023639f3a387677edc9851948c8fa58068fa02edf44d41c34",
+        "records": 19
+      },
+      "restorationReceipts": [
+        "reload-inspector",
+        "reload-router"
+      ],
+      "postRollbackEqual": true
+    },
+    {
+      "name": "different-prior-hook-rollback",
+      "primaryError": "plugin-runtime-contract: different prior hook rollback proof",
+      "restorationError": null,
+      "restorationAttempted": true,
+      "backupRestore": {
+        "completed": true,
+        "generation": "e3978f0c57dcc32023639f3a387677edc9851948c8fa58068fa02edf44d41c34",
+        "records": 19
+      },
+      "restorationReceipts": [
+        "reload-inspector",
+        "reload-router"
+      ],
+      "postRollbackEqual": true,
+      "beforeWorkbench": "fixture-prior",
+      "restoredWorkbench": "fixture-prior"
+    },
+    {
+      "name": "idempotent-rollback",
+      "primaryError": null,
+      "restorationError": null
+    }
+  ],
+  "success": {
+    "remainsActive": true,
+    "operationOrder": [
+      "build-inspector",
+      "build-router",
+      "reload-inspector",
+      "reload-router",
+      "install-router",
+      "install-hooks",
+      "status-hooks"
+    ],
+    "hookTransition": {
+      "before": "absent",
+      "active": {
+        "record": "present",
+        "health": "ready",
+        "selectedWorkbench": "fixture-selected"
+      }
+    },
+    "postCommandAttestations": [
+      "built-dist-artifacts",
+      "loaded-app-server",
+      "router-launcher-manifest-generation",
+      "hook-record-status-workbench"
+    ]
+  },
+  "protectedState": {
+    "result": "unchanged-by-fixture-only-rehearsal",
+    "liveCommandsExecuted": false,
+    "rootsTouched": "private fixture root only"
+  },
+  "ok": true
+}

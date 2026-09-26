@@ -1,0 +1,1299 @@
+amends "workbench:plan"
+
+meta {
+  title = "Context Magnet provider-session ETL refactor"
+  goal = "Replace the unavailable BB host-trace architecture with a plugin-owned, rollback-safe ETL from public BB identity events, bounded Workbench decisions, and persisted context receipts in original Codex rollouts, rendered as a canonical semantic context trace without changing the BB fork."
+}
+
+// The prior host-trace plan and ledger remain historical evidence, not inputs.
+// Hard boundaries:
+// - no BB fork, SDK artifact, service, or host-trace API change;
+// - no app-server launch or routed thread/read against an original account:
+//   even thread/read startup mutates Codex SQLite/WAL state on this host;
+// - original rollout JSONL is admitted only through one versioned, bounded,
+//   streaming, read-only reducer that projects allowlisted context receipts;
+// - the only native Codex carrier is an aligned response_item developer
+//   message part whose content_item_kinds entry is hooks.additional_context;
+//   generic developer messages are not Context Magnet evidence;
+// - no timestamp, text-similarity, or inferred provider/session joins;
+// - the rollout reducer never returns or persists raw provider records, paths,
+//   messages, reasoning, commands, tool data, credentials, or unrelated text;
+// - atomic facts retain one authority; derived associations retain all source
+//   keys, route attestations, source digests, and the projector version;
+// - a persisted rollout context receipt does not prove model transmission or use;
+// - publication, promotion, normal-host retention, and historical fork-patch
+//   deletion require separate authority.
+
+local forkPreservationBaseline = new Action {
+  id = "fork-preservation-baseline"
+  owner = "workspace-conservator"
+  outcome = "Capture the pre-refactor workspace and runtime preimage: tracked and untracked plugin/router files, Workbench source identity, fork and queued patches, SDK artifacts, loaded plugin generation, exact shared-hook bytes and executable digests, router revision, services, ports, provider processes, and active BB children. Separate protected prior dirty work from declared campaign grants."
+  grant {
+    "plans/context-magnet-session-etl-workspace-preimage.json"
+    "plans/verify-context-magnet-session-etl-preimage.mjs"
+  }
+  oracle = module.mechanical("node plans/verify-context-magnet-session-etl-preimage.mjs baseline")
+}
+
+local mutationSafetyHarness = new Action {
+  id = "mutation-safety-harness"
+  owner = "workspace-conservator"
+  outcome = "Build and self-test the parent-owned recovery harness: verify each node's expected preimage before dispatch, capture exact changed paths and a reverse patch, reject writes outside its grant, and restore only explicitly snapshotted proof-runtime state without stash, reset, clean, or broad deletion. Children never write the plan ledger or perform recovery."
+  grant {
+    "plans/context-magnet-session-etl-recovery.mjs"
+    "plans/context-magnet-session-etl-recovery/**"
+  }
+  needs { module.produced(forkPreservationBaseline); module.verified(forkPreservationBaseline) }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-recovery.mjs self-test")
+}
+
+local codexSchemaReceipt = new Action {
+  id = "codex-schema-receipt"
+  owner = "session-access-investigator"
+  outcome = "Record the router-selected realCodex launcher plus its resolved native Codex payload realpaths, versions and SHA-256 digests, and the app-server schema digest generated through that exact launcher chain; vendor only required version-matched initialize, thread/read, Thread, Turn, ThreadItem and hookPrompt shapes into the plugin; and fail closed on launcher, payload or schema mismatch."
+  grant {
+    "plugins/plugins/context-magnet-inspector/codex-app-server-schema/**"
+    "plugins/plugins/context-magnet-inspector/docs/codex-reader-version-contract.md"
+    "plugins/plugins/context-magnet-inspector/test/codex-schema-receipt.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/fixtures/codex-schema-receipt.json"
+  }
+  needs { module.produced(mutationSafetyHarness); module.verified(mutationSafetyHarness) }
+  oracle = module.mechanical("node --test --experimental-strip-types test/codex-schema-receipt.test.ts")
+}
+
+local sessionAccessProbe = new Action {
+  id = "session-access-probe"
+  owner = "session-access-investigator"
+  outcome = "Build and execute a bounded probe from one BB thread's bodyless metadata and server-filtered identity events. Require providerId=codex; resolve one existing enabled unambiguous router owner through a strictly read-only state snapshot; open the already-recorded original rollout with no-follow/containment and pre/post file-identity fences; stream bounded UTF-8 JSONL without launching Codex; validate the exact observed rollout dialect; and recognize only response_item developer-message parts whose aligned content_item_kinds entry is hooks.additional_context. Keep BB provider identity, native rollout id and native session_id distinct; bind provisional receipts to native session_id and metadata turn_id; project only redacted identity relations, bounded carrier/receipt counts and explicit gaps. Never return or persist unrelated record bodies or the rollout/account path. Cover native, missing, archived, disabled, divergent, unauthorized, forked, compacted, interrupted, failed, subagent, zero-receipt, malformed, duplicate, racing and oversized cases."
+  grant {
+    "plugins/plugins/context-magnet-inspector/docs/codex-session-access-probe.md"
+    "plugins/plugins/context-magnet-inspector/test/codex-session-access-probe.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/run-codex-session-access-probe.mts"
+    "plugins/plugins/context-magnet-inspector/test/fixtures/codex-session-access-probe.json"
+  }
+  needs { module.produced(mutationSafetyHarness); module.verified(mutationSafetyHarness) }
+  oracle = module.mechanical("node --experimental-strip-types test/run-codex-session-access-probe.mts && node --test --experimental-strip-types test/codex-session-access-probe.test.ts")
+}
+
+local sessionAccessReview = new Guard {
+  id = "session-access-review"
+  owner = "architecture-reviewer"
+  outcome = "Review the provider-session access evidence and sensitive-response boundary."
+  observes {
+    "plugins/plugins/context-magnet-inspector/docs/codex-session-access-probe.md"
+    "plugins/plugins/context-magnet-inspector/test/fixtures/codex-session-access-probe.json"
+  }
+  needs { module.produced(sessionAccessProbe); module.verified(sessionAccessProbe) }
+  oracle = module.adjudicated("A fresh probe proves a non-resuming, non-assigning, account-scoped read of the original Codex rollout for an allowed provider; uses only server-filtered BB identity rows and a strictly read-only unambiguous router snapshot; validates and streams one versioned rollout dialect under byte/line/record/time caps; recognizes only aligned native hooks.additional_context carrier parts; keeps BB provider, rollout id and session_id distinct; fails closed for malformed or declared-invalid carrier evidence; makes duplicate, unbound and zero-receipt states explicit; never logs, persists, or returns raw provider bodies or paths; covers lifecycle and adversarial file cases; and shows identical rollout, router, BB, process, and workspace pre/post state. Any app-server launch against the original account fails this review.", "architecture-reviewer")
+}
+
+local sessionAccessRoute = new Guard {
+  id = "session-access-route"
+  owner = "architecture-reviewer"
+  outcome = "Admit only the bounded router-owned, account-scoped, read-only original-rollout reducer; otherwise stop and revise as unsupported."
+  observes {
+    "plugins/plugins/context-magnet-inspector/docs/codex-session-access-probe.md"
+    "plugins/plugins/subscription-router/host/router.mjs"
+  }
+  needs { module.verified(sessionAccessReview) }
+  oracle = module.adjudicated("The route selects an already-owned enabled account without copy, repair, assignment, resume, Codex launch, or router mutation; proves rollout containment and stable file identity; and fails closed for native, unknown, disabled, divergent, archived, migrated-ambiguous, unsupported-dialect, unsafe-path, or changed sessions.", "architecture-reviewer")
+}
+
+local etlContract = new Action {
+  id = "etl-contract"
+  owner = "contract-author"
+  outcome = "Define one versioned canonical semantic context-trace vocabulary, following the agent-evals normalization architecture while keeping Codex-dialect parsing inside one rollout reducer. A leading meta record binds projector version, BB and router fences, rollout dialect/file digest without its path, Workbench store instance/generation, and distinct BB provider/native rollout/session identities. Stable event seq is the citation identity; native BB turn/provider checkpoint, rollout ordinal, response-item id, metadata turn_id, content ordinal, and Workbench record/contribution keys are optional exact correlations, never substitutes. Workbench-minted unpredictable receipt envelopes bind native session_id and event-specific turn_id when present, ordered decision keys, emitted UTF-8 bytes and actual-body digest. The rollout reducer recognizes only aligned response_item developer-message input_text parts marked hooks.additional_context; generic developer content is never relabeled. Exact bounded Workbench-emitted text becomes a first-class context-admission only when a uniquely matching persisted rollout context receipt exists; unknown, missing, unbound, malformed, duplicate, partial and ambiguous cases become explicit gap events, never reconstructed admissions. Each event has resolvable redacted source locators and source-specific authority. Ban raw provider persistence, rollout paths, timestamp/text joins, and claims beyond persisted context receipt."
+  grant {
+    "plugins/plugins/context-magnet-inspector/docs/session-etl-contract.md"
+    "plugins/plugins/context-magnet-inspector/test/fixtures/session-etl.json"
+    "plugins/plugins/context-magnet-inspector/test/session-etl-contract.test.ts"
+  }
+  needs {
+    module.verified(sessionAccessRoute)
+    module.produced(mutationSafetyHarness); module.verified(mutationSafetyHarness)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types test/session-etl-contract.test.ts")
+}
+
+local etlContractReview = new Guard {
+  id = "etl-contract-review"
+  owner = "architecture-reviewer"
+  outcome = "Review identity, authority, freshness, privacy, ambiguity and canonical-projection laws before producer or consumer work."
+  observes {
+    "plugins/plugins/context-magnet-inspector/docs/session-etl-contract.md"
+    "plugins/plugins/context-magnet-inspector/test/fixtures/session-etl.json"
+    "plugins/plugins/context-magnet-inspector/test/session-etl-contract.test.ts"
+  }
+  needs { module.produced(etlContract); module.verified(etlContract) }
+  oracle = module.adjudicated("Atomic facts name one authority; associations retain all supporting keys and projector version; providerId is Codex before interpreting providerThreadId; checkpoint-to-rollout-turn joins cover only emitting terminal states; thread and session identities may differ; event-specific hook identities may be absent; one Workbench store/generation and BB/route/rollout fence each snapshot; exact admissions retain body only from Workbench plus redacted locators; zero/duplicate/mismatched receipts and stale sources are gaps; UI/digest never parse provider dialects; and no event claims executable authorship, model transmission, or semantic use.", "architecture-reviewer")
+}
+
+// Verify in the canonical workbench-go checkout selected by Workbench Subject.
+local workbenchReceiptProducer = new Action {
+  id = "workbench-receipt-producer"
+  owner = "workbench-context-author"
+  outcome = "From a canonical branch-backed workbench-go checkout reproduced by Workbench Snapshot at installed revision 65f62403b31126431c8098d986dbba90d2fbdddd (never the detached /tmp evidence clone), add the reviewed durable emission receipt at the daemon/trace-store authority boundary. Give each trace store a durable instance id; mint a fresh unpredictable emission nonce after Plan selects the exact ordered offer; bind normalized audience, native session and event-specific turn when present, ordered generation/record/contribution identities, exact emitted UTF-8 bytes/SHA-256, and daemon-derived executable/source identity; synchronously append and flush before Observe returns an output-capable offer. Receipt persistence failure must suppress Context Magnet output while preserving harness availability—never emit an unreceipted body. Encode the versioned receipt line plus unchanged Workbench body in Codex additionalContext, retain the same structured receipt in history/inspect contribution/inspect turn JSON, preserve old-store behavior without fabricating v1 provenance, and keep Confirm's distinct post-write semantics. Add a bounded public `context inspect decision-slots NATIVE_SESSION_SLOT TURN_SLOT [NONCE_SLOT] --json` query that hashes retained native identities inside the trace authority, accepts only canonical sha256 slots, returns a complete slot-redacted decision/receipt envelope plus exact bounded emitted body, and never requires raw native identities to cross the router boundary. Add restart, clear, concurrent duplicate-body, malformed/bounded receipt, persistence-failure, transport, exact-envelope, slot-query and public-query acceptance proofs."
+  grant {
+    "internal/contexttrace/contexttrace.go"
+    "internal/contexttrace/contexttrace_test.go"
+    "internal/contextdaemon/api.go"
+    "internal/contextdaemon/runtime.go"
+    "internal/contextdaemon/runtime_review_test.go"
+    "internal/contextdaemon/trace_runtime.go"
+    "internal/contextdaemon/trace_runtime_test.go"
+    "internal/contextdaemon/transport.go"
+    "internal/contextdaemon/transport_lifetime_test.go"
+    "cmd/workbench/context_runtime.go"
+    "cmd/workbench/context_runtime_test.go"
+    "cmd/workbench/context_cli.go"
+    "cmd/workbench/context_cli_test.go"
+    "acceptance/context_test.go"
+    "docs/context.md"
+    "docs/adr/2026-09-wokbench-context.md"
+  }
+  needs { module.produced(etlContract); module.verified(etlContractReview) }
+  oracle = module.mechanical("GOCACHE=/tmp/cm-workbench-receipt-parent-gocache GOMODCACHE=/tmp/cm-workbench-receipt-parent-gomodcache PKL_EXECUTABLE=/home/ubuntu/.local/share/mise/installs/pkl/0.32.1/pkl go test ./internal/contexttrace ./internal/contextdaemon ./cmd/workbench && GOCACHE=/tmp/cm-workbench-receipt-parent-gocache GOMODCACHE=/tmp/cm-workbench-receipt-parent-gomodcache PKL_EXECUTABLE=/home/ubuntu/.local/share/mise/installs/pkl/0.32.1/pkl go test ./acceptance -run '^TestContext' -count=1 && git diff --check")
+}
+
+local workbenchRuntimeSelection = new Action {
+  id = "workbench-runtime-selection"
+  owner = "workbench-runtime-operator"
+  outcome = "Build the accepted Workbench producer source as the one versioned executable at plans/context-magnet-workbench-runtime/bd9e7818cb2f4c7cbb6144544339b303df7c68e845d8d944cd825e4e2cb881f9/workbench, where the directory name is the accepted 16-file source-diff SHA-256. Record and verify its realpath, mode, platform, version, SHA-256, source revision, source-diff digest and build toolchain. The artifact is build-only evidence, not an alternate default runtime source. Do not install hooks, modify the shared-hook record, or touch provider processes."
+  grant {
+    "plans/context-magnet-workbench-runtime/bd9e7818cb2f4c7cbb6144544339b303df7c68e845d8d944cd825e4e2cb881f9/workbench"
+    "plans/context-magnet-workbench-runtime-receipt.json"
+    "plans/verify-context-magnet-workbench-runtime.mjs"
+  }
+  needs { module.produced(workbenchReceiptProducer); module.verified(workbenchReceiptProducer) }
+  oracle = module.mechanical("node plans/verify-context-magnet-workbench-runtime.mjs build-only")
+}
+
+local bbEventIdentityAdapter = new Action {
+  id = "bb-event-identity-adapter"
+  owner = "bb-event-adapter-author"
+  outcome = "Implement a bounded BB adapter that validates the Codex provider, captures an event high-watermark, reads only identity-bearing thread/turn events, recognizes checkpoint-emitting terminal states, pages safely, rereads completion, and rejects foreign, conflicting, missing, reordered, body-bearing, provider-neutral or inferred correlations."
+  grant {
+    "plugins/plugins/context-magnet-inspector/bb-event-adapter.ts"
+    "plugins/plugins/context-magnet-inspector/test/bb-event-adapter.test.ts"
+  }
+  needs { module.produced(etlContract); module.verified(etlContractReview) }
+  oracle = module.mechanical("node --test --experimental-strip-types test/bb-event-adapter.test.ts")
+}
+
+local codexSessionAdapter = new Action {
+  id = "codex-session-adapter"
+  owner = "codex-session-adapter-author"
+  outcome = "Implement the router-owned reducer and plugin adapter: select only an existing unambiguous enabled owner from read-only state; attest the provider route and original rollout identity; open the contained regular rollout without following links; stream and validate the reviewed versioned JSONL dialect under byte/line/record/time caps; recognize only aligned response_item developer-message input_text parts marked hooks.additional_context; validate native item/session/turn locators and the versioned receipt; return canonical receipt facts and stable zero/unbound/malformed/duplicate gaps; and prove no router/session mutation. Never launch Codex or return/persist unrelated context text, messages, reasoning, commands, tool data, credentials, rollout paths, raw records, or crash bodies."
+  grant {
+    "plugins/plugins/context-magnet-inspector/codex-session-adapter.ts"
+    "plugins/plugins/context-magnet-inspector/test/codex-session-adapter.test.ts"
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.mjs"
+    "plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+  }
+  needs {
+    module.verified(sessionAccessRoute)
+    module.produced(etlContract); module.verified(etlContractReview)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/context-magnet-inspector/test/codex-session-adapter.test.ts plugins/subscription-router/test/context-magnet-session-reader.test.ts")
+}
+
+local workbenchAdapterV2 = new Action {
+  id = "workbench-adapter-v2"
+  owner = "workbench-adapter-author"
+  outcome = "Upgrade the Workbench adapter to fixed shell-free explanation-history reads fenced to one store instance and generation. Resolve the audience exactly as codex:<native session_id>, query the exact BB provider checkpoint/native turn, and use Workbench history plus inspect contribution/turn as the only Workbench authority. Preserve exact record/contribution/turn/envelope identity, decision reasons/outcomes, exact bounded emitted body and gaps; reject invalid receipts, cross-session records, unsafe paths, oversized collections and incomplete/partial queries. A Workbench observation with null content and zero contribution remains an explicit no-contribution decision, never evidence that a hook failed."
+  grant {
+    "plugins/plugins/context-magnet-inspector/workbench-adapter.ts"
+    "plugins/plugins/context-magnet-inspector/test/workbench-adapter-v2.test.ts"
+  }
+  needs { module.produced(etlContract); module.verified(etlContractReview) }
+  oracle = module.mechanical("node --test --experimental-strip-types test/workbench-adapter-v2.test.ts")
+}
+
+local workbenchReceiptSlotAdapter = new Action {
+  id = "workbench-receipt-slot-adapter"
+  owner = "workbench-adapter-author"
+  outcome = "Replace the raw-native-identity Workbench query seam with the verified decision-slots contract. Accept only canonical native-session, terminal-turn, optional receipt-nonce, store-instance and generation SHA-256 slots from the BB/router projections; invoke only fixed shell-free `context inspect decision-slots` argv; require one complete non-partial Workbench response; recompute emitted body bytes/digest; compare every receipt slot and ordered key slot; and return the existing bounded WorkbenchDecisionResult shape. Raw native session/turn/nonce values must never be inputs, outputs or inferred. A complete slot query with zero contribution remains explicit no-contribution; missing, duplicate, mismatched, stale, oversized or unsupported evidence is a named gap."
+  grant {
+    "plugins/plugins/context-magnet-inspector/workbench-adapter.ts"
+    "plugins/plugins/context-magnet-inspector/test/workbench-adapter-v2.test.ts"
+  }
+  needs {
+    module.produced(workbenchAdapterV2); module.verified(workbenchAdapterV2)
+    module.produced(workbenchReceiptProducer); module.verified(workbenchReceiptProducer)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types test/workbench-adapter-v2.test.ts")
+}
+
+local sessionEtlProjection = new Action {
+  id = "session-etl-projection"
+  owner = "etl-author"
+  outcome = "Purely project normalized BB, routing, Workbench and Codex facts into the canonical trace; renderers must not reinterpret provider shapes. Emit versioned meta, stable seq, exact source locators, lifecycle/selection/emission/context-admission/gap events, and a separate bounded summary projection retaining seq and locators. Distinguish unbound, selected, emitted, persisted rollout context receipt, unavailable, partial, unauthorized, compacted and semantic-use-unobserved states. Reject thread/session/turn collisions, source-freshness races, digest/nonce mismatch, duplicate matches and compaction ambiguity."
+  grant {
+    "plugins/plugins/context-magnet-inspector/context-magnet.ts"
+    "plugins/plugins/context-magnet-inspector/test/session-etl-projection.test.ts"
+  }
+  needs {
+    module.produced(bbEventIdentityAdapter); module.verified(bbEventIdentityAdapter)
+    module.produced(codexSessionAdapter); module.verified(codexSessionAdapter)
+    module.produced(workbenchAdapterV2); module.verified(workbenchAdapterV2)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types test/session-etl-projection.test.ts")
+}
+
+local hostFreeRenderer = new Action {
+  id = "host-free-renderer"
+  owner = "ui-author"
+  outcome = "Keep native ThreadChat as the sole transcript owner and render only canonical Context Magnet events in an adjacent causal narrative; the installed ThreadChat API does not permit safe interleaving of plugin-owned rows, so never imitate or reparse its message/tool timeline. Make exact admitted text a first-class 'Context added' row carrying its exact native turn slot and canonical seq/locator, outside any folded operational summary because it changes what the agent can know next. Keep compact rows vertically scannable, surface the consequential fact before disclosure, and use one lazily realized keyboard-reachable metadata inspector whose opening does not remount or resize the reading path. Show missing/partial/unauthorized/compacted/unsupported, displaced-event bounds and unrecognized context-bearing evidence as explicit gaps, never reconstructed context; additive unknown metadata may remain inspectable. Remove host-authority language and prove loading, timeout, stale-thread switch, focus restoration, color-independent/accessibility semantics, maximum payload, bounded mounted rows/overlay work and a measurable responsiveness ceiling."
+  grant {
+    "plugins/plugins/context-magnet-inspector/app.tsx"
+    "plugins/plugins/context-magnet-inspector/app.css"
+    "plugins/plugins/context-magnet-inspector/test/session-etl-renderer.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/session-etl-performance.test.ts"
+  }
+  needs { module.produced(sessionEtlProjection); module.verified(sessionEtlProjection) }
+  oracle = module.mechanical("node --test --experimental-strip-types test/session-etl-renderer.test.ts test/session-etl-performance.test.ts")
+}
+
+local routerReaderInvocation = new Action {
+  id = "router-reader-invocation"
+  owner = "router-reader-bridge-author"
+  outcome = "Expose the accepted original-rollout reducer through one explicit read-only Subscription Router host command and a bounded inspector client over BB's public host-terminal API. The command must run from the active attested router generation, open state.db readonly/create:false without initialization, chmod, migration, status, ownership claim or lifecycle work, select one existing enabled non-draining owner with no migration claim, and invoke only the no-follow bounded reducer. The inspector client resolves the thread's actual host and host directory from bodyless public BB metadata, invokes the fixed router launcher with shell-quoted fixed argv, caps stdout/stderr/time/process lifetime, validates the strict redacted projection, rechecks active generation/source/route fences, and always closes its owned terminal. No rollout path, account/home value, raw router row or provider body may cross the command boundary; missing, legacy, divergent, racing or unsupported router state is an explicit unavailable gap."
+  grant {
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.mjs"
+    "plugins/plugins/subscription-router/host/router.mjs"
+    "plugins/plugins/subscription-router/deployment.ts"
+    "plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+    "plugins/plugins/subscription-router/test/context-magnet-session-command.test.ts"
+    "plugins/plugins/subscription-router/test/deployment.test.ts"
+    "plugins/plugins/context-magnet-inspector/router-reader-client.ts"
+    "plugins/plugins/context-magnet-inspector/test/router-reader-client.test.ts"
+  }
+  needs {
+    module.produced(codexSessionAdapter); module.verified(codexSessionAdapter)
+    module.verified(sessionAccessRoute)
+  }
+  oracle = module.mechanical("bun test plugins/subscription-router/test/context-magnet-session-reader.test.ts plugins/subscription-router/test/context-magnet-session-command.test.ts plugins/subscription-router/test/deployment.test.ts plugins/context-magnet-inspector/test/router-reader-client.test.ts")
+}
+
+local checkpointZeroContributionContract = new Action {
+  id = "checkpoint-zero-contribution-contract"
+  owner = "etl-contract-corrector"
+  outcome = "Align the host-free ETL on the provider checkpoint rather than the BB scope turn, and make zero contribution a real complete-evidence state. Preserve both BB scope-turn and provider-checkpoint slots as separate facts, but use the provider checkpoint slot for the native receipt and Workbench decision join. A complete bounded rollout with zero native hook carriers/receipts must remain a complete zero-receipt projection, not a partial error. Permit a slot-only Workbench zero probe using native-session plus provider-checkpoint slots without inventing nonce/store/generation facts; accept only an explicit unique terminal zero decision. If that unfenced probe returns a contribution, or if native receipts coexist with a zero decision, fail closed with a named contradiction. Retain strict nonce/store/generation/key/body comparison whenever one persisted receipt exists, and keep malformed, unbound, duplicate, racing and incomplete evidence as explicit gaps. Tests must deliberately make the BB scope turn differ from the provider checkpoint/native turn and cover genuine zero, contradictory zero, unexpected complete contribution, and the strict receipted path."
+  grant {
+    "plugins/plugins/context-magnet-inspector/workbench-adapter.ts"
+    "plugins/plugins/context-magnet-inspector/test/workbench-adapter-v2.test.ts"
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.mjs"
+    "plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+    "plugins/plugins/context-magnet-inspector/context-magnet.ts"
+    "plugins/plugins/context-magnet-inspector/test/session-etl-projection.test.ts"
+  }
+  needs {
+    module.produced(workbenchReceiptSlotAdapter); module.verified(workbenchReceiptSlotAdapter)
+    module.produced(routerReaderInvocation); module.verified(routerReaderInvocation)
+    module.produced(sessionEtlProjection); module.verified(sessionEtlProjection)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/context-magnet-inspector/test/workbench-adapter-v2.test.ts plugins/context-magnet-inspector/test/session-etl-projection.test.ts plugins/subscription-router/test/context-magnet-session-reader.test.ts")
+}
+
+local checkpointZeroRendererSchema = new Action {
+  id = "checkpoint-zero-renderer-schema"
+  owner = "ui-contract-corrector"
+  outcome = "Align the bounded renderer validator and narrative with the corrected canonical ETL schema. Preserve BB scopeTurnSlot and providerCheckpointSlot as separate optional facts, use only providerCheckpointSlot as the Context-added/native-turn label, and never treat scopeTurnSlot as the provider turn. Accept Workbench storeInstance and generation only when both canonical slots are present; permit both to be absent for an otherwise complete explicit zero-contribution projection, while rejecting one-sided, malformed or receipt-bearing unfenced projections. Keep the exact 16-event correspondence, omission accounting, shared lazy inspector, focus restoration, stale-projection invalidation and raw-body/redaction rules. Add fixtures for divergent scope/checkpoint admission, valid zero without receipt fences, malformed partial fences, and replacement projections."
+  grant {
+    "plugins/plugins/context-magnet-inspector/app.tsx"
+    "plugins/plugins/context-magnet-inspector/test/session-etl-renderer.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/session-etl-performance.test.ts"
+  }
+  needs {
+    module.produced(hostFreeRenderer); module.verified(hostFreeRenderer)
+    module.produced(checkpointZeroContributionContract); module.verified(checkpointZeroContributionContract)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types test/session-etl-renderer.test.ts test/session-etl-performance.test.ts")
+}
+
+local hostFreeRpc = new Action {
+  id = "host-free-rpc"
+  owner = "plugin-server-author"
+  outcome = "Replace host-page authority with one bounded snapshot read: validate BB thread/provider, fence and page identity events, invoke the router reducer, query Workbench by exact identities, reread BB/route revisions, and return canonical events plus redacted diagnostics. Enforce schema/source digest and collection/output/time caps; reject a source changing during the read instead of streaming a partial snapshot. Remove host cursors, experimental_contextMagnetContributions, fallback-authority wording and normal-path manual binding."
+  grant {
+    "plugins/plugins/context-magnet-inspector/server.ts"
+    "plugins/plugins/context-magnet-inspector/test/inspector-payload.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/plugin-integration.test.ts"
+  }
+  needs {
+    module.produced(sessionEtlProjection); module.verified(sessionEtlProjection)
+    module.produced(hostFreeRenderer); module.verified(hostFreeRenderer)
+    module.produced(routerReaderInvocation); module.verified(routerReaderInvocation)
+    module.produced(workbenchReceiptSlotAdapter); module.verified(workbenchReceiptSlotAdapter)
+    module.produced(checkpointZeroContributionContract); module.verified(checkpointZeroContributionContract)
+    module.produced(checkpointZeroRendererSchema); module.verified(checkpointZeroRendererSchema)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types test/inspector-payload.test.ts test/plugin-integration.test.ts")
+}
+
+local legacyDisconnection = new Action {
+  id = "legacy-disconnection"
+  owner = "refactor-author"
+  outcome = "Disconnect host-trace declaration/adapter, host paging, provider-admission, host witness and agent-cli carrier from runtime and UI entry points while retaining source and tests as rollback material. Prove active RPC/UI imports only canonical ETL and cannot silently fall back."
+  grant {
+    "plugins/plugins/context-magnet-inspector/server.ts"
+    "plugins/plugins/context-magnet-inspector/app.tsx"
+    "plugins/plugins/context-magnet-inspector/app.css"
+    "plugins/plugins/context-magnet-inspector/test/host-free-boundary.test.ts"
+  }
+  needs { module.produced(hostFreeRpc); module.verified(hostFreeRpc) }
+  oracle = module.mechanical("node --test --experimental-strip-types test/host-free-boundary.test.ts")
+}
+
+local pluginIntegration = new Action {
+  id = "plugin-integration"
+  owner = "integration-author"
+  outcome = "Run repository sync/reference/SDK checks and both affected package typechecks, complete tests and builds. Update stale legacy UI/trace tests so they exercise retained rollback modules directly and never require the active app/server to restore disconnected APIs or styles. Add narrow declarations for the new router reader/command exports and repair their strict test typings without weakening runtime checks. Prove fixed commands, sensitive-response bounds, canonical-only UI/RPC consumption, and no host-trace-dependent skip. Keep legacy source disconnected but recoverable."
+  grant {
+    "plugins/plugins/context-magnet-inspector/test/plugin-integration.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/host-free-boundary.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/plugin-trace-producer.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/working-block-performance.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/working-block-renderer.test.ts"
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.d.mts"
+    "plugins/plugins/subscription-router/host/router.d.mts"
+    "plugins/plugins/subscription-router/test/context-magnet-session-command.test.ts"
+    "plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+  }
+  needs {
+    module.produced(legacyDisconnection); module.verified(legacyDisconnection)
+    module.produced(workbenchReceiptProducer); module.verified(workbenchReceiptProducer)
+    module.produced(codexSessionAdapter); module.verified(codexSessionAdapter)
+  }
+  oracle = module.mechanical("bun run sync:check && bun run references:check && bun run sdk-types:check && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' typecheck && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' test && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' build && bun run --filter '@phosphor/bb-plugin-subscription-router' typecheck && bun run --filter '@phosphor/bb-plugin-subscription-router' test && bun run --filter '@phosphor/bb-plugin-subscription-router' build")
+}
+
+local activationPreimage = new Action {
+  id = "activation-preimage"
+  owner = "plugin-runtime-operator"
+  outcome = "Snapshot exact pre-activation plugin generation/source/app hash, shared-hook bytes and prior Workbench receipt, router revision, provider process launch configurations, services/ports and active children; verify prior bytes and executable remain restorable; and complete the reserved preactivation/restored verifier contracts so declared node grants and recovery evidence are distinguished from protected state without broad exclusions."
+  grant {
+    "plans/context-magnet-session-etl-activation-preimage.json"
+    "plans/verify-context-magnet-session-etl-activation-preimage.mjs"
+    "plans/verify-context-magnet-session-etl-preimage.mjs"
+  }
+  needs {
+    module.produced(pluginIntegration); module.verified(pluginIntegration)
+    module.produced(workbenchRuntimeSelection); module.verified(workbenchRuntimeSelection)
+  }
+  oracle = module.mechanical("node plans/verify-context-magnet-session-etl-activation-preimage.mjs capture && node plans/verify-context-magnet-session-etl-preimage.mjs preactivation")
+}
+
+local activationTargetReview = new Guard {
+  id = "activation-target-review"
+  owner = "workspace-conservator"
+  outcome = "Report mechanically available isolated-proof and normal-runtime targets, their roles, ports, state roots and blast radius without mutating either."
+  observes {
+    "plans/context-magnet-session-etl-activation-preimage.json"
+    "AGENTS.md"
+  }
+  needs { module.produced(activationPreimage); module.verified(activationPreimage) }
+  oracle = module.mechanical("node plans/verify-context-magnet-session-etl-activation-preimage.mjs target-options")
+}
+
+local activationTarget = new Selector {
+  id = "activation-target"
+  owner = "cole"
+  outcome = "Select the explicitly authorized target for plugin reload, hook replacement and fresh-process proof."
+  question = "Activate only an isolated proof runtime, or explicitly mutate and later restore the normal bb-machine runtime?"
+  options { "isolated-proof-runtime"; "normal-bb-machine-explicit" }
+  probe = activationTargetReview
+}
+
+local pluginOwnedRuntimeBinding = new Action {
+  id = "plugin-owned-runtime-binding"
+  owner = "runtime-binding-author"
+  outcome = "Remove all CONTEXT_MAGNET_* BB-process environment dependencies. Add one bounded subscription-router host command that accepts only the raw provider-thread address plus the redacted BB provider-checkpoint slot; internally attests the active router generation, accepted reader, selected shared-hook Workbench executable and decision-slots response; binds receipt and genuine-zero paths to that exact checkpoint; combines the native rollout and Workbench decision into one strict redacted envelope; and is invoked by the inspector only through the public host-terminal SDK while retaining BB before/middle/after fences. The client must validate the exact Workbench decision/authority/receipt shape and cross-field hashes and slots, not a generic object. Preserve the accepted 64 KiB UTF-8 body inside the 256 KiB combined transport bound, reject over-bound output, and repair the Node SQLite constructor boundary exercised by the exact shared-hook oracle without weakening Bun behavior. Prove the active graph cannot fall back to host configuration, raw identities, host trace or manual binding."
+  grant {
+    "plugins/plugins/context-magnet-inspector/server.ts"
+    "plugins/plugins/context-magnet-inspector/router-reader-client.ts"
+    "plugins/plugins/context-magnet-inspector/test/host-free-boundary.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/inspector-payload.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/plugin-integration.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/router-reader-client.test.ts"
+    "plugins/plugins/subscription-router/deployment.ts"
+    "plugins/plugins/subscription-router/host/context-magnet-session-etl.mjs"
+    "plugins/plugins/subscription-router/host/context-magnet-session-etl.d.mts"
+    "plugins/plugins/subscription-router/host/router.mjs"
+    "plugins/plugins/subscription-router/host/router.d.mts"
+    "plugins/plugins/subscription-router/host/sqlite-state.mjs"
+    "plugins/plugins/subscription-router/test/context-magnet-session-command.test.ts"
+    "plugins/plugins/subscription-router/test/context-magnet-session-etl.test.ts"
+    "plugins/plugins/subscription-router/test/deployment.test.ts"
+    "plugins/plugins/subscription-router/test/sqlite-state.test.ts"
+  }
+  needs {
+    module.produced(pluginIntegration); module.verified(pluginIntegration)
+    module.produced(workbenchRuntimeSelection); module.verified(workbenchRuntimeSelection)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/context-magnet-inspector/test/host-free-boundary.test.ts plugins/context-magnet-inspector/test/inspector-payload.test.ts plugins/context-magnet-inspector/test/router-reader-client.test.ts plugins/subscription-router/test/context-magnet-session-command.test.ts plugins/subscription-router/test/context-magnet-session-etl.test.ts plugins/subscription-router/test/context-magnet-session-reader.test.ts && node --test --experimental-strip-types --test-name-pattern='opens node:sqlite with no explicit undefined constructor options' plugins/subscription-router/test/sqlite-state.test.ts && bun test plugins/subscription-router/test/shared-hooks.test.ts plugins/subscription-router/test/sqlite-state.test.ts && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' typecheck && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' build && bun run --filter '@phosphor/bb-plugin-subscription-router' typecheck && bun run --filter '@phosphor/bb-plugin-subscription-router' build")
+}
+
+local pluginRuntimeBackupContract = new Action {
+  id = "plugin-runtime-backup-contract"
+  owner = "plugin-runtime-backup-author"
+  outcome = "Implement a standalone bounded backup-v1 codec and exact private-fixture restoration proof for the Context Magnet activation mutation set. The codec must contain canonical relative target paths, file kind/presence, mode, byte length, SHA-256 and canonical base64 bytes for the two plugins' complete dist artifact sets, the exact regular router-command launcher, the exact relative router.mjs compatibility symlink, the exact absolute lib/bun runtime symlink, the active literal router generation selected by the launcher's strict versions/<digest>/router.mjs target, its manifest-driven bounded file set, and the exact hook record. Bind the launcher's runtime and lib/bun target to manifest capabilities.runtimeExecPath. Retained inactive generation directories, including a newly installed but rolled-back candidate, are normal deployment state: rollback must restore the authoritative launcher, aliases, plugin artifacts and hook without deleting any generation directory. Accept the authoritative formatVersion/digest/files/capabilities manifest shape while deriving and verifying digest from canonical formatVersion/files and preserving bounded capabilities evidence; do not hardcode a generation file count. Enforce containment, unique required paths, allowlisted modes, file/count/aggregate bounds and hash/length/base64 agreement before decoding or parsing large payloads. Expose a deterministic SHA-256 identity over the complete canonical backup, so downstream activation receipts bind every saved plugin/router/alias/hook fact rather than only generation names. After every restoration, freshly recapture the filesystem and compare all controlled plugin bytes/modes, active generation bytes, router-command, router.mjs, lib/bun and hook state against the saved backup; only the retained-generation name list may be a strict superset. Return the fresh verified post-state, never the input backup. Prove round-trip restoration, candidate-generation retention as inactive evidence, absent-hook restoration, idempotence, and rejection of traversal, symlink/ancestor races, in-place read races, duplicate, missing, malformed, corrupt and oversized records. The codec must contain no candidate deletion API and must not inspect or mutate live runtime."
+  grant {
+    "plans/context-magnet-session-etl-plugin-backup.mjs"
+    "plans/context-magnet-session-etl-plugin-backup.test.mjs"
+  }
+  needs {
+    module.produced(pluginOwnedRuntimeBinding); module.verified(pluginOwnedRuntimeBinding)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-backup.test.mjs")
+}
+
+local pluginRuntimeDispatchContract = new Action {
+  id = "plugin-runtime-dispatch-contract"
+  owner = "plugin-runtime-dispatch-author"
+  outcome = "Implement a standalone strict command dispatcher contract for Context Magnet activation. Accept only typed operations for the two exact plugin builds, two exact plugin reloads, selected-host subscription-router install with required flags, and authoritative hook status/install with the selected attested Workbench. Resolve each to one exact executable/cwd/argv/env template; a fixed relative plugin build argument is valid only with the fixed canonical plugins cwd. Reject foreign plugins, hosts, paths, flags and actions before invocation. Parse each command's actual native output rather than inventing a uniform JSON receipt: plugin build emits bounded newline-separated paths for the exact expected dist outputs; plugin reload --json emits an ok response with a matching installed-plugin entry; router install --json emits RouterStatus with the selected deployment generation; hook install/status emit shared-hook records whose Workbench executable and SHA-256 match the selection, with ready health required from status. Retain bounded redacted exit/diagnostic evidence and only the necessary projected receipt fields; do not persist account snapshots or raw router status bodies. Build stdout is not an artifact hash: the later lifecycle controller must separately attest built file bytes and loaded plugin/router state after each command, binding those post-state hashes to its activation receipt. Prove native-shape parsing, required ordering, and failure propagation with a recording fixture executor; do not invoke live commands."
+  grant {
+    "plans/context-magnet-session-etl-plugin-dispatch.mjs"
+    "plans/context-magnet-session-etl-plugin-dispatch.test.mjs"
+  }
+  needs {
+    module.produced(pluginOwnedRuntimeBinding); module.verified(pluginOwnedRuntimeBinding)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-dispatch.test.mjs")
+}
+
+local pluginRuntimeContract = new Action {
+  id = "plugin-runtime-contract"
+  owner = "plugin-runtime-operator"
+  outcome = "Implement and fixture-rehearse one narrow plugin lifecycle controller before any live mutation. One readable adapter-driven engine must capture the exact current dist app/server/host artifacts and BB source/status projections for context-magnet-inspector and subscription-router, the literal verified router manifest generation, and the exact shared-hook record plus authoritative hook status. Compose the accepted strict dispatcher and backup-v1 codec rather than reimplementing them. After native build path output, separately hash the exact built artifacts; after reload, router install, and hook install/status, independently attest the loaded plugin bytes/source, literal router launcher/manifest generation, and selected Workbench hook record, and bind those post-state facts to the activation receipt. Leave a successful activation active; on any activation/proof failure restore and verify the saved mutation set in mandatory finally while preserving primary and restoration failures separately. Rehearsal must mutate and verify those exact controlled identities through the same engine only in a private fixture root, including partial activation, drift, idempotent rollback and dual-failure cases. Do not freeze or claim ownership of unrelated account databases, system listeners, BB core/service/fork/SDK or pre-existing provider processes."
+  grant {
+    "plans/context-magnet-session-etl-plugin-runtime.mjs"
+    "plans/context-magnet-session-etl-plugin-preimage.json"
+    "plans/context-magnet-session-etl-plugin-runtime-rehearsal.json"
+  }
+  needs {
+    module.produced(pluginOwnedRuntimeBinding); module.verified(pluginOwnedRuntimeBinding)
+    module.produced(activationPreimage); module.verified(activationPreimage)
+    module.produced(pluginRuntimeBackupContract); module.verified(pluginRuntimeBackupContract)
+    module.produced(pluginRuntimeDispatchContract); module.verified(pluginRuntimeDispatchContract)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local pluginRuntimeBackupIdempotence = new Action {
+  id = "plugin-runtime-backup-idempotence"
+  owner = "plugin-runtime-backup-author"
+  outcome = "Correct the accepted backup-v1 restorer for a no-router-mutation activation. Under fd/path-fenced equality, skip rewriting any controlled file or alias whose saved bytes, mode and target already match, especially the immutable router generation, launcher, router.mjs and lib/bun. Prove failure rollback leaves byte-identical router paths' inode and mtime unchanged, while still restoring changed plugin dist and hook records and freshly verifying the full controlled post-state. A live adapter must fail closed on router drift rather than treating it as this campaign's mutation. Retain all accepted bounds, symlink/race rejection and inactive-generation preservation. Fixture only; no live restoration."
+  grant {
+    "plans/context-magnet-session-etl-plugin-backup.mjs"
+    "plans/context-magnet-session-etl-plugin-backup.test.mjs"
+  }
+  needs { module.produced(pluginRuntimeBackupContract); module.verified(pluginRuntimeBackupContract) }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-backup.test.mjs")
+}
+
+local pluginRuntimeBackupDistMode = new Action {
+  id = "plugin-runtime-backup-dist-mode"
+  owner = "plugin-runtime-backup-author"
+  outcome = "Correct backup-v1 for the actual canonical BB plugin build output: all twelve current direct dist files under the two granted plugin roots are regular mode 0664. Permit 0664 only for bounded regular-file plugin dist records during fd-first capture, strict parsing and exact-mode restore; keep router launcher/generation and hook mode allowlists unchanged. Fixture-test capture, round trip, fresh restore and idempotent equality with both six-file dist sets at 0664, plus negative router/hook 0664 and existing symlink/race/bounds adversaries. Do not chmod, rebuild, reload, capture live preimage or mutate runtime in this node."
+  grant {
+    "plans/context-magnet-session-etl-plugin-backup.mjs"
+    "plans/context-magnet-session-etl-plugin-backup.test.mjs"
+  }
+  needs { module.produced(pluginRuntimeBackupIdempotence); module.verified(pluginRuntimeBackupIdempotence) }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-backup.test.mjs && node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local pluginRuntimeNoRouterDispatch = new Action {
+  id = "plugin-runtime-no-router-dispatch"
+  owner = "plugin-runtime-dispatch-author"
+  outcome = "Correct the accepted strict dispatcher for this host's already-matching immutable router generation. Remove subscription-router install from the executable operation allowlist and activation sequence; reject every router-install request before executor use. The remaining exact six operations are two plugin builds, two plugin reloads, shared-hook install and shared-hook status. Retain native-output parsing, fixed cwd/argv/env checks, metadata-only redacted evidence and immediate failure propagation. Test exact six-kind ordering, foreign install rejection with zero executor calls and secret-safe output. This node does not install, activate or refresh router/account state."
+  grant {
+    "plans/context-magnet-session-etl-plugin-dispatch.mjs"
+    "plans/context-magnet-session-etl-plugin-dispatch.test.mjs"
+  }
+  needs { module.produced(pluginRuntimeDispatchContract); module.verified(pluginRuntimeDispatchContract) }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-dispatch.test.mjs")
+}
+
+local pluginRuntimeLiveNoopAdapter = new Action {
+  id = "plugin-runtime-live-noop-adapter"
+  owner = "plugin-runtime-operator"
+  outcome = "Compose the accepted fixture lifecycle, idempotent backup and six-operation dispatcher with a bounded plugin-only live adapter, without invoking it during this node. Before any mutator and after reload, hook, proof and finalization, attest the unchanged literal router launcher/manifest generation against the currently selected generation and every manifest-listed canonical subscription-router host file; reject missing, extra unlisted files inside the active immutable generation, symlink/race or byte drift and never fall back to subscription-router install. Canonical source may contain files outside the installed manifest; do not require its directory to equal the manifest set. Bind the exact selected BB host, two direct-loaded plugin source/status/app receipts, separately attested dist server bytes, authoritative hook record/status, selected Workbench executable/receipt, and protected workspace through read-only capture, excluding only explicitly granted generated evidence from post-activation workspace comparisons. Expose explicit capture-live-preimage, preactivation, activate, rollback-failure, finalize-success and activated-boundary commands whose mutating paths use only the six accepted dispatcher templates and exact backup restoration. The exported activate engine itself requires an actionable preimage before any mutator, not merely its CLI wrapper. Persist and verify bounded backup-v1 separately before the first mutator at plans/context-magnet-session-etl-plugin-backup/activation-v1.json (0600, codec envelope at most 48 MiB) under the later plugin-activation grant; retain only path, size, SHA-256 and backupIdentity in the at-most-256-KiB redacted activation receipt. A successful receipt binds all six native operation receipts and leaves activation active; a distinct partial-failure receipt binds its completed prefix and rollback payload without pretending six commands completed. Failure restores only owned plugin/hook changes, rejects router drift before rollback writes, and preserves primary and restoration errors even if receipt persistence fails. Prove these seams with injected private fixtures, including size-realistic backup reference transport, direct null-preimage rejection, partial rollback, unchanged router source, drift, hook rollback and dual failure; no live command, backup write, reload, hook install or provider launch in this node."
+  grant {
+    "plans/context-magnet-session-etl-plugin-runtime.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.test.mjs"
+  }
+  needs {
+    module.produced(pluginRuntimeContract); module.verified(pluginRuntimeContract)
+    module.produced(pluginRuntimeBackupIdempotence); module.verified(pluginRuntimeBackupIdempotence)
+    module.produced(pluginRuntimeNoRouterDispatch); module.verified(pluginRuntimeNoRouterDispatch)
+    module.produced(workbenchRuntimeSelection); module.verified(workbenchRuntimeSelection)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local successfulActivationRollbackContract = new Action {
+  id = "successful-activation-rollback-contract"
+  owner = "plugin-runtime-operator"
+  outcome = "Correct the accepted live adapter so rollback-failure restores the saved prior plugin and hook state after either a successful six-operation activation receipt followed by live-proof/Cole-review failure, or a partial-failure receipt from activation. Validate each receipt kind independently: successful history must bind all six native operations and exact active state; partial history must bind only its completed prefix and preserve primary/restoration error fields. Both must bind the exact separate bounded backup reference and unchanged router generation before any restore write. Idempotently restore only owned plugin/hook bytes, reload only the two plugins, freshly compare full prior controlled and loaded state, and report primary, proof/review and restoration errors separately without accepting a foreign receipt. Prove both forms and malformed/foreign references with private fixtures only; do not run live rollback, reload, hook or provider commands in this node."
+  grant {
+    "plans/context-magnet-session-etl-plugin-runtime.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.test.mjs"
+  }
+  needs {
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local pluginRuntimeRouterModeNormalization = new Action {
+  id = "plugin-runtime-router-mode-normalization"
+  owner = "plugin-runtime-operator"
+  outcome = "Correct read-only router no-op attestation for the observed installer normalization: all 17 manifest-listed active-generation files must match their canonical subscription-router host counterparts by exact bytes, length and SHA-256, while their filesystem modes are validated independently on each side rather than required equal across sides. Preserve backup-v1's strict active-generation mode and path/identity fences; retain canonical mode and identity in the live preimage so a later canonical mode change fails preactivation. Permit extra canonical source files outside the installed manifest, never missing or extra active-generation entries. Fixture-test all 17 byte-identical installed files with normalized modes, active/canonical byte-drift rejection, and canonical-mode drift rejection after capture. No live capture retry, chmod, build, reload, hook or provider operation in this node."
+  grant {
+    "plans/context-magnet-session-etl-plugin-live-adapter.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.test.mjs"
+  }
+  needs {
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+    module.produced(pluginRuntimeBackupDistMode); module.verified(pluginRuntimeBackupDistMode)
+    module.produced(messageDrivenProofFixture); module.verified(messageDrivenProofFixture)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local pluginPanelLayoutCorrection = new Action {
+  id = "plugin-panel-layout-correction"
+  owner = "context-magnet-ui-author"
+  outcome = "Correct the observed unusable Context Magnet right-panel layout without changing the native ThreadChat or ETL evidence semantics. The flush tab must fill its bounded host region without forcing page width or height; native chat and canonical narrative must each have a clear, reachable scroll boundary, long admitted text and locators must wrap within the panel, and a persistent narrative summary must state how many canonical events are shown or omitted. Use panel-width rather than viewport-width responsive behavior, retain keyboard/focus and exact Context added accessibility. Verify focused source/renderer tests and leaf typecheck only; do not build dist, reload a plugin, refresh the live preimage or mutate runtime in this node. Live visual acceptance remains Cole's later experience review."
+  grant {
+    "plugins/plugins/context-magnet-inspector/app.css"
+    "plugins/plugins/context-magnet-inspector/app.tsx"
+    "plugins/plugins/context-magnet-inspector/test/panel-layout.test.ts"
+  }
+  needs {
+    module.produced(hostFreeRenderer); module.verified(hostFreeRenderer)
+    module.produced(checkpointZeroRendererSchema); module.verified(checkpointZeroRendererSchema)
+    module.produced(legacyDisconnection); module.verified(legacyDisconnection)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/context-magnet-inspector/test/panel-layout.test.ts plugins/context-magnet-inspector/test/session-etl-renderer.test.ts plugins/context-magnet-inspector/test/working-block-renderer.test.ts && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' typecheck")
+}
+
+local pluginRuntimeLivePreimage = new Action {
+  id = "plugin-runtime-live-preimage"
+  owner = "workspace-conservator"
+  outcome = "Capture one fresh read-only, bounded 0600 plugin-runtime live preimage before activation, then verify it without refreshing. The receipt must be explicitly actionableLivePreimage=true and bind authoritative selected host, current two direct plugin sources/status/app receipts and all dist file modes/hashes, full backupIdentity without raw backup bytes, exact unchanged router launcher/manifest generation and each of its 17 manifest-listed files byte-equal to the matching canonical host source; extra canonical source files outside the manifest are permitted, but extra files inside the active immutable generation are not. Bind shared-hook bytes/status/health and selected Workbench executable receipt/hash, and current protected workspace HEAD/gitlink/index/dirty-path identities. Treat current unrelated dirty and gitlink drift as a reviewed baseline, never repair it. A host timeout, ambiguous source, path race or router/source mismatch fails closed. Capture may write only this receipt; its Mechanical oracle is a read-only preactivation comparison."
+  grant { "plans/context-magnet-session-etl-plugin-live-preimage.json" }
+  needs {
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+    module.produced(successfulActivationRollbackContract); module.verified(successfulActivationRollbackContract)
+    module.produced(pluginRuntimeBackupDistMode); module.verified(pluginRuntimeBackupDistMode)
+    module.produced(messageDrivenProofFixture); module.verified(messageDrivenProofFixture)
+    module.produced(pluginRuntimeRouterModeNormalization); module.verified(pluginRuntimeRouterModeNormalization)
+    module.produced(workbenchRuntimeSelection); module.verified(workbenchRuntimeSelection)
+    module.produced(proofFailureContract); module.verified(proofFailureContract)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local pluginRuntimeLargeWorkspaceFence = new Action {
+  id = "plugin-runtime-large-workspace-fence"
+  owner = "workspace-conservator"
+  outcome = "Replace the live adapter's unbounded dirtyPaths array and 256-KiB Git status command capture with a bounded streaming, read-only workspace-status projection. Include every current Git porcelain status entry except the same exact generated receipt paths; retain status code, path and ordering in a cryptographic digest plus entry count, with no raw paths or status body in a persisted receipt. Bound command time, total bytes, entry length and count; fail closed on Git error, truncation, malformed records, timeout or a changed pre/post status projection, and retire the child process. Keep HEAD, recursive gitlinks and staged-index identities independently fenced. Fixture-test status output larger than 256 KiB, an in-scope path/status drift, generated-path exclusion, malformed/oversized output, timeout and nonzero exit without invoking live commands. Do not clean caches, alter the historical preimage, retry capture or mutate runtime in this node."
+  grant {
+    "plans/context-magnet-session-etl-plugin-live-adapter.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.test.mjs"
+  }
+  needs {
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+    module.produced(successfulActivationRollbackContract); module.verified(successfulActivationRollbackContract)
+    module.produced(messageDrivenProofFixture); module.verified(messageDrivenProofFixture)
+    module.produced(pluginRuntimeRouterModeNormalization); module.verified(pluginRuntimeRouterModeNormalization)
+    module.produced(pluginPanelLayoutCorrection); module.verified(pluginPanelLayoutCorrection)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local failedActivationReconciliation = new Guard {
+  id = "failed-activation-reconciliation"
+  owner = "outcome-owner"
+  outcome = "Adjudicate the first failed activation without claiming a controller-verified rollback: preserve the exact partial-failure receipt and backup, confirm the two build-only operation prefix and distinct primary/restoration stdout-bound errors, and independently reobserve the current complete controlled plugin/router/hook bytes, loaded plugin receipts, Workbench and protected workspace equal to the saved preimage and backupIdentity. No reload, hook operation, backup restore, receipt rewrite or retry is permitted by this guard. A mismatch requires manual recovery rather than a fresh activation."
+  observes {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-v1.json"
+  }
+  needs {
+    module.produced(pluginRuntimeLivePreimageRefresh); module.verified(pluginRuntimeLivePreimageRefresh)
+    module.verified(preactivationNoninterference)
+  }
+  oracle = module.adjudicated("The first attempt's backup and partial receipt remain immutable 0600 evidence; the native reload output bound caused both the primary and restoration errors; a fresh independent read-only preactivation comparison matches the saved backupIdentity, exact two loaded plugin receipts, router generation/files, hook bytes/status/Workbench and protected workspace. This records operator-observed reconciliation only, not a successful controller rollback or activation.", "outcome-owner")
+}
+
+local pluginRuntimeNativeReloadOutput = new Action {
+  id = "plugin-runtime-native-reload-output"
+  owner = "plugin-runtime-author"
+  outcome = "Correct the fixture-only dispatcher so actual native plugin reload JSON larger than the 64-KiB public evidence window but within a separate strict parse/command byte cap can be parsed transiently and reduced to only the requested plugin receipt. Preserve metadata-only bounded diagnostic evidence, exact executable/argv/order and foreign-output rejection; never persist full plugin JSON, accounts or stdout. Reject oversized, malformed, foreign and nonzero outputs before any success claim, and test a realistic >64-KiB native-shape reload and the same path during rollback. Do not invoke a live reload, retry activation or edit runtime receipts here."
+  grant {
+    "plans/context-magnet-session-etl-plugin-dispatch.mjs"
+    "plans/context-magnet-session-etl-plugin-dispatch.test.mjs"
+  }
+  needs { module.produced(pluginRuntimeNoRouterDispatch); module.verified(pluginRuntimeNoRouterDispatch) }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-dispatch.test.mjs && node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local pluginRuntimeSourceContentFence = new Action {
+  id = "plugin-runtime-source-content-fence"
+  owner = "workspace-conservator"
+  outcome = "Extend the compact protected-workspace projection with a bounded, exact content identity for the fixed four-module controller import closure (runtime, live-adapter, backup, dispatch) and both direct plugin source roots used by build, excluding only each root's exact top-level dist/ and recognized dependency/cache directories. Enumerate ordinary files and directories under fixed roots with no-follow pinned-directory traversal; hash sorted relative raw paths, type, mode, byte length and bytes, including empty-directory records, under explicit file/count/aggregate/path/time limits and per-file pre/post inode/mode/size/mtime/ctime fences. Repeat the full projection and reject additions, removals, symlinks, races and oversized sources. Keep only compact digests/counts in receipts; compare source identity before every activation operation, before restoration reloads, and at preactivation/final boundaries. Fixture-test a byte edit to an already-dirty or untracked source path with unchanged Git-status projection, source-set changes, chmod, symlink/race and bound failures. This is source identity, not proof of reproducible external toolchain/node_modules. No live capture, build, reload, cache cleanup or receipt mutation in this node."
+  grant {
+    "plans/context-magnet-session-etl-plugin-live-adapter.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.test.mjs"
+  }
+  needs {
+    module.produced(pluginRuntimeLargeWorkspaceFence); module.verified(pluginRuntimeLargeWorkspaceFence)
+    module.produced(pluginRuntimeNativeReloadOutput); module.verified(pluginRuntimeNativeReloadOutput)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local pluginRuntimeLivePreimageRefresh = new Action {
+  id = "plugin-runtime-live-preimage-refresh"
+  owner = "workspace-conservator"
+  outcome = "After the panel source and bounded workspace-fence corrections, verify that the stale 0600 live preimage is preserved with exact SHA-256 ff607066716626d3517f6592d5eb2f2fe10b7f7aa39a30ff520a6720052a849f at the one historical path without overwriting it, then immediately before a separately authorized activation perform one fresh read-only capture to the fixed O_EXCL preimage path and run the read-only preactivation comparison. Bind current child HEADs, the bounded exact Git-status count/digest, loaded plugin receipts, router generation/files, selected Workbench and hook without repairing unrelated state. Stop on a source or protected-state race; do not build, reload, install hooks, launch providers or mutate runtime. The historical capture remains evidence for its original state, not an actionable current receipt."
+  grant {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-plugin-live-preimage-historical.json"
+  }
+  needs {
+    module.produced(pluginRuntimeLivePreimage); module.verified(pluginRuntimeLivePreimage)
+    module.produced(pluginPanelLayoutCorrection); module.verified(pluginPanelLayoutCorrection)
+    module.produced(pluginRuntimeLargeWorkspaceFence); module.verified(pluginRuntimeLargeWorkspaceFence)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local preactivationNoninterference = new Guard {
+  id = "preactivation-noninterference"
+  owner = "workspace-conservator"
+  outcome = "Immediately before plugin activation, read-only compare the exact selected host, canonical two-plugin source and loaded app/status receipts, dist artifact hashes, unchanged literal active router generation and all manifest-listed canonical host file bytes, shared-hook bytes/status/Workbench, and protected workspace against the fresh actionable plugin live preimage. Prove the executable allowlist contains only two plugin builds/reloads plus hooks install/status and no router install, BB core/service/fork/SDK, account, port, unrelated-plugin or pre-existing-provider operation. A drift or timeout stops activation; never refresh the receipt in this check."
+  observes {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plugins/plugins/subscription-router/host/**"
+  }
+  needs {
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+    module.produced(pluginRuntimeLivePreimage); module.verified(pluginRuntimeLivePreimage)
+    module.produced(pluginPanelLayoutCorrection); module.verified(pluginPanelLayoutCorrection)
+    module.produced(pluginRuntimeLivePreimageRefresh); module.verified(pluginRuntimeLivePreimageRefresh)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local pluginRuntimePostfailurePreimage = new Action {
+  id = "plugin-runtime-postfailure-preimage"
+  owner = "workspace-conservator"
+  outcome = "After operator reconciliation and the fixture-verified native-output/source-content corrections, preserve the first attempt's exact 0600 preimage, partial-failure activation receipt and backup at three fixed historical paths without altering their bytes. Verify their current SHA-256 values bbd1cdb7524fe77953f8674d72cbf1701eb10bc8d4d3b72f0baf956aa44f917e, e73e7118fef042ad191ae309dbbd87a810d647f4544b80bbf4926064a801661d and e88f39de6dc480ca7992fd75070d00842ba49283a7b46d2f7ef8a811597ec28a before moving them; never delete historical evidence. Then make exactly one fresh read-only O_EXCL capture at the fixed current preimage path and run its read-only preactivation oracle. The new receipt must include the compact status and source-content fences; stop on any mismatch, race or command error. No build, reload, hook, router, provider or other runtime mutation."
+  grant {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-plugin-live-preimage-before-failed-activation.json"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plans/context-magnet-session-etl-activation-receipt-failed-attempt1.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-v1.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-failed-attempt1-v1.json"
+  }
+  needs {
+    module.verified(failedActivationReconciliation)
+    module.produced(pluginRuntimeNativeReloadOutput); module.verified(pluginRuntimeNativeReloadOutput)
+    module.produced(pluginRuntimeSourceContentFence); module.verified(pluginRuntimeSourceContentFence)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local preactivationAfterFailure = new Guard {
+  id = "preactivation-after-failure"
+  owner = "workspace-conservator"
+  outcome = "Immediately before any second activation attempt, compare the newly captured actionable preimage, saved backupIdentity, compact status and exact source-content identity to a fresh read-only live observation. Require the same selected host, two loaded plugin sources/app receipts, dist bytes, literal router generation/canonical files, Workbench and hook; enforce the unchanged six-operation allowlist. A drift or timeout stops; never refresh the receipt inside this guard."
+  observes { "plans/context-magnet-session-etl-plugin-live-preimage.json" }
+  needs {
+    module.produced(pluginRuntimePostfailurePreimage); module.verified(pluginRuntimePostfailurePreimage)
+    module.verified(failedActivationReconciliation)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local secondActivationReconciliation = new Guard {
+  id = "second-activation-reconciliation"
+  owner = "outcome-owner"
+  outcome = "Adjudicate the second failed activation without claiming successful controller rollback. Preserve the exact second partial receipt and backup; verify its two-build prefix, separate primary/restoration native-reload-shape errors, attempted rollback without postRestore, and independent read-only equality of current controlled bytes, loaded plugin app/source/status, router, hook, Workbench and protected workspace to the saved source-attested preimage and backupIdentity. A mismatch requires manual recovery; this guard authorizes no reload, restore or retry."
+  observes {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-v1.json"
+  }
+  needs {
+    module.produced(pluginRuntimePostfailurePreimage); module.verified(pluginRuntimePostfailurePreimage)
+    module.verified(preactivationAfterFailure)
+  }
+  oracle = module.adjudicated("The second failed attempt's 0600 partial receipt and backup remain byte-exact evidence; independent read-only capture equals the prior source-attested preimage and saved backupIdentity, while the missing controller postRestore is explicitly reported. This is operator-observed reconciliation only, not a successful activation or controller rollback.", "outcome-owner")
+}
+
+local pluginRuntimeNativeReloadCollection = new Action {
+  id = "plugin-runtime-native-reload-collection"
+  owner = "plugin-runtime-author"
+  outcome = "Correct the fixture-only dispatcher for the actual id-scoped BB reload response: the native CLI prints the whole pluginMutationResponseSchema outcome, whose plugins array may contain multiple installed plugins. Under the existing strict <=256-KiB transient parse cap, require ok=true and exactly one requested plugin entry with running status and matching ID; reject a missing, duplicate, malformed or non-running requested entry, but permit other native plugin entries without projecting or persisting them. Keep the six exact executable/argv templates, 64-KiB metadata-only evidence and secret redaction. Fixture-test a realistic multi-plugin successful response, duplicate/missing/failed/non-running requested entries, extra secret-bearing entries, over-cap output and the same parser during rollback. Do not invoke live reload or retry activation in this node."
+  grant {
+    "plans/context-magnet-session-etl-plugin-dispatch.mjs"
+    "plans/context-magnet-session-etl-plugin-dispatch.test.mjs"
+  }
+  needs {
+    module.produced(pluginRuntimeNativeReloadOutput); module.verified(pluginRuntimeNativeReloadOutput)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-dispatch.test.mjs")
+}
+
+local pluginRuntimeRehearsalNativeReload = new Action {
+  id = "plugin-runtime-rehearsal-native-reload"
+  owner = "plugin-runtime-author"
+  outcome = "Update only the private eight-case runtime rehearsal's simulated reload JSON to the native full installed-plugin response, with exactly one running requested entry and distinct unrelated installed entries. Preserve all eight existing case names and substantive rollback/full-state assertions; do not relax the production parser or invoke live reload. Fixture-test the updated shape through the accepted adapter and deterministic rehearsal, without changing saved fixture-only JSON evidence."
+  grant { "plans/context-magnet-session-etl-plugin-runtime.mjs" }
+  needs {
+    module.produced(pluginRuntimeNativeReloadCollection); module.verified(pluginRuntimeNativeReloadCollection)
+    module.produced(pluginRuntimeContract); module.verified(pluginRuntimeContract)
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+    module.produced(successfulActivationRollbackContract); module.verified(successfulActivationRollbackContract)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local pluginRuntimeRestorationReceiptContinuity = new Action {
+  id = "plugin-runtime-restoration-receipt-continuity"
+  owner = "plugin-runtime-author"
+  outcome = "Preserve each successfully parsed restoration reload receipt even when a later restoration reload or post-restore verification fails. Both the activation-failure partial receipt and the saved-success rollback receipt must retain the completed restoration prefix and distinct bounded primary/restoration errors; neither may claim postRestore or restoredIdentity without a fresh full-state comparison. Fixture-test first reload success followed by second reload failure, both reload failures, and successful two-reload restoration using native multi-plugin response shapes. Keep router-drift fail-closed behavior, bounded redacted receipts and the exact six-operation/no-router-install boundary. Do not invoke live reload, restore or activation in this node."
+  grant {
+    "plans/context-magnet-session-etl-plugin-live-adapter.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.test.mjs"
+  }
+  needs {
+    module.produced(pluginRuntimeNativeReloadCollection); module.verified(pluginRuntimeNativeReloadCollection)
+    module.produced(pluginRuntimeRehearsalNativeReload); module.verified(pluginRuntimeRehearsalNativeReload)
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+    module.produced(successfulActivationRollbackContract); module.verified(successfulActivationRollbackContract)
+    module.produced(pluginRuntimeRouterModeNormalization); module.verified(pluginRuntimeRouterModeNormalization)
+    module.produced(pluginRuntimeLargeWorkspaceFence); module.verified(pluginRuntimeLargeWorkspaceFence)
+    module.produced(pluginRuntimeSourceContentFence); module.verified(pluginRuntimeSourceContentFence)
+    module.produced(messageDrivenProofFixture); module.verified(messageDrivenProofFixture)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local pluginRuntimeAttempt3Preimage = new Action {
+  id = "plugin-runtime-attempt3-preimage"
+  owner = "workspace-conservator"
+  outcome = "After second-attempt operator reconciliation and native multi-plugin reload fixture correction, preserve the second attempt's exact 0600 preimage, partial receipt and backup at three fixed historical paths without overwriting or rewriting their bytes. Require original SHA-256 e10902c9068bdf210209e30f94f0cb18ba014702a06a83433271486c994273d2, 03f90d81cecd2659e55129104d9694b7750ab7404a9aff54db902b1a6778554f and e88f39de6dc480ca7992fd75070d00842ba49283a7b46d2f7ef8a811597ec28a before bounded no-overwrite moves. Keep both earlier historical captures and first failed attempt evidence untouched. Then make exactly one fresh read-only O_EXCL capture to the fixed current preimage path, binding the corrected dispatcher and full source-content fence, and run its read-only preactivation oracle. Do not build, reload, install hooks, touch router/provider/accounts, clean caches or retry activation here."
+  grant {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-plugin-live-preimage-before-failed-activation-2.json"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plans/context-magnet-session-etl-activation-receipt-failed-attempt2.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-v1.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-failed-attempt2-v1.json"
+  }
+  needs {
+    module.verified(secondActivationReconciliation)
+    module.produced(pluginRuntimeNativeReloadCollection); module.verified(pluginRuntimeNativeReloadCollection)
+    module.produced(pluginRuntimeRestorationReceiptContinuity); module.verified(pluginRuntimeRestorationReceiptContinuity)
+    module.produced(pluginRuntimePostfailurePreimage); module.verified(pluginRuntimePostfailurePreimage)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local preactivationAttempt3 = new Guard {
+  id = "preactivation-attempt3"
+  owner = "workspace-conservator"
+  outcome = "Immediately before any third live activation attempt, compare the fresh source-attested actionable preimage, saved backupIdentity, compact Git-status and exact controller/plugin source-content identity to current read-only state. Require the same selected host, both direct loaded plugin app/source/status receipts, dist bytes, router generation/canonical files, Workbench and hook, and the exact six-operation no-router-install allowlist. Drift or timeout stops; never refresh the receipt in this guard."
+  observes { "plans/context-magnet-session-etl-plugin-live-preimage.json" }
+  needs {
+    module.produced(pluginRuntimeAttempt3Preimage); module.verified(pluginRuntimeAttempt3Preimage)
+    module.verified(secondActivationReconciliation)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local thirdActivationReconciliation = new Guard {
+  id = "third-activation-reconciliation"
+  owner = "outcome-owner"
+  outcome = "Adjudicate the third failed activation without claiming success. Preserve its exact partial receipt and backup, verify the four completed build/reload operation receipts and install-hooks exit-1 primary error, and require both restoration reload receipts, restorationError=null, a non-null postRestore exactly equal to saved before across all controlled fields, unchanged router and hook record, and an independent read-only preactivation pass. No hook install, restore, build, reload or retry in this guard; a mismatch requires manual recovery."
+  observes {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-v1.json"
+  }
+  needs {
+    module.produced(pluginRuntimeAttempt3Preimage); module.verified(pluginRuntimeAttempt3Preimage)
+    module.verified(preactivationAttempt3)
+  }
+  oracle = module.adjudicated("Attempt 3 has a bounded partial receipt and byte-exact backup; both controller restoration reload receipts and full postRestore equality are independently checked, with no success or proof claim. The fresh read-only preactivation still passes, and all failed-attempt artifacts remain preserved.", "outcome-owner")
+}
+
+local hookInstallPermissionDisposition = new Guard {
+  id = "hook-install-permission-disposition"
+  owner = "outcome-owner"
+  outcome = "Before any fourth activation attempt, account for the third install-hooks failure without claiming the exact historical syscall. Record that the worker ran the activate CLI in the default workspace-write sandbox with no escalation or approval event, while shared-hooks.mjs publishes under /home/ubuntu/.codex-subscription-router outside its writable roots. The exact selected Workbench and configured real Codex completed private-root installSharedHooks diagnostics under both Node and Bun without touching the live record. Require a future single reviewed activate invocation to request sandbox escalation explicitly for the fixed hook path; if approval is denied, stop without an un-escalated fallback. Keep all six-operation, router-no-op, backup and rollback fences unchanged."
+  observes {
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-v1.json"
+    "plugins/plugins/subscription-router/host/shared-hooks.mjs"
+  }
+  needs { module.verified(thirdActivationReconciliation) }
+  oracle = module.adjudicated("The default-sandbox invocation and outside-root publication path are source/event-cited; both private-root Node/Bun diagnostics succeeded and cleaned up; the live hook hash stayed unchanged. Escalation is required for one future guarded activation, not granted by this ruling itself, and no live retry ran.", "outcome-owner")
+}
+
+local pluginRuntimeAttempt4Preimage = new Action {
+  id = "plugin-runtime-attempt4-preimage"
+  owner = "workspace-conservator"
+  outcome = "Preserve attempt 3's exact 0600 current preimage, partial receipt and backup at three fixed historical paths by bounded no-overwrite moves, requiring SHA-256 c9e649251ffdaee2db59bb2217d08e686f1ef21707fbc41d60244645ebf8439d, e79d56c466a35121fae72ec03fb97fa033629160a6970aaa89bf41dde937c783 and e88f39de6dc480ca7992fd75070d00842ba49283a7b46d2f7ef8a811597ec28a before moving. Keep all earlier archives untouched. Make exactly one fresh read-only O_EXCL capture to the fixed current preimage path and run its read-only preactivation oracle only on successful capture. Do not build, reload, install hooks, touch router/provider/accounts, clean caches or retry activation here."
+  grant {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-plugin-live-preimage-before-failed-activation-3.json"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plans/context-magnet-session-etl-activation-receipt-failed-attempt3.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-v1.json"
+    "plans/context-magnet-session-etl-plugin-backup/activation-failed-attempt3-v1.json"
+  }
+  needs {
+    module.verified(thirdActivationReconciliation)
+    module.verified(hookInstallPermissionDisposition)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local preactivationAttempt4 = new Guard {
+  id = "preactivation-attempt4"
+  owner = "workspace-conservator"
+  outcome = "Immediately before a separately authorized fourth activation attempt, compare the fresh actionable preimage, backupIdentity, exact controller/plugin source identity, router generation/canonical files, loaded plugin source/status/app, Workbench, hook and protected workspace to the current read-only state. Drift or timeout stops; never refresh the receipt in this guard."
+  observes { "plans/context-magnet-session-etl-plugin-live-preimage.json" }
+  needs {
+    module.produced(pluginRuntimeAttempt4Preimage); module.verified(pluginRuntimeAttempt4Preimage)
+    module.verified(hookInstallPermissionDisposition)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs preactivation --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json")
+}
+
+local proofFailureContract = new Action {
+  id = "proof-failure-rollback-contract"
+  owner = "live-proof-author"
+  outcome = "Implement and fixture-test the pure live-proof runner failure/finally contract before plugin activation. The future live path requests exactly one proof-owned BB child with provider codex, model gpt-6-sol, high reasoning and fast tier; it must verify the observed child/provider identity, retire only that proof child/process in finally, and on every proof failure invoke the fixed saved-activation rollback-failure command with its exact activation and restoration receipt paths. A failed or partial proof must preserve primary and rollback errors separately, retain only bounded redacted evidence, and never claim model use from an absent receipt. Fixture tests inject child, evidence, cleanup and rollback adapters, including simultaneous proof and rollback failure. Do not implement or invoke a polling live adapter here: BB children report by message, and the later live-session-etl-proof node must add the real message-driven adapter and bounded deadline without bb thread wait or equivalent polling. This node oracle must not spawn a real BB child, reload plugins, install hooks or mutate live runtime."
+  grant {
+    "plugins/plugins/context-magnet-inspector/test/run-live-session-etl-proof.mts"
+    "plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/fixtures/live-session-etl-proof.json"
+  }
+  needs {
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts")
+}
+
+local messageDrivenProofFixture = new Action {
+  id = "message-driven-proof-fixture"
+  owner = "live-proof-author"
+  outcome = "Before live preimage capture, extend the pure injected proof contract for a BB-parent-owned message-driven continuation. The parent records one exact proof child/nonce in durable BB thread history, ends its turn and resumes only from the child's queued nonce-bound message or one scheduled deadline prompt; never bb thread wait, sleep-poll or repeatedly inspect logs. The message is a trigger, not proof. A fixture-only finalizer consumes the saved spawn identity, one bounded native event page, one canonical ETL projection and an explicit accessible UI witness; it verifies requested and observed codex/gpt-6-sol/high/fast, parent/project/environment, native session/turn/ordinal, unique persisted receipt/admission bytes/hash, unchanged router and Workbench identities and honest unobserved semantic/model use. Preserve exact owned-child cleanup, saved-success rollback on proof or cleanup failure, and distinct bounded primary/cleanup/restoration errors; reject foreign, duplicate, late or malformed nonce/message evidence. Expose a read-only verify-report CLI for one fixed <=8 KiB redacted live report; do not spawn a child or run live commands in this node. Add only plans/context-magnet-session-etl-live-proof-report.json to the live adapter's exact generated-evidence exclusion before preimage capture, removing the obsolete hook-activation receipt exclusion. Fixture-test timeout, report-write failure, native/UI gaps and dual errors without a live transport or polling adapter. A one-time BB scheduled prompt is best-effort; do not claim autonomous recovery during parent/host outage or a 180-second aggregate restoration bound."
+  grant {
+    "plugins/plugins/context-magnet-inspector/test/run-live-session-etl-proof.mts"
+    "plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/fixtures/live-session-etl-proof.json"
+    "plans/context-magnet-session-etl-plugin-live-adapter.mjs"
+    "plans/context-magnet-session-etl-plugin-live-adapter.test.mjs"
+  }
+  needs {
+    module.produced(proofFailureContract); module.verified(proofFailureContract)
+    module.produced(successfulActivationRollbackContract); module.verified(successfulActivationRollbackContract)
+    module.produced(pluginRuntimeBackupDistMode); module.verified(pluginRuntimeBackupDistMode)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts && node --test plans/context-magnet-session-etl-plugin-live-adapter.test.mjs && node plans/context-magnet-session-etl-plugin-runtime.mjs rehearse")
+}
+
+local liveProofContinuationCorrection = new Action {
+  id = "live-proof-continuation-correction"
+  owner = "live-proof-author"
+  outcome = "Correct the pure message-driven proof contract before any proof child is spawned. Keep the 32-hex BB continuation nonce only for the exact child message, deadline and redacted report; Workbench independently mints a 48-hex emission nonce after its offer, so never require it to equal the BB nonce. Continue to compare the Workbench nonce slot across the original-rollout receipt, Workbench decision and canonical associations. Remove child-session router revision and Workbench store/generation slots from pre-spawn SavedContinuation; bind only facts authoritative before spawn from the accepted activation, and verify route, store and generation identities from independent post-turn evidence. Make the one-child spawn, durable child ID, deadline scheduling and failure/cleanup order representable in the injected fixture without live transport, bb thread wait or polling. Require a bounded duplicate/late/foreign trigger test and separate primary, cleanup and saved-success restoration errors. Preserve all existing receipt, admission, body hash/byte, no-gap and eight-case runtime protections; do not change active plugin/router/hook runtime in this node. A later native-witness decision and concrete live UI reader remain separate gates."
+  grant {
+    "plugins/plugins/context-magnet-inspector/test/run-live-session-etl-proof.mts"
+    "plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/fixtures/live-session-etl-proof.json"
+  }
+  needs {
+    module.produced(messageDrivenProofFixture); module.verified(messageDrivenProofFixture)
+    module.produced(pluginActivation); module.verified(pluginActivation)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts")
+}
+
+local liveProofNativeWitness = new Selector {
+  id = "live-proof-native-witness"
+  owner = "cole"
+  outcome = "Choose the native-rollout witness required for final live proof. The active router's read-only reducer exposes a unique redacted record locator that hashes record ordinal, item, turn and part, but not the numeric ordinal. Preserving a numeric ordinal requires a separately reviewed router-reader change and guarded new router generation; accepting the existing locator avoids that mutation but revises the proof report and oracle. Neither choice weakens exact native receipt, Workbench decision, admission and source-fence checks. A ruling alone does not implement either branch or authorize a router install."
+  question = "Must the live proof expose a numeric native rollout record ordinal, or may the unique redacted native-record locator be the witness?"
+  options { "redacted-native-locator"; "numeric-ordinal-router-upgrade" }
+}
+
+local workbenchProofOptin = new Selector {
+  id = "workbench-proof-optin"
+  owner = "cole"
+  outcome = "Choose how the currently inactive Workbench context project at /home/ubuntu/bb may be enabled to produce a genuine bounded Context Magnet offer. Current selected Workbench status reports activation.inactive and zero providers; hook installation alone is not an offer. A temporary declaration may be visible to concurrent sessions and must have exact file and trace-state side effects reviewed and bounded, while a persistent declaration becomes selected workspace source to verify and publish. A ruling does not create files, launch a provider or authorize unreviewed account/router changes."
+  question = "May Workbench context be opted in for /home/ubuntu/bb to generate the live proof offer, and should that opt-in be temporary or retained?"
+  options { "temporary-proof-only"; "persistent-project-optin"; "do-not-opt-in" }
+}
+
+local liveProofObserverAdapter = new Action {
+  id = "live-proof-observer-adapter"
+  owner = "live-proof-author"
+  outcome = "Build and fixture-test the bounded live observation seam only after the corrected continuation contract and native-witness choice. Consume one authoritative BB child identity/event page, the exact context-magnet-inspector inspect RPC for that child, and one browser DOM plus accessibility observation from the same loaded Context Magnet panel. Require the native ThreadChat timeline and exact child route, open only the Context added disclosure, and compare sequence, row key, locator, admitted UTF-8 bytes/SHA-256 and Inspect button without retaining raw thread text or unrelated DOM. Bind the loaded inspector asset to the selected activation receipt; preserve all source-fence, Workbench receipt/decision and honest unobserved semantic/model-use checks. Tests inject BB, RPC and browser responses from private fixtures; importing or testing the adapter must never spawn a BB child, navigate a live browser, invoke a provider, reload plugins or install hooks. A branch-specific numeric ordinal witness, if chosen, needs its own verified producer before live proof."
+  grant {
+    "plugins/plugins/context-magnet-inspector/test/run-live-session-etl-proof.mts"
+    "plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts"
+    "plugins/plugins/context-magnet-inspector/test/run-live-session-etl-proof-live-adapter.mts"
+    "plugins/plugins/context-magnet-inspector/test/live-session-etl-proof-live-adapter.test.ts"
+  }
+  needs {
+    module.produced(liveProofContinuationCorrection); module.verified(liveProofContinuationCorrection)
+    module.ruled(liveProofNativeWitness)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts plugins/plugins/context-magnet-inspector/test/live-session-etl-proof-live-adapter.test.ts")
+}
+
+local contextOfferReadiness = new Guard {
+  id = "context-offer-readiness"
+  owner = "workbench-context-author"
+  outcome = "Immediately before live proof, the exact selected Workbench executable must report an active context declaration for /home/ubuntu/bb with at least one genuine selected contributor and bounded source. Hook installation by itself is not project opt-in. A temporary or persistent declaration needs its own reviewed write grant and rollback/cleanup disposition; this Guard does not create a provider or fabricate an offer. Current observation is inactive with zero providers and must fail closed until the selected opt-in is actually implemented."
+  observes {
+    "workbench-context.pkl"
+    "ai-context.md"
+    "/home/ubuntu/.config/workbench/workbench-context.pkl"
+    "plans/context-magnet-workbench-runtime-receipt.json"
+  }
+  needs { module.ruled(workbenchProofOptin) }
+  oracle = module.mechanical("/home/ubuntu/bb/plans/context-magnet-workbench-runtime/bd9e7818cb2f4c7cbb6144544339b303df7c68e845d8d944cd825e4e2cb881f9/workbench context status --path /home/ubuntu/bb --home-config /home/ubuntu/.config/workbench/workbench-context.pkl --runtime-dir /run/user/1000/workbench --socket /run/user/1000/workbench/context.sock --start-lock /run/user/1000/workbench/context.start.lock --server-lock /run/user/1000/workbench/context.server.lock --cache-dir /home/ubuntu/.cache/workbench/context --json | jq -e '.activation.state == \"enabled\" and .activation.scope.authority == \"project\" and .activation.scope.canonicalRoot == \"/home/ubuntu/bb\" and ((.activation.effective.providers // []) | length) > 0' >/dev/null")
+}
+
+local codexRolloutDialectFixture = new Action {
+  id = "codex-rollout-dialect-fixture"
+  owner = "router-reader-author"
+  outcome = "Before another router generation is installed, make the canonical read-only original-rollout reader accept the selected Codex 0.156.1 dialect as well as the previously tested 0.153.2 dialect, without broadening to unknown versions or changing the record, carrier, path, byte, time, redaction or no-follow bounds. An existing bounded 0.156.1 original rollout independently established session_meta and ordinary response_item framing but contained no Context Magnet hook carrier; therefore private synthetic receipt fixtures must test the native-shaped carrier and adversarial unknown/changed forms, while a later live proof remains responsible for observing an actual Workbench receipt. This node changes only canonical source and focused tests: it does not alter the active router generation, install a router, launch a provider, or make the current activation receipt fresh."
+  grant {
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.mjs"
+    "plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+  }
+  needs { module.produced(pluginActivation); module.verified(pluginActivation) }
+  oracle = module.mechanical("node --test --experimental-strip-types plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts plugins/plugins/subscription-router/test/context-magnet-session-etl.test.ts")
+}
+
+local routerGenerationOnlyController = new Action {
+  id = "router-generation-only-controller"
+  owner = "router-runtime-author"
+  outcome = "Build a private, injection-tested controller for a later guarded router-generation-only update. Stage the exact canonical HOST_FILES as an immutable digest-addressed generation without rewriting an existing digest path; capture a bounded preimage of the active launcher and deployment receipt; compare-and-swap the launcher and deployment receipt under the deployment-db transaction; retain both immutable generations; and recover failures or crash gaps only when the saved ownership and current launcher/receipt still match. The private fixture must cover stage races, mismatched existing bytes, publish/commit interruption, idempotent recovery, foreign drift and old/new-process overlap; spy on every write and reject aliases, state.db and WAL/SHM, accounts, Codex shim, hooks, plugin dist and source. Do not call the public subscription-router install or existing activation helper, and do not execute this controller against the live router in this Action. The later live grant must explicitly name the candidate generation directory, launcher and temporary sibling, deployment.db with WAL/SHM companions, and bounded O_EXCL receipts; this fixture grant does not authorize those paths."
+  grant {
+    "plans/context-magnet-router-generation-only.mjs"
+    "plans/context-magnet-router-generation-only.test.mjs"
+  }
+  needs {
+    module.produced(codexRolloutDialectFixture); module.verified(codexRolloutDialectFixture)
+  }
+  oracle = module.mechanical("node --test plans/context-magnet-router-generation-only.test.mjs")
+}
+
+local routerGenerationSafetyRoute = new Selector {
+  id = "router-generation-safety-route"
+  owner = "cole"
+  outcome = "Choose the host-level safety route, if any, for replacing the active router generation. The verified fixture models only cooperating writers: deployment.db BEGIN IMMEDIATE cannot stop a same-UID process replacing lib/router-command or its ancestors. A live switch therefore needs either an independently tested privileged filesystem writer barrier plus proven compatibility of old/new processes, or privileged maintenance supervision that prevents competing writers and new admissions throughout compare, publication and recovery and explicitly drains sessions. Neither route is implemented or authorized by this ruling, and deferral leaves native 0.156.1 proof blocked."
+  question = "Which host-level route, if any, may be designed for the router-generation update?"
+  options { "privileged-writer-barrier-and-overlap-proof"; "supervised-maintenance-and-drain"; "defer-router-update" }
+}
+
+local routerGenerationOnlyReview = new Guard {
+  id = "router-generation-only-review"
+  owner = "outcome-owner"
+  outcome = "Independently review the fixture controller's exact write footprint, launcher/deployment-receipt compare-and-swap, bounded immutable staging, failure and crash-gap recovery, and old/new-process overlap behavior before authoring any live router-generation grant. A green private fixture is not authorization to switch the active generation. The selected active router, state.db, account homes, shim and hooks remain unchanged."
+  observes {
+    "plans/context-magnet-router-generation-only.mjs"
+    "plans/context-magnet-router-generation-only.test.mjs"
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.mjs"
+    "plugins/plugins/subscription-router/UPGRADE_RUNBOOK.md"
+  }
+  needs {
+    module.produced(routerGenerationOnlyController); module.verified(routerGenerationOnlyController)
+    module.ruled(routerGenerationSafetyRoute)
+  }
+  oracle = module.adjudicated("The exact source and private adversarial fixtures establish a generation-only write boundary and recoverable launcher/receipt CAS without account, shim, hook, state.db or unrelated plugin writes. The proposed live path, exact write grant and process-overlap disposition are explicitly identified; neither fixture pass nor review is treated as an active deployment.", "outcome-owner")
+}
+
+local nativeRolloutDialectReadiness = new Guard {
+  id = "native-rollout-dialect-readiness"
+  owner = "outcome-owner"
+  outcome = "Before live proof, show that the exact ACTIVE router generation's reader accepts the selected Codex producer's observed 0.156.1 original-rollout metadata/framing, while retaining 0.153.2 and rejecting unknown versions or changed native carrier forms under focused fixtures. A bounded existing 0.156.1 rollout establishes session_meta, known record types and response_item metadata shape but contains no Context Magnet hook carrier; fixture evidence may establish preflight parser compatibility, while the later live proof must independently observe the actual persisted Workbench receipt and admission. The canonical reader correction alone is insufficient: require a separately reviewed guarded router-generation deployment, fresh source-attested preimage and activated-boundary verification. Never read unrelated account content or launch a provider merely for this Guard."
+  observes {
+    "plugins/plugins/subscription-router/host/context-magnet-session-reader.mjs"
+    "plugins/plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+    "/home/ubuntu/.codex-subscription-router/shared-hooks.json"
+  }
+  needs {
+    module.produced(pluginActivation); module.verified(pluginActivation)
+    module.produced(codexRolloutDialectFixture); module.verified(codexRolloutDialectFixture)
+    module.verified(routerGenerationOnlyReview)
+  }
+  oracle = module.adjudicated("The selected Codex producer's bounded original-rollout session metadata and framing are independently observed without retaining raw context; positive and adversarial native-shaped fixtures pass for 0.153.2 and 0.156.1; and those exact corrected reader bytes are loaded in the guarded active router generation. An unobserved actual Context Magnet carrier is not passed off as a live receipt: the later proof must observe it. A version mismatch, uninstalled reader or unknown carrier shape is not a pass.", "outcome-owner")
+}
+
+local liveProofFreshActivation = new Guard {
+  id = "live-proof-fresh-activation"
+  owner = "plugin-runtime-operator"
+  outcome = "After every proof-contract, observer, router-reader or Workbench opt-in source change, require a fresh source-attested preimage and a separately guarded plugin/hook activation disposition before proof. Compare current loaded plugins, source identity, router generation/canonical bytes, selected Workbench, hook and protected workspace to the saved successful activation receipt. The existing attempt4 receipt is preserved as historical evidence; this Guard may pass only if the exact current source and protected state still match it, and does not refresh or mutate anything. A failure requires explicit archive/recapture and an appropriately scoped new activation action, never an in-place receipt rewrite."
+  observes {
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plugins/plugins/context-magnet-inspector/**"
+    "plugins/plugins/subscription-router/**"
+  }
+  needs {
+    module.produced(liveProofObserverAdapter); module.verified(liveProofObserverAdapter)
+    module.produced(codexRolloutDialectFixture); module.verified(codexRolloutDialectFixture)
+    module.verified(contextOfferReadiness)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs activated-boundary --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json --activation /home/ubuntu/bb/plans/context-magnet-session-etl-activation-receipt.json --rollback /home/ubuntu/bb/plans/context-magnet-session-etl-restoration-receipt.json")
+}
+
+local pluginActivation = new Action {
+  id = "plugin-activation"
+  owner = "plugin-runtime-operator"
+  outcome = "Immediately recheck the fresh actionable plugin live preimage, including exact backupIdentity and byte equality of the already-active router generation to canonical host source, before any build. Invoke the already-reviewed plugin-runtime activate CLI with its fixed preimage and activation receipt flags; do not create a new verifier script after preimage capture. The next invocation must explicitly request sandbox escalation for the fixed live shared-hooks.json publication path; if approval is denied, stop without an un-escalated fallback. Persist and verify the bounded 0600 backup-v1 snapshot at plans/context-magnet-session-etl-plugin-backup/activation-v1.json under this node's grant before the first mutator; the at-most-256-KiB activation receipt records only its exact path, size, SHA-256 and backupIdentity, never its raw/base64 bytes. From canonical /home/ubuntu/bb/plugins build and reload only context-magnet-inspector and subscription-router, and install/status only the attested Workbench shared hook. Do not invoke subscription-router install, change router generation, refresh accounts or touch shims; receipt history must contain zero router-install commands and show the same literal router generation/files before and after. A successful six-operation activation remains active for live proof and review; a partial failure uses a distinct bounded receipt with its completed operation prefix and saved rollback reference. On any failure, including receipt persistence failure after mutation, restore owned plugin/hook changes using the idempotent backup path and two reloads, verify the router stayed untouched, and preserve primary/restoration errors separately. No BB core/service/fork/SDK, account, port, unrelated-plugin or pre-existing-provider operation is permitted."
+  grant {
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plans/context-magnet-session-etl-restoration-receipt.json"
+    "plans/context-magnet-session-etl-plugin-backup/**"
+    "plugins/plugins/context-magnet-inspector/dist/**"
+    "plugins/plugins/subscription-router/dist/**"
+    "/home/ubuntu/.codex-subscription-router/shared-hooks.json"
+  }
+  needs {
+    module.produced(pluginRuntimeContract); module.verified(pluginRuntimeContract)
+    module.produced(pluginRuntimeLiveNoopAdapter); module.verified(pluginRuntimeLiveNoopAdapter)
+    module.produced(pluginRuntimeLivePreimage); module.verified(pluginRuntimeLivePreimage)
+    module.verified(preactivationNoninterference)
+    module.verified(preactivationAfterFailure)
+    module.verified(preactivationAttempt3)
+    module.verified(preactivationAttempt4)
+    module.produced(workbenchRuntimeSelection); module.verified(workbenchRuntimeSelection)
+    module.produced(proofFailureContract); module.verified(proofFailureContract)
+    module.produced(successfulActivationRollbackContract); module.verified(successfulActivationRollbackContract)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs activated-boundary --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json --activation /home/ubuntu/bb/plans/context-magnet-session-etl-activation-receipt.json --rollback /home/ubuntu/bb/plans/context-magnet-session-etl-restoration-receipt.json")
+}
+
+local liveSessionEtlProof = new Action {
+  id = "live-session-etl-proof"
+  owner = "live-proof-author"
+  outcome = "Execute a fresh message-nonce proof after the corrected fixture and Cole's native-witness ruling are implemented and verified. The BB parent generates its independent continuation nonce, spawns exactly one proof-owned Codex/gpt-6-sol/high/fast child, durably records the returned child ID/nonce, schedules one child-bound timeout prompt, and ends its turn; a delayed first child turn may be used to close the setup race. A spawn, persistence or schedule failure retires any owned child and invokes saved-success rollback. The child sends one nonce-bound queued BB message; on that message or the one-time deadline prompt the parent makes one bounded authoritative child-event read and one canonical ETL/UI projection read, invokes the pure finalizer and writes exactly one 0600 <=8 KiB redacted report. Do not bb thread wait, sleep-poll or repeatedly inspect logs. Verify BB/provider identity, native session/turn and the chosen authentic native record witness, router and Workbench cross-source fences, unique persisted rollout context receipt, exact canonical admission and accessible UI witness without inferred semantic/model use. The BB message nonce never needs to equal Workbench's independently minted emission nonce; that nonce must match across native receipt, Workbench decision and canonical association. Retire only the proof-owned child in finally; on proof, cleanup, message or timeout failure invoke saved-success plugin/hook rollback and preserve primary/cleanup/restoration errors. On success leave the reviewed two-plugin/hook activation active and prove the pre-existing router generation/canonical files unchanged. A scheduled prompt is not an autonomous watchdog: if the parent/host is unavailable, stop and require operator reconciliation; never claim a hard aggregate 180-second restoration bound."
+  grant {
+    "plugins/plugins/context-magnet-inspector/docs/live-session-etl-proof.md"
+    "plans/context-magnet-session-etl-live-proof-report.json"
+  }
+  needs {
+    module.produced(pluginActivation); module.verified(pluginActivation)
+    module.produced(pluginRuntimeContract); module.verified(pluginRuntimeContract)
+    module.produced(proofFailureContract); module.verified(proofFailureContract)
+    module.produced(successfulActivationRollbackContract); module.verified(successfulActivationRollbackContract)
+    module.produced(liveProofContinuationCorrection); module.verified(liveProofContinuationCorrection)
+    module.produced(liveProofObserverAdapter); module.verified(liveProofObserverAdapter)
+    module.ruled(liveProofNativeWitness)
+    module.ruled(workbenchProofOptin)
+    module.verified(contextOfferReadiness)
+    module.verified(nativeRolloutDialectReadiness)
+    module.verified(liveProofFreshActivation)
+  }
+  oracle = module.mechanical("node --experimental-strip-types plugins/plugins/context-magnet-inspector/test/run-live-session-etl-proof.mts verify-report --report /home/ubuntu/bb/plans/context-magnet-session-etl-live-proof-report.json && node --test --experimental-strip-types plugins/plugins/context-magnet-inspector/test/live-session-etl-proof.test.ts")
+}
+
+local experienceReview = new Guard {
+  id = "experience-review"
+  owner = "cole"
+  outcome = "Review the activated host-free Context Magnet experience before source cleanup and final delivery. A pass keeps the reviewed plugin/router/hook activation active. On FAIL, before ending the review turn the Outcome Owner invokes the already fixture-verified saved-success rollback-failure CLI with the exact activation and restoration receipt paths, verifies its fresh controlled/restored receipt, records the review reason separately in the ledger and stops success finalization; a foreign-state or restoration failure requires manual reconciliation, never a silent pass."
+  observes {
+    "plugins/plugins/context-magnet-inspector/app.tsx"
+    "plugins/plugins/context-magnet-inspector/app.css"
+    "plugins/plugins/context-magnet-inspector/docs/live-session-etl-proof.md"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+  }
+  needs { module.produced(liveSessionEtlProof); module.verified(liveSessionEtlProof) }
+  oracle = module.adjudicated("The fresh child automatically resolves the exact Codex session without host trace; exact admitted Context Magnet text appears as a first-class canonical row aligned by native turn identity with seq and resolvable provenance; Workbench decision and persisted rollout context receipt are distinct from unobserved transmission/use; no unrelated thread content appears; native ThreadChat remains intact; panel width, independent scroll boundaries, visible event count, long-content wrapping, gap, loading, timeout, stale-switch, accessibility and maximum-payload states are honest and responsive at narrow and ordinary right-panel widths; and loaded provenance matches activation receipts. A pass authorizes retaining this exact reviewed plugin/router/hook activation through cleanup and the later perspectives/correction/final-reload gate, but does not itself authorize publication, another deployment target, promotion, or fork-patch deletion.", "cole")
+}
+
+local activationFinalization = new Action {
+  id = "plugin-activation-finalization"
+  owner = "plugin-runtime-operator"
+  outcome = "After Cole's successful review, prove the proof-owned child/process is retired, the reviewed two-plugin artifacts and hook selection remain exactly active, and the pre-existing router generation and canonical files are unchanged. Retain the bounded rollback snapshot until the later perspectives/correction/final-reload gate. This success path does not restore the accepted activation. Failure paths have already invoked the narrow rollback in mandatory finally."
+  grant { "plans/context-magnet-session-etl-restoration-receipt.json" }
+  needs {
+    module.verified(experienceReview)
+    module.produced(pluginRuntimeContract); module.verified(pluginRuntimeContract)
+  }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs finalize-success --activation /home/ubuntu/bb/plans/context-magnet-session-etl-activation-receipt.json --rollback /home/ubuntu/bb/plans/context-magnet-session-etl-restoration-receipt.json")
+}
+
+local pluginBoundaryAudit = new Guard {
+  id = "plugin-boundary-audit"
+  owner = "workspace-conservator"
+  outcome = "Prove the successful live change is exactly the reviewed plugin-owned mutation set: the two accepted plugin artifacts and selected hook remain active; the original router manifest generation and all canonical host files are byte-identical; the proof child/process is absent; unrelated plugin source/status projections and protected dirty files are unchanged; and command receipts contain no router install or BB core/service/fork/SDK, account, port or pre-existing-provider operation. Do not compare volatile unrelated database bytes or global listener snapshots."
+  observes {
+    "fork/"
+    "sdk-artifacts/"
+    "plans/context-magnet-session-etl-workspace-preimage.json"
+    "plans/context-magnet-session-etl-plugin-live-preimage.json"
+    "plans/context-magnet-session-etl-restoration-receipt.json"
+  }
+  needs { module.produced(activationFinalization); module.verified(activationFinalization) }
+  oracle = module.mechanical("node plans/context-magnet-session-etl-plugin-runtime.mjs activated-boundary --preimage /home/ubuntu/bb/plans/context-magnet-session-etl-plugin-live-preimage.json --activation /home/ubuntu/bb/plans/context-magnet-session-etl-activation-receipt.json --rollback /home/ubuntu/bb/plans/context-magnet-session-etl-restoration-receipt.json")
+}
+
+local legacyRetirement = new Action {
+  id = "legacy-retirement"
+  owner = "refactor-author"
+  outcome = "Only after live review and the plugin-boundary audit, remove disconnected host-trace/provider-admission/live-consumption artifacts, host paging/placement, host witness and legacy agent-cli carrier. Preserve reusable source-neutral types, leave fork patches untouched, and prove active RPC/UI contains no experimental_contextMagnet*, HostTrace, host cursor, exposed or persisted rollout path, provider body, prompt/tool data, credential or transcript-text dependency; only the reviewed router reducer may touch rollout records."
+  grant {
+    "plugins/plugins/context-magnet-inspector/agent-cli-adapter.ts"
+    "plugins/plugins/context-magnet-inspector/host-trace-adapter.ts"
+    "plugins/plugins/context-magnet-inspector/trace-producer.ts"
+    "plugins/plugins/context-magnet-inspector/witness.ts"
+    "plugins/plugins/context-magnet-inspector/README.md"
+    "plugins/plugins/context-magnet-inspector/docs/**"
+    "plugins/plugins/context-magnet-inspector/test/**"
+  }
+  needs {
+    module.produced(codexSchemaReceipt); module.verified(codexSchemaReceipt)
+    module.verified(experienceReview)
+    module.verified(pluginBoundaryAudit)
+  }
+  oracle = module.mechanical("node --test --experimental-strip-types test/host-free-boundary.test.ts test/*.test.ts")
+}
+
+local finalIntegration = new Guard {
+  id = "final-integration"
+  owner = "integration-author"
+  outcome = "Re-run complete affected repository verification after legacy cleanup and confirm the reviewed plugin activation remains exact while its proof-owned child/process is absent."
+  observes {
+    "plugins/plugins/context-magnet-inspector/**"
+    "plugins/plugins/subscription-router/**"
+    "plans/context-magnet-session-etl-restoration-receipt.json"
+  }
+  needs {
+    module.produced(legacyRetirement); module.verified(legacyRetirement)
+    module.produced(activationFinalization); module.verified(activationFinalization)
+  }
+  oracle = module.mechanical("bun run sync:check && bun run references:check && bun run sdk-types:check && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' typecheck && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' test && bun run --filter '@phosphor/bb-plugin-context-magnet-inspector' build && bun run --filter '@phosphor/bb-plugin-subscription-router' typecheck && bun run --filter '@phosphor/bb-plugin-subscription-router' test && bun run --filter '@phosphor/bb-plugin-subscription-router' build")
+}
+
+local pluginGitlinkComposition = new Selector {
+  id = "plugin-gitlink-composition"
+  owner = "cole"
+  outcome = "Choose whether the eventual workspace plugin gitlink may include all already-pushed unrelated commits currently on plugins/main through 7f6039f1 (the transcript-viewer commit and five later thread-progress/Recent-sort commits) after combined-composition verification, or whether Context Magnet needs a separately authorized isolated source-delivery path from the recorded 054d555a gitlink. Preserve unrelated dirty plugin work in either case. This choice does not authorize publication by itself; re-review if plugins/main advances again before promotion."
+  question = "May the final workspace plugins gitlink include the currently pushed plugins/main composition through 7f6039f1, including unrelated viewer and thread-progress commits?"
+  options { "include-current-main-and-test"; "isolated-delivery-path" }
+}
+
+local deliveryClosure = new Guard {
+  id = "delivery-closure"
+  owner = "outcome-owner"
+  outcome = "Do not declare this Context Magnet campaign complete at the plugin test frontier. After satisfactory live proof, Cole experience review, legacy cleanup and full integration, gather three or four independent source-cited perspectives on the weakest evidenced areas using Codex gpt-6-sol BB threads; record each suggestion and its applied or reasoned disposition. Revise this graph with exact correction, affected/full verification, final plugin-only reload, Workbench source provenance and selected-repository publication nodes once those inputs are concrete. Completion requires the final loaded plugin/hook provenance and bounded rollback evidence, accepted source checks, selected Workbench source commit/push or equivalent reproducible provenance, selected plugins child commit/push, workspace gitlink promotion/push in child-first order, and explicit exclusion of unrelated dirty fork/community/SDK work. This adjudicated gate cannot stand in for missing implementation or publication nodes and must not pass before their recorded evidence."
+  observes {
+    "plans/context-magnet-session-etl-refactor.plan.pkl"
+    "plans/context-magnet-session-etl-refactor.ledger.jsonl"
+    "plans/context-magnet-session-etl-activation-receipt.json"
+    "plugins/plugins/context-magnet-inspector/**"
+    "plugins/plugins/subscription-router/**"
+  }
+  needs { module.verified(finalIntegration); module.ruled(pluginGitlinkComposition) }
+  oracle = module.adjudicated("Three or four independent weak-lens reviews and reasoned dispositions are recorded; reasonable corrections and affected/full verification passed; the final plugin-only reload and loaded provenance were verified; the Workbench source and exact selected plugin changes were committed and pushed; the workspace gitlink and selected evidence were promoted and pushed only after child commits; unrelated dirty state is preserved. Concrete delivery nodes and their oracles are present and verified, not replaced by this judgment.", "outcome-owner")
+}
+
+nodes {
+  forkPreservationBaseline
+  mutationSafetyHarness
+  codexSchemaReceipt
+  sessionAccessProbe
+  sessionAccessReview
+  sessionAccessRoute
+  etlContract
+  etlContractReview
+  workbenchReceiptProducer
+  workbenchRuntimeSelection
+  bbEventIdentityAdapter
+  codexSessionAdapter
+  workbenchAdapterV2
+  workbenchReceiptSlotAdapter
+  sessionEtlProjection
+  hostFreeRenderer
+  routerReaderInvocation
+  checkpointZeroContributionContract
+  checkpointZeroRendererSchema
+  hostFreeRpc
+  legacyDisconnection
+  pluginIntegration
+  activationPreimage
+  activationTargetReview
+  activationTarget
+  pluginOwnedRuntimeBinding
+  pluginRuntimeBackupContract
+  pluginRuntimeDispatchContract
+  pluginRuntimeContract
+  pluginRuntimeBackupIdempotence
+  pluginRuntimeBackupDistMode
+  pluginRuntimeNoRouterDispatch
+  pluginRuntimeLiveNoopAdapter
+  successfulActivationRollbackContract
+  pluginRuntimeRouterModeNormalization
+  pluginPanelLayoutCorrection
+  pluginRuntimeLargeWorkspaceFence
+  failedActivationReconciliation
+  pluginRuntimeNativeReloadOutput
+  pluginRuntimeSourceContentFence
+  pluginRuntimeLivePreimage
+  pluginRuntimeLivePreimageRefresh
+  preactivationNoninterference
+  pluginRuntimePostfailurePreimage
+  preactivationAfterFailure
+  secondActivationReconciliation
+  pluginRuntimeNativeReloadCollection
+  pluginRuntimeRehearsalNativeReload
+  pluginRuntimeRestorationReceiptContinuity
+  pluginRuntimeAttempt3Preimage
+  preactivationAttempt3
+  thirdActivationReconciliation
+  hookInstallPermissionDisposition
+  pluginRuntimeAttempt4Preimage
+  preactivationAttempt4
+  proofFailureContract
+  messageDrivenProofFixture
+  liveProofContinuationCorrection
+  liveProofNativeWitness
+  workbenchProofOptin
+  liveProofObserverAdapter
+  contextOfferReadiness
+  codexRolloutDialectFixture
+  routerGenerationOnlyController
+  routerGenerationSafetyRoute
+  routerGenerationOnlyReview
+  nativeRolloutDialectReadiness
+  liveProofFreshActivation
+  pluginActivation
+  liveSessionEtlProof
+  experienceReview
+  activationFinalization
+  pluginBoundaryAudit
+  legacyRetirement
+  finalIntegration
+  pluginGitlinkComposition
+  deliveryClosure
+}

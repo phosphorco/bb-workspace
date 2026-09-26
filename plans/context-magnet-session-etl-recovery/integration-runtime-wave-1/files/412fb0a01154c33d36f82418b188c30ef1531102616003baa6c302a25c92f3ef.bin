@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+import plugin, { rpcContract } from "../server.ts";
+
+test("registers only the bodyless inspect RPC and preserves the ThreadChat event channel", () => {
+  let registered: unknown;
+  let event: unknown;
+  plugin({ rpc: { register: (_contract: unknown, handler: unknown) => { registered = handler; } }, events: { on: (name: unknown) => { event = name; } }, realtime: { publish() {} }, sdk: {} } as never);
+  assert.ok(registered);
+  assert.equal(event, "experimental_thread.events");
+  assert.deepEqual(rpcContract.inspect.input.parse({ threadId: "thread-1" }), { threadId: "thread-1" });
+  assert.throws(() => rpcContract.inspect.input.parse({ threadId: "thread-1", hostCursor: "legacy" }));
+});
+
+test("active server path contains no host cursor, trace carrier, manual binding, or experimental contribution dependency", async () => {
+  const source = await readFile(new URL("../server.ts", import.meta.url), "utf8");
+  for (const forbidden of ["experimental_contextMagnetContributions", "hostCursor", "agent-cli-adapter", "host-trace-adapter", "trace-producer", "bind-workbench", "fallback-authority"]) assert.equal(source.includes(forbidden), false, forbidden);
+  assert.match(source, /readRouterOriginalSession/);
+  assert.match(source, /inspectWorkbenchDecision/);
+  assert.match(source, /readBbEventIdentity/);
+});

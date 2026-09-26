@@ -1,0 +1,4825 @@
+{
+  "schemaVersion": 1,
+  "node": "rollback-harness",
+  "command": "rehearse",
+  "cwd": "/home/ubuntu/bb",
+  "activationTarget": {
+    "choice": "normal-bb-machine-explicit",
+    "rulingSha256": "sha256:90ef7ad19a65e382ae7f85e7d9a257e7165784d22ab5f0ea2956b397132ca47f",
+    "normalRuntimeMutation": false
+  },
+  "temporaryRoots": [
+    {
+      "path": "/tmp/context-magnet-session-etl-rollback-6qLagx",
+      "before": "absent",
+      "after": "removed"
+    }
+  ],
+  "phases": [
+    {
+      "phase": "proof-activation",
+      "proofProvider": {
+        "kind": "ready",
+        "pid": 106,
+        "port": 36527,
+        "configurationSha256": "9bc663015ecf6a18673bcf05da3883bec61330cf53862a562218f55479968fb7",
+        "configuration": {
+          "mode": "proof",
+          "routerRoot": "/tmp/context-magnet-session-etl-rollback-6qLagx/isolated-router-root",
+          "selectedWorkbenchSha256": "d72d04b219c9cbb8c35989a84d6d87dba776aef5e42636b4a8c8e5dc54fa4f28"
+        }
+      },
+      "fixtureState": "proof",
+      "ports": [
+        {
+          "port": 36527,
+          "before": "absent",
+          "during": "listening"
+        }
+      ]
+    },
+    {
+      "phase": "rollback",
+      "retiredProofProviders": [
+        {
+          "pid": 106,
+          "code": 0,
+          "signal": null,
+          "escalated": false
+        }
+      ],
+      "idempotent": false,
+      "freshPriorWitness": {
+        "kind": "ready",
+        "pid": 113,
+        "port": 34271,
+        "configurationSha256": "cb148afe96e041bf0e4d19f9060c470e234abc7a98a129898f7928c26023cade",
+        "configuration": {
+          "mode": "prior",
+          "hookSha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b",
+          "workbenchSha256": "db0beed02912b7593dad4978ad430cbaf00db24139dda3d219074d6e0fa5b257",
+          "pluginGeneration": [
+            {
+              "id": "context-magnet-inspector",
+              "appSha256": "ca63412bbe53fd77d4c47fc2aeb78cd82a09bf762bb2238ac1fffd8dd2358599",
+              "serverSha256": "8f06b3cbc056cc14fdb8a60366cd76dd33e52ee9603600481cb622bd59b61963"
+            },
+            {
+              "id": "subscription-router",
+              "appSha256": "3481f9b831e3ef6d07229020877cc0e01383d3de43e9b6c885a9b3cc8df70e16",
+              "serverSha256": "d623f600f4abe3549e3e2c70277424bd92f93f9911a245f347402638f1a1500d"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phase": "idempotent-repeat",
+      "retiredProofProviders": [],
+      "idempotent": true,
+      "freshPriorWitness": {
+        "kind": "ready",
+        "pid": 113,
+        "port": 34271,
+        "configurationSha256": "cb148afe96e041bf0e4d19f9060c470e234abc7a98a129898f7928c26023cade",
+        "configuration": {
+          "mode": "prior",
+          "hookSha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b",
+          "workbenchSha256": "db0beed02912b7593dad4978ad430cbaf00db24139dda3d219074d6e0fa5b257",
+          "pluginGeneration": [
+            {
+              "id": "context-magnet-inspector",
+              "appSha256": "ca63412bbe53fd77d4c47fc2aeb78cd82a09bf762bb2238ac1fffd8dd2358599",
+              "serverSha256": "8f06b3cbc056cc14fdb8a60366cd76dd33e52ee9603600481cb622bd59b61963"
+            },
+            {
+              "id": "subscription-router",
+              "appSha256": "3481f9b831e3ef6d07229020877cc0e01383d3de43e9b6c885a9b3cc8df70e16",
+              "serverSha256": "d623f600f4abe3549e3e2c70277424bd92f93f9911a245f347402638f1a1500d"
+            }
+          ]
+        }
+      },
+      "samePriorPid": true
+    },
+    {
+      "phase": "adversarial-finally",
+      "injectedFailure": "intentional proof failure after activation",
+      "retiredProofProviders": [
+        {
+          "pid": 120,
+          "code": 0,
+          "signal": null,
+          "escalated": false
+        }
+      ],
+      "idempotent": false,
+      "freshPriorWitness": {
+        "kind": "ready",
+        "pid": 127,
+        "port": 39281,
+        "configurationSha256": "cb148afe96e041bf0e4d19f9060c470e234abc7a98a129898f7928c26023cade",
+        "configuration": {
+          "mode": "prior",
+          "hookSha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b",
+          "workbenchSha256": "db0beed02912b7593dad4978ad430cbaf00db24139dda3d219074d6e0fa5b257",
+          "pluginGeneration": [
+            {
+              "id": "context-magnet-inspector",
+              "appSha256": "ca63412bbe53fd77d4c47fc2aeb78cd82a09bf762bb2238ac1fffd8dd2358599",
+              "serverSha256": "8f06b3cbc056cc14fdb8a60366cd76dd33e52ee9603600481cb622bd59b61963"
+            },
+            {
+              "id": "subscription-router",
+              "appSha256": "3481f9b831e3ef6d07229020877cc0e01383d3de43e9b6c885a9b3cc8df70e16",
+              "serverSha256": "d623f600f4abe3549e3e2c70277424bd92f93f9911a245f347402638f1a1500d"
+            }
+          ]
+        }
+      },
+      "finallyRestored": true
+    }
+  ],
+  "normalBefore": {
+    "hook": {
+      "path": "/home/ubuntu/.codex-subscription-router/shared-hooks.json",
+      "bytes": 3559,
+      "mode": 384,
+      "sha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b"
+    },
+    "priorHookSha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b",
+    "plugins": [
+      {
+        "id": "context-magnet-inspector",
+        "app": {
+          "path": "/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/dist/app.js",
+          "bytes": 14240,
+          "mode": 436,
+          "sha256": "ca63412bbe53fd77d4c47fc2aeb78cd82a09bf762bb2238ac1fffd8dd2358599"
+        },
+        "server": {
+          "path": "/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/dist/server.js",
+          "bytes": 582330,
+          "mode": 436,
+          "sha256": "8f06b3cbc056cc14fdb8a60366cd76dd33e52ee9603600481cb622bd59b61963"
+        }
+      },
+      {
+        "id": "subscription-router",
+        "app": {
+          "path": "/home/ubuntu/bb/plugins/plugins/subscription-router/dist/app.js",
+          "bytes": 162448,
+          "mode": 436,
+          "sha256": "3481f9b831e3ef6d07229020877cc0e01383d3de43e9b6c885a9b3cc8df70e16"
+        },
+        "server": {
+          "path": "/home/ubuntu/bb/plugins/plugins/subscription-router/dist/server.js",
+          "bytes": 683501,
+          "mode": 436,
+          "sha256": "d623f600f4abe3549e3e2c70277424bd92f93f9911a245f347402638f1a1500d"
+        }
+      }
+    ],
+    "workbench": {
+      "path": "/home/ubuntu/.local/share/mise/installs/github-phosphorco-workbench-go/0.8.1/bin/workbench",
+      "bytes": 12996734,
+      "mode": 493,
+      "sha256": "db0beed02912b7593dad4978ad430cbaf00db24139dda3d219074d6e0fa5b257"
+    },
+    "codex": {
+      "path": "/home/ubuntu/.codex-subscription-router/lib/mise-codex-command",
+      "bytes": 83,
+      "mode": 448,
+      "sha256": "5dc28f195b8be0f7ca8da93b211020cf831f30dcd91bc43475f26a4455279cc3"
+    },
+    "router": {
+      "path": "/home/ubuntu/.codex-subscription-router/state.db",
+      "sha256": "335d6ffcce091010f1c913a84270b802615fa267c91b39e7c2fb35e4cee8bfdb"
+    },
+    "bbRuntime": {
+      "path": "/home/ubuntu/.bb/bb-app-runtime.json",
+      "entryPath": "/home/ubuntu/bb/fork/build/bb/packages/bb-app/dist/bb-app.js",
+      "pid": 1826,
+      "serverUrl": "http://127.0.0.1:38886",
+      "version": "0.43.1"
+    },
+    "ports": {
+      "status": 0,
+      "stdout": "LISTEN 0      4096                       0.0.0.0:22    0.0.0.0:*\nLISTEN 0      4096                 127.0.0.53%lo:53    0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:42459 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:38886 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:38887 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:38397 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:37251 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:36501 0.0.0.0:*\nLISTEN 0      4096                    127.0.0.54:53    0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:34531 0.0.0.0:*\nLISTEN 0      4096               100.121.144.120:63961 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:33171 0.0.0.0:*\nLISTEN 0      4096                          [::]:22       [::]:*\nLISTEN 0      4096   [fd7a:115c:a1e0::6b31:9079]:38199    [::]:*",
+      "stderr": ""
+    },
+    "services": {
+      "status": 0,
+      "stdout": "atd.service                 loaded active running Deferred execution scheduler\n  chrony.service              loaded active running chrony, an NTP client/server\n  cron.service                loaded active running Regular background program processing daemon\n  dbus.service                loaded active running D-Bus System Message Bus\n  getty@tty1.service          loaded active running Getty on tty1\n  mdmonitor.service           loaded active running MD array monitor\n  multipathd.service          loaded active running Device-Mapper Multipath Device Controller\n  networkd-dispatcher.service loaded active running Dispatcher daemon for systemd-networkd\n  polkit.service              loaded active running Authorization Manager\n  rsyslog.service             loaded active running System Logging Service\n  ssh.service                 loaded active running OpenBSD Secure Shell server\n  systemd-journald.service    loaded active running Journal Service\n  systemd-logind.service      loaded active running User Login Management\n  systemd-networkd.service    loaded active running Network Management\n  systemd-resolved.service    loaded active running Network Name Resolution\n  systemd-udevd.service       loaded active running Rule-based Manager for Device Events and Files\n  tailscaled.service          loaded active running Tailscale node agent\n  unattended-upgrades.service loaded active running Unattended Upgrades Shutdown\n  user@1000.service           loaded active running User Manager for UID 1000",
+      "stderr": ""
+    },
+    "directChildren": {
+      "status": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    "providers": [],
+    "configuredProviderLaunches": [],
+    "selectedTarget": "normal-bb-machine-explicit"
+  },
+  "workspaceBefore": [
+    {
+      "path": ".",
+      "head": "5f025fe0387eefb09353e18a278010237117633e",
+      "status": [
+        {
+          "code": " M",
+          "path": "AGENTS.md"
+        },
+        {
+          "code": " M",
+          "path": "community-plugins"
+        },
+        {
+          "code": " M",
+          "path": "fork"
+        },
+        {
+          "code": " M",
+          "path": "plans/analytics-delivery.ledger.jsonl"
+        },
+        {
+          "code": " M",
+          "path": "plugins"
+        },
+        {
+          "code": " M",
+          "path": "sdk-artifacts/checks.json"
+        },
+        {
+          "code": " M",
+          "path": "sdk-artifacts/README.md"
+        },
+        {
+          "code": "??",
+          "path": "="
+        },
+        {
+          "code": "??",
+          "path": "docs/adrs/2026-09-analytics-performance-isolation.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/analytics-isolation-coordination.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/analytics-isolation.ledger.jsonl"
+        },
+        {
+          "code": "??",
+          "path": "plans/analytics-isolation.plan.pkl"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-fork-queue-baseline.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-provider-admission-queue-baseline.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-activation-preimage.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/files/7256120c5e6517f3d89dad2166d83ce32f12f330b778eca829f30f875d216f9d.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/files/893074789c1071a3ba16fcd074949fcf7fbe9fd440ea844e183fe315a24f594e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/files/948d7868553d2305aaa8511c8ee61f04c2204152e46ca7a00f6f97e611d7ae97.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-2/files/948d7868553d2305aaa8511c8ee61f04c2204152e46ca7a00f6f97e611d7ae97.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage/files/893074789c1071a3ba16fcd074949fcf7fbe9fd440ea844e183fe315a24f594e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/files/42d25faa7848d99fbab63030a39eefbbe1f6a38a14f6aa09701e658181754bdb.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/files/a3a91bfee561a732f5ea7aee94a7a033e590ca3338cad418b65eb75967cc93af.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-wave-1/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-wave-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-wave-1/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-wave-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/1d8035d54b6ba23d3f2eeb8f785028beda1e2afd3514072dea966dcdb058247c.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/3927c98b43ae2c72acbe794c9f6ffa14e7758a4e32615cc432aad8556493f8df.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/c6a15b7626f6f0f3d5304cb5747c9fb213380c2490471dcbcb842d9c1ac3bcf2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/reverse/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/1d8035d54b6ba23d3f2eeb8f785028beda1e2afd3514072dea966dcdb058247c.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/3927c98b43ae2c72acbe794c9f6ffa14e7758a4e32615cc432aad8556493f8df.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/c6a15b7626f6f0f3d5304cb5747c9fb213380c2490471dcbcb842d9c1ac3bcf2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/reverse/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/files/071062948176f94127caeddd02e5d8c302462866b618998307d52d3bf728f7f2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/files/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/files/76b735b725d9965fb4f9febee93389672fba3f67c750982a130c319feac52a61.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/files/071062948176f94127caeddd02e5d8c302462866b618998307d52d3bf728f7f2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/files/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/files/76b735b725d9965fb4f9febee93389672fba3f67c750982a130c319feac52a61.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/codex-schema-receipt/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/codex-schema-receipt/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/files/7ace203746a065f24c5364228be204404e13dc6a9f40e7544a88e59ac0cb984d.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/files/c7e16622a7edc3273c576d37b47944149c03a7fab33f95637259d9d8719412b6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/files/e58e0c5f420e4ac82c08f80f6212f8f024dfc32df8c2b93f0fad7fdb9777ac83.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/files/7ace203746a065f24c5364228be204404e13dc6a9f40e7544a88e59ac0cb984d.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/files/c7e16622a7edc3273c576d37b47944149c03a7fab33f95637259d9d8719412b6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/files/e58e0c5f420e4ac82c08f80f6212f8f024dfc32df8c2b93f0fad7fdb9777ac83.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/files/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/files/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/reverse/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/files/965d2a800d172936b58c50db19e248e7540605a3ac47f941524194765c37250b.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/files/965d2a800d172936b58c50db19e248e7540605a3ac47f941524194765c37250b.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/files/965d2a800d172936b58c50db19e248e7540605a3ac47f941524194765c37250b.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/files/965d2a800d172936b58c50db19e248e7540605a3ac47f941524194765c37250b.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/files/8b624799a66597331400a309caedff0de39b73f541a796541ad51b1eecd08a0e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/493af6f207090f21bb7e3592079e61fb1957e8f100e4f53eb034f70f1f5aff27.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/7108e0d1a9b8da0baf391692fc549fdeb0f261d15f5e58db3e5755a3d3f183c8.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/8b624799a66597331400a309caedff0de39b73f541a796541ad51b1eecd08a0e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/a13e30639814fe5617a081397f8294279215b99d845846f0000afa3c92ec0b5d.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/f059ee205f530042f4b783e54a1929d5e7d317466c58f7c07b7f73d43f15db7e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/reverse/7108e0d1a9b8da0baf391692fc549fdeb0f261d15f5e58db3e5755a3d3f183c8.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/reverse/a13e30639814fe5617a081397f8294279215b99d845846f0000afa3c92ec0b5d.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/files/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/files/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/reverse/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/06ac7ce4b0d5cb23a956c19d44799e76b67b2709ae9ff40f602b927726024ae3.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/171adccd8c4693f706754592b35148330f1534716e19729b98175960e82b2b0c.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/3927c98b43ae2c72acbe794c9f6ffa14e7758a4e32615cc432aad8556493f8df.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/a48bac74b467073b601560567d61e2c81ed7aa1fee17b15de22786ee7a7a42cc.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/reverse/06ac7ce4b0d5cb23a956c19d44799e76b67b2709ae9ff40f602b927726024ae3.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/reverse/171adccd8c4693f706754592b35148330f1534716e19729b98175960e82b2b0c.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/reverse/a48bac74b467073b601560567d61e2c81ed7aa1fee17b15de22786ee7a7a42cc.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-etl-projection/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-etl-projection/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-etl-projection/reverse/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-etl-projection/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/files/c6a15b7626f6f0f3d5304cb5747c9fb213380c2490471dcbcb842d9c1ac3bcf2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/files/c6a15b7626f6f0f3d5304cb5747c9fb213380c2490471dcbcb842d9c1ac3bcf2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-runtime-binary-capture/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-runtime-binary-capture/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-refactor.ledger.jsonl"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-refactor.plan.pkl"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-workspace-preimage.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-workbench-runtime-receipt.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-workbench-runtime/bd9e7818cb2f4c7cbb6144544339b303df7c68e845d8d944cd825e4e2cb881f9/workbench"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-working-block-lane.ledger.jsonl"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-working-block-lane.plan.pkl"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics.ledger.jsonl"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics.plan.pkl"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/evidence/fork-free-rollback.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/evidence/fork-materialization.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/evidence/performance-policy.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/evidence/provider-observability.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/final/fork-free-skills-analytics-handoff.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/final/skills-analytics-handoff.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-fork-queue-baseline.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-provider-admission-queue-baseline.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-session-etl-activation-preimage.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-session-etl-preimage.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-workbench-runtime.mjs"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.25b901166dd7.sdk.899d97628db8.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.25b901166dd7.sdk.899d97628db8.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.3e6b869f8e40.sdk.d0325285c52d.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.3e6b869f8e40.sdk.d0325285c52d.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.4b6273a251ed.sdk.899d97628db8.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.4b6273a251ed.sdk.899d97628db8.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.94b275320838.sdk.92b3acd09a4a.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.94b275320838.sdk.92b3acd09a4a.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/verify-context-magnet-sdk.mjs"
+        }
+      ]
+    },
+    {
+      "path": "fork",
+      "head": "f3a49bccd0ff3d56a95089ad66a8228578a62940",
+      "status": [
+        {
+          "code": " M",
+          "path": "DOWNSTREAM.md"
+        },
+        {
+          "code": " M",
+          "path": "patches/series"
+        },
+        {
+          "code": " M",
+          "path": "patches/sha256"
+        },
+        {
+          "code": " M",
+          "path": "result-tree.lock"
+        },
+        {
+          "code": "??",
+          "path": "patches/0024-feat-modal-join-sandboxes-to-tailnets-with-OIDC.patch"
+        },
+        {
+          "code": "??",
+          "path": "patches/0025-feat-context-magnet-contribution-trace-api.patch"
+        },
+        {
+          "code": "??",
+          "path": "patches/0026-feat-context-magnet-provider-admission.patch"
+        },
+        {
+          "code": "??",
+          "path": "patches/0027-Fix-editor-thread-storage-host-routing-3605.patch"
+        },
+        {
+          "code": "??",
+          "path": "patches/0028-feat-plugins-serve-versioned-lazy-frontend-artifacts.patch"
+        },
+        {
+          "code": "??",
+          "path": "scripts/verify-context-magnet-contribution-trace"
+        },
+        {
+          "code": "??",
+          "path": "scripts/verify-context-magnet-provider-admission"
+        }
+      ]
+    },
+    {
+      "path": "plugins",
+      "head": "054d555a3750125c0bacf48f93bb733a26adf34c",
+      "status": [
+        {
+          "code": " M",
+          "path": "bun.lock"
+        },
+        {
+          "code": " M",
+          "path": "packages/bb-identity/type-tests/browser/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agent-connect/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentd/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/background-jobs/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/bb-bug-reporter/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/btw/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/app.css"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/app.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/context-magnet.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/README.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/server.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/test/context-magnet.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/test/trace-projection.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/test/working-block-performance.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/test/working-block-renderer.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/witness.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/workbench-adapter.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/diffs/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/espresso-theme/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/future-threads/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/github-review/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/identity-boundaries/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/ntfy/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/plan-graph/components/ThreadPlanPanel.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/plan-graph/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/plan-portfolio/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/review-to-disposition/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/rosetta-slack/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/sidebar-defaults/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/sticky-notes/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/subscription-router/deployment.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/subscription-router/host/router.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/subscription-router/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/subscription-router/test/deployment.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/thread-links/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/thread-manager/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/thread-peek/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/thread-progress/package.json"
+        },
+        {
+          "code": " M",
+          "path": "tools/workspaces-sync/definition.ts"
+        },
+        {
+          "code": " M",
+          "path": "tsconfig.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/bb-event-adapter.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/AbsolutePathBuf.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/AgentPath.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ClientInfo.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ClientNotification.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/FunctionCallOutputBody.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/FunctionCallOutputContentItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ImageDetail.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ImageGenerationFailure.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ImageGenerationItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/InitializeCapabilities.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/InitializeParams.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/InitializeResponse.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/LegacyAppPathString.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/MessagePhase.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ReasoningEffort.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/serde_json/JsonValue.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/SleepItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/SubAgentSource.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ThreadId.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/AgentMessageDelivery.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/AsyncUserInputQuestion.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ByteRange.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CodexErrorInfo.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CollabAgentState.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CollabAgentStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CollabAgentTool.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CollabAgentToolCallStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CommandAction.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CommandExecutionSource.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CommandExecutionStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/DynamicToolCallOutputContentItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/DynamicToolCallStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/FileUpdateChange.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/GitInfo.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/HookPromptFragment.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/McpToolCallAppContext.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/McpToolCallError.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/McpToolCallResult.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/McpToolCallStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/MemoryCitation.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/MemoryCitationEntry.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/MisalignmentErrorDetails.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/MisalignmentSteer.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/NonSteerableTurnKind.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/PatchApplyStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/PatchChangeKind.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/SessionSource.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/SubAgentActivityKind.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/TextElement.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/Thread.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadActiveFlag.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadHistoryMode.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadReadParams.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadReadResponse.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadSection.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadSectionAppearance.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadSource.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/Turn.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/TurnError.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/TurnItemsView.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/TurnStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/UserInput.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/WebSearchAction.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/WebSearchItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-session-adapter.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/codex-reader-version-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/codex-session-access-probe.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/live-consumption-projection-diagnosis.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/live-consumption-proof.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/provider-admission-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/provider-admission-topology.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/provider-transport-not-accepted-diagnosis.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/receipt-admission-probe.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/session-etl-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/host-trace-adapter.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/router-reader-client.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/bb-event-adapter.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/codex-schema-receipt.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/codex-session-access-probe.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/codex-session-adapter.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/codex-schema-receipt.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/codex-session-access-probe.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/live-consumption-proof.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/provider-admission.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/session-etl.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/host-free-boundary.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/host-trace-adapter.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/inspector-payload.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/live-consumption-proof.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/plugin-integration.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/plugin-trace-producer.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/provider-admission-fixture.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/router-reader-client.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/run-codex-session-access-probe.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/run-live-consumption-proof.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/session-etl-contract.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/session-etl-performance.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/session-etl-projection.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/session-etl-renderer.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/witness-step-link.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/workbench-adapter-v2.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/trace-producer.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/plan-graph/test/lazy-renderer-boundary.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/host/context-magnet-session-reader.d.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/host/context-magnet-session-reader.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/host/router.d.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/test/context-magnet-session-command.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+        }
+      ]
+    },
+    {
+      "path": "community-plugins",
+      "head": "4677a85e5b09bac9f7451498feaea47c57501378",
+      "status": [
+        {
+          "code": " D",
+          "path": "plugins/analytics/query-runtime/parameter-bridge.cjs"
+        },
+        {
+          "code": " D",
+          "path": "plugins/analytics/query-runtime/worker.cjs"
+        },
+        {
+          "code": " M",
+          "path": "package-lock.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/app.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/CHANGELOG.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/components/settings-section.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/README.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/server.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/skills/agentation-mentions/SKILL.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/test/reconciliation-contract.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/analytics-model.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/analytics-verifier.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/app.css"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/app.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/docs/execution-contract.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/execution-contract.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/extraction/event-projector.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/extraction/source-adapter.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/query-runtime/index.d.mts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/query-runtime/index.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/README.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/rpc-contract.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/server.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/store.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/analytics-verifier.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/captured-svg.browser.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/captured-svg.fixture.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/execution-backed-ui.fixture.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/stale-event.browser.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/stale-event.fixture.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/query-runtime/binding.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/query-runtime/builtin-summary-admission-control.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/query-runtime/parameter-bridge-controls.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/query-runtime/scheduler-controls.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/ui.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/server.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/store.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/tsconfig.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/machine-monitor/app.css"
+        },
+        {
+          "code": " M",
+          "path": "plugins/machine-monitor/app.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/machine-monitor/fleet-contract.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/machine-monitor/timeline-chart.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/agentation-mentions/components/annotation-prompt-action.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/isolation/collector/snapshot-supply.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/isolation/execution/enforced-execution-envelope.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/isolation/frontend/emitted-artifact-v2-proof.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/isolation/frontend/lazy-artifact-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/skill-analytics-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/skills-analytics.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/execution-service.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/execution-store.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/extraction/capture-budget.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/extraction/fork-free-skill-projector.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/extraction/retained-projector.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/extraction/skill-observation-projector.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/frontend/analytics-panel.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/query-runtime/isolation-policy.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/retained-query-cache.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-fact-projection.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-fact-schema.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-observation-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-query-schema.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-query-service.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skills-dashboard/skills-dashboard.css"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skills-dashboard/skills-dashboard.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/snapshot-provider.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/architecture/browser/bindings/ui.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/architecture/suites/data/bindings/extraction.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/capture-budget.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/capture-publication.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/collector/snapshot-provider.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/execution-contract-envelope.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/execution-service.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/isolation-policy.test.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/legacy-runtime-denial.test.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/production-import-boundary.test.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/frontend/lazy-artifact-boundary.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/legacy-capture.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/analytics-verifier-probe.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/legacy-parameter-bridge.cjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/legacy-query-runtime-worker.cjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/legacy-query-runtime.d.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/legacy-query-runtime.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skill-fact-projection.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills-host-containment.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/acceptance.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/fixtures/skills-dashboard-fixture.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/fork-free/dashboard-semantics.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/qualification/skills-dashboard-performance.test.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/qualification/vitest.config.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/ui/skills-dashboard.test.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/ui/vitest.config.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/composition/fork-free/capture-coordinator.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/composition/skill-refresh-failure.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/analytics/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/analytics/schema-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/fork-free/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/fork-free/schema-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/fork-free/thr-tn5pxvdf7j-fixture.d.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/runtime-events/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/runtime-events/schema-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/bootstrap/malformed-observation.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/bootstrap/rejected-import.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/bootstrap/timeout.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/bootstrap/wrong-value.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/fork-free/thr-tn5pxvdf7j.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/projection/pre-skill-store.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/projection/retained-source-integration/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/projection/store-migration-coverage/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/providers/catalog-identity/provider-catalog-identity.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/providers/skill-observation-v1-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/providers/skill-observation-v1.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/qualification/performance-calibration.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/qualification/performance-workload.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/qualification/roundtrip/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/qualification/workload.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/query-ui/skill-query-fixture.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/probes/fixtures/controlled-skill-root.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/probes/fixtures/provider-events.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/probes/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/projection/fork-free/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/projection/retained-projection.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/provider-claude/README.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/provider-claude/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/queries/dashboard-queries/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/queries/fork-free/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/retention-surface/retention-surface.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/retention-surface/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/runner/bootstrap-suite.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/runner/suite-child.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/runner/suite-process.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/runner/supervised-node.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/analytics-contract.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/catalog-delivery.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/compatibility.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/composition.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/dashboard-queries.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/dashboard-ui.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-composition.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-contract.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-projection.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-queries.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-ui.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-materialization.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/observability-probe.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/performance.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/provider-catalog-identity.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/provider-claude.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/provider-codex.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/retained-projection.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/retained-source-integration.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/retention-surface.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/runtime-contract.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/store-migration-coverage.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/vertical-slice.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/machine-monitor/test/lazy-renderer-boundary.test.ts"
+        }
+      ]
+    },
+    {
+      "path": "fork/upstream",
+      "head": "267938526dfcbc0edb228ce827b5bec202c1af97",
+      "status": []
+    }
+  ],
+  "protectedState": {
+    "result": "pass",
+    "normalRuntimeReadOnly": true,
+    "priorHookRestored": true,
+    "priorWorkbenchRestored": true,
+    "directPluginGenerationRestored": true,
+    "proofConfiguredProviderRetired": true,
+    "freshPriorConfigurationWitness": {
+      "kind": "ready",
+      "pid": 127,
+      "port": 39281,
+      "configurationSha256": "cb148afe96e041bf0e4d19f9060c470e234abc7a98a129898f7928c26023cade",
+      "configuration": {
+        "mode": "prior",
+        "hookSha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b",
+        "workbenchSha256": "db0beed02912b7593dad4978ad430cbaf00db24139dda3d219074d6e0fa5b257",
+        "pluginGeneration": [
+          {
+            "id": "context-magnet-inspector",
+            "appSha256": "ca63412bbe53fd77d4c47fc2aeb78cd82a09bf762bb2238ac1fffd8dd2358599",
+            "serverSha256": "8f06b3cbc056cc14fdb8a60366cd76dd33e52ee9603600481cb622bd59b61963"
+          },
+          {
+            "id": "subscription-router",
+            "appSha256": "3481f9b831e3ef6d07229020877cc0e01383d3de43e9b6c885a9b3cc8df70e16",
+            "serverSha256": "d623f600f4abe3549e3e2c70277424bd92f93f9911a245f347402638f1a1500d"
+          }
+        ]
+      }
+    }
+  },
+  "emergencyFinally": {
+    "invoked": true,
+    "retiredProofProviders": [],
+    "idempotent": true,
+    "freshPriorWitness": {
+      "kind": "ready",
+      "pid": 127,
+      "port": 39281,
+      "configurationSha256": "cb148afe96e041bf0e4d19f9060c470e234abc7a98a129898f7928c26023cade",
+      "configuration": {
+        "mode": "prior",
+        "hookSha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b",
+        "workbenchSha256": "db0beed02912b7593dad4978ad430cbaf00db24139dda3d219074d6e0fa5b257",
+        "pluginGeneration": [
+          {
+            "id": "context-magnet-inspector",
+            "appSha256": "ca63412bbe53fd77d4c47fc2aeb78cd82a09bf762bb2238ac1fffd8dd2358599",
+            "serverSha256": "8f06b3cbc056cc14fdb8a60366cd76dd33e52ee9603600481cb622bd59b61963"
+          },
+          {
+            "id": "subscription-router",
+            "appSha256": "3481f9b831e3ef6d07229020877cc0e01383d3de43e9b6c885a9b3cc8df70e16",
+            "serverSha256": "d623f600f4abe3549e3e2c70277424bd92f93f9911a245f347402638f1a1500d"
+          }
+        ]
+      }
+    }
+  },
+  "childProcesses": [
+    {
+      "pid": 127,
+      "code": 0,
+      "signal": null,
+      "escalated": false
+    }
+  ],
+  "normalAfter": {
+    "hook": {
+      "path": "/home/ubuntu/.codex-subscription-router/shared-hooks.json",
+      "bytes": 3559,
+      "mode": 384,
+      "sha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b"
+    },
+    "priorHookSha256": "7ff5a42a2f2ae83b229391c89e59425ec537f9763750dab0c8e222c57efbcf7b",
+    "plugins": [
+      {
+        "id": "context-magnet-inspector",
+        "app": {
+          "path": "/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/dist/app.js",
+          "bytes": 14240,
+          "mode": 436,
+          "sha256": "ca63412bbe53fd77d4c47fc2aeb78cd82a09bf762bb2238ac1fffd8dd2358599"
+        },
+        "server": {
+          "path": "/home/ubuntu/bb/plugins/plugins/context-magnet-inspector/dist/server.js",
+          "bytes": 582330,
+          "mode": 436,
+          "sha256": "8f06b3cbc056cc14fdb8a60366cd76dd33e52ee9603600481cb622bd59b61963"
+        }
+      },
+      {
+        "id": "subscription-router",
+        "app": {
+          "path": "/home/ubuntu/bb/plugins/plugins/subscription-router/dist/app.js",
+          "bytes": 162448,
+          "mode": 436,
+          "sha256": "3481f9b831e3ef6d07229020877cc0e01383d3de43e9b6c885a9b3cc8df70e16"
+        },
+        "server": {
+          "path": "/home/ubuntu/bb/plugins/plugins/subscription-router/dist/server.js",
+          "bytes": 683501,
+          "mode": 436,
+          "sha256": "d623f600f4abe3549e3e2c70277424bd92f93f9911a245f347402638f1a1500d"
+        }
+      }
+    ],
+    "workbench": {
+      "path": "/home/ubuntu/.local/share/mise/installs/github-phosphorco-workbench-go/0.8.1/bin/workbench",
+      "bytes": 12996734,
+      "mode": 493,
+      "sha256": "db0beed02912b7593dad4978ad430cbaf00db24139dda3d219074d6e0fa5b257"
+    },
+    "codex": {
+      "path": "/home/ubuntu/.codex-subscription-router/lib/mise-codex-command",
+      "bytes": 83,
+      "mode": 448,
+      "sha256": "5dc28f195b8be0f7ca8da93b211020cf831f30dcd91bc43475f26a4455279cc3"
+    },
+    "router": {
+      "path": "/home/ubuntu/.codex-subscription-router/state.db",
+      "sha256": "335d6ffcce091010f1c913a84270b802615fa267c91b39e7c2fb35e4cee8bfdb"
+    },
+    "bbRuntime": {
+      "path": "/home/ubuntu/.bb/bb-app-runtime.json",
+      "entryPath": "/home/ubuntu/bb/fork/build/bb/packages/bb-app/dist/bb-app.js",
+      "pid": 1826,
+      "serverUrl": "http://127.0.0.1:38886",
+      "version": "0.43.1"
+    },
+    "ports": {
+      "status": 0,
+      "stdout": "LISTEN 0      4096                       0.0.0.0:22    0.0.0.0:*\nLISTEN 0      4096                 127.0.0.53%lo:53    0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:42459 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:38886 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:38887 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:38397 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:37251 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:36501 0.0.0.0:*\nLISTEN 0      4096                    127.0.0.54:53    0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:34531 0.0.0.0:*\nLISTEN 0      4096               100.121.144.120:63961 0.0.0.0:*\nLISTEN 0      511                      127.0.0.1:33171 0.0.0.0:*\nLISTEN 0      4096                          [::]:22       [::]:*\nLISTEN 0      4096   [fd7a:115c:a1e0::6b31:9079]:38199    [::]:*",
+      "stderr": ""
+    },
+    "services": {
+      "status": 0,
+      "stdout": "atd.service                 loaded active running Deferred execution scheduler\n  chrony.service              loaded active running chrony, an NTP client/server\n  cron.service                loaded active running Regular background program processing daemon\n  dbus.service                loaded active running D-Bus System Message Bus\n  getty@tty1.service          loaded active running Getty on tty1\n  mdmonitor.service           loaded active running MD array monitor\n  multipathd.service          loaded active running Device-Mapper Multipath Device Controller\n  networkd-dispatcher.service loaded active running Dispatcher daemon for systemd-networkd\n  polkit.service              loaded active running Authorization Manager\n  rsyslog.service             loaded active running System Logging Service\n  ssh.service                 loaded active running OpenBSD Secure Shell server\n  systemd-journald.service    loaded active running Journal Service\n  systemd-logind.service      loaded active running User Login Management\n  systemd-networkd.service    loaded active running Network Management\n  systemd-resolved.service    loaded active running Network Name Resolution\n  systemd-udevd.service       loaded active running Rule-based Manager for Device Events and Files\n  tailscaled.service          loaded active running Tailscale node agent\n  unattended-upgrades.service loaded active running Unattended Upgrades Shutdown\n  user@1000.service           loaded active running User Manager for UID 1000",
+      "stderr": ""
+    },
+    "directChildren": {
+      "status": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    "providers": [],
+    "configuredProviderLaunches": [],
+    "selectedTarget": "normal-bb-machine-explicit"
+  },
+  "workspaceAfter": [
+    {
+      "path": ".",
+      "head": "5f025fe0387eefb09353e18a278010237117633e",
+      "status": [
+        {
+          "code": " M",
+          "path": "AGENTS.md"
+        },
+        {
+          "code": " M",
+          "path": "community-plugins"
+        },
+        {
+          "code": " M",
+          "path": "fork"
+        },
+        {
+          "code": " M",
+          "path": "plans/analytics-delivery.ledger.jsonl"
+        },
+        {
+          "code": " M",
+          "path": "plugins"
+        },
+        {
+          "code": " M",
+          "path": "sdk-artifacts/checks.json"
+        },
+        {
+          "code": " M",
+          "path": "sdk-artifacts/README.md"
+        },
+        {
+          "code": "??",
+          "path": "="
+        },
+        {
+          "code": "??",
+          "path": "docs/adrs/2026-09-analytics-performance-isolation.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/analytics-isolation-coordination.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/analytics-isolation.ledger.jsonl"
+        },
+        {
+          "code": "??",
+          "path": "plans/analytics-isolation.plan.pkl"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-fork-queue-baseline.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-provider-admission-queue-baseline.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-activation-preimage.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/files/7256120c5e6517f3d89dad2166d83ce32f12f330b778eca829f30f875d216f9d.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/files/893074789c1071a3ba16fcd074949fcf7fbe9fd440ea844e183fe315a24f594e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/files/948d7868553d2305aaa8511c8ee61f04c2204152e46ca7a00f6f97e611d7ae97.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-2/files/948d7868553d2305aaa8511c8ee61f04c2204152e46ca7a00f6f97e611d7ae97.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage-correction-2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage/files/893074789c1071a3ba16fcd074949fcf7fbe9fd440ea844e183fe315a24f594e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/activation-preimage/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/files/42d25faa7848d99fbab63030a39eefbbe1f6a38a14f6aa09701e658181754bdb.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/files/a3a91bfee561a732f5ea7aee94a7a033e590ca3338cad418b65eb75967cc93af.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-typecheck-repair/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-wave-1/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-wave-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-wave-1/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/adapter-wave-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/1d8035d54b6ba23d3f2eeb8f785028beda1e2afd3514072dea966dcdb058247c.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/3927c98b43ae2c72acbe794c9f6ffa14e7758a4e32615cc432aad8556493f8df.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/files/c6a15b7626f6f0f3d5304cb5747c9fb213380c2490471dcbcb842d9c1ac3bcf2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/reverse/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/1d8035d54b6ba23d3f2eeb8f785028beda1e2afd3514072dea966dcdb058247c.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/3927c98b43ae2c72acbe794c9f6ffa14e7758a4e32615cc432aad8556493f8df.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/files/c6a15b7626f6f0f3d5304cb5747c9fb213380c2490471dcbcb842d9c1ac3bcf2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/reverse/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-contribution-contract/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/files/071062948176f94127caeddd02e5d8c302462866b618998307d52d3bf728f7f2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/files/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/files/76b735b725d9965fb4f9febee93389672fba3f67c750982a130c319feac52a61.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/files/071062948176f94127caeddd02e5d8c302462866b618998307d52d3bf728f7f2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/files/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/files/76b735b725d9965fb4f9febee93389672fba3f67c750982a130c319feac52a61.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/checkpoint-zero-renderer-schema/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/codex-schema-receipt/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/codex-schema-receipt/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/files/7ace203746a065f24c5364228be204404e13dc6a9f40e7544a88e59ac0cb984d.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/files/c7e16622a7edc3273c576d37b47944149c03a7fab33f95637259d9d8719412b6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/files/e58e0c5f420e4ac82c08f80f6212f8f024dfc32df8c2b93f0fad7fdb9777ac83.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-bounds-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/files/7ace203746a065f24c5364228be204404e13dc6a9f40e7544a88e59ac0cb984d.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/files/c7e16622a7edc3273c576d37b47944149c03a7fab33f95637259d9d8719412b6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/files/e58e0c5f420e4ac82c08f80f6212f8f024dfc32df8c2b93f0fad7fdb9777ac83.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/etl-contract/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/files/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/files/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/reverse/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-renderer/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/files/965d2a800d172936b58c50db19e248e7540605a3ac47f941524194765c37250b.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/files/965d2a800d172936b58c50db19e248e7540605a3ac47f941524194765c37250b.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v3/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/files/965d2a800d172936b58c50db19e248e7540605a3ac47f941524194765c37250b.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc-v4/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/files/965d2a800d172936b58c50db19e248e7540605a3ac47f941524194765c37250b.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/host-free-rpc/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/files/8b624799a66597331400a309caedff0de39b73f541a796541ad51b1eecd08a0e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/412fb0a01154c33d36f82418b188c30ef1531102616003baa6c302a25c92f3ef.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/493af6f207090f21bb7e3592079e61fb1957e8f100e4f53eb034f70f1f5aff27.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/7108e0d1a9b8da0baf391692fc549fdeb0f261d15f5e58db3e5755a3d3f183c8.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/8b624799a66597331400a309caedff0de39b73f541a796541ad51b1eecd08a0e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/a13e30639814fe5617a081397f8294279215b99d845846f0000afa3c92ec0b5d.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/files/f059ee205f530042f4b783e54a1929d5e7d317466c58f7c07b7f73d43f15db7e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/reverse/7108e0d1a9b8da0baf391692fc549fdeb0f261d15f5e58db3e5755a3d3f183c8.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/reverse/a13e30639814fe5617a081397f8294279215b99d845846f0000afa3c92ec0b5d.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/integration-runtime-wave-2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/files/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/files/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/files/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/reverse/328bf51dae9062598ca82974d64a85e58fde17fb2a873d7f6312857fc8c35d89.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/reverse/723858dbb1da23fa1e3a23145bd7660cc3defb95085ebea7c855dc5467d4b3e3.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/reverse/f2820e24e2d45969dba7681db8a05e833f65db4a0732bb3781045452c9044069.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/legacy-disconnection/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/06ac7ce4b0d5cb23a956c19d44799e76b67b2709ae9ff40f602b927726024ae3.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/171adccd8c4693f706754592b35148330f1534716e19729b98175960e82b2b0c.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/358f71644b12e0f2445c175e1b341e476f74daadab745e95cea686597b44d18e.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/3927c98b43ae2c72acbe794c9f6ffa14e7758a4e32615cc432aad8556493f8df.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/files/a48bac74b467073b601560567d61e2c81ed7aa1fee17b15de22786ee7a7a42cc.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/reverse/06ac7ce4b0d5cb23a956c19d44799e76b67b2709ae9ff40f602b927726024ae3.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/reverse/171adccd8c4693f706754592b35148330f1534716e19729b98175960e82b2b0c.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/reverse/a48bac74b467073b601560567d61e2c81ed7aa1fee17b15de22786ee7a7a42cc.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/router-reader-invocation/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-correction-2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-2/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/files/3657737fcf25892c6aaf29336cc487951cf23c20072c1d1335fe4090eaff9c19.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/files/7c6ee839b09fa102c8bfd950c1514b02d1454e7c262c768c0c0e497462240189.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/files/80616f39729f6a7584f32a8f7961dd86305f074f7537d5361c04950beb4b9914.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/files/ce186799276105e1d0dcdb239c5add1ca08ebfa953c3ac6e18cd424dcf93a295.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe-rollout-3/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-access-probe/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-etl-projection/files/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-etl-projection/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-etl-projection/reverse/c222b084d13f4d34eae9d90053453d4900744e3e9901a820b020efabba83bde6.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/session-etl-projection/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/files/c6a15b7626f6f0f3d5304cb5747c9fb213380c2490471dcbcb842d9c1ac3bcf2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter-correction-1/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/files/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/files/c6a15b7626f6f0f3d5304cb5747c9fb213380c2490471dcbcb842d9c1ac3bcf2.bin"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/reverse/bfd6a9655693f635515f0858af228776b51d4e91ffb23fcedad3599ee99326b5.patch"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-receipt-slot-adapter/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-runtime-binary-capture/recovery-manifest.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-recovery/workbench-runtime-binary-capture/state.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-refactor.ledger.jsonl"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-refactor.plan.pkl"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-session-etl-workspace-preimage.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-workbench-runtime-receipt.json"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-workbench-runtime/bd9e7818cb2f4c7cbb6144544339b303df7c68e845d8d944cd825e4e2cb881f9/workbench"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-working-block-lane.ledger.jsonl"
+        },
+        {
+          "code": "??",
+          "path": "plans/context-magnet-working-block-lane.plan.pkl"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics.ledger.jsonl"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics.plan.pkl"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/evidence/fork-free-rollback.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/evidence/fork-materialization.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/evidence/performance-policy.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/evidence/provider-observability.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/final/fork-free-skills-analytics-handoff.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/skills-analytics/final/skills-analytics-handoff.md"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-fork-queue-baseline.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-provider-admission-queue-baseline.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-session-etl-activation-preimage.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-session-etl-preimage.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plans/verify-context-magnet-workbench-runtime.mjs"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.045a825edd2b.sdk.92b3acd09a4a.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.25b901166dd7.sdk.899d97628db8.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.25b901166dd7.sdk.899d97628db8.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.3e6b869f8e40.sdk.d0325285c52d.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.3e6b869f8e40.sdk.d0325285c52d.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.4b6273a251ed.sdk.899d97628db8.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.4b6273a251ed.sdk.899d97628db8.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.94b275320838.sdk.92b3acd09a4a.tgz"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/get-bb-plugin-sdk-0.4.98+phosphor.94b275320838.sdk.92b3acd09a4a.tgz.provenance.json"
+        },
+        {
+          "code": "??",
+          "path": "sdk-artifacts/verify-context-magnet-sdk.mjs"
+        }
+      ]
+    },
+    {
+      "path": "fork",
+      "head": "f3a49bccd0ff3d56a95089ad66a8228578a62940",
+      "status": [
+        {
+          "code": " M",
+          "path": "DOWNSTREAM.md"
+        },
+        {
+          "code": " M",
+          "path": "patches/series"
+        },
+        {
+          "code": " M",
+          "path": "patches/sha256"
+        },
+        {
+          "code": " M",
+          "path": "result-tree.lock"
+        },
+        {
+          "code": "??",
+          "path": "patches/0024-feat-modal-join-sandboxes-to-tailnets-with-OIDC.patch"
+        },
+        {
+          "code": "??",
+          "path": "patches/0025-feat-context-magnet-contribution-trace-api.patch"
+        },
+        {
+          "code": "??",
+          "path": "patches/0026-feat-context-magnet-provider-admission.patch"
+        },
+        {
+          "code": "??",
+          "path": "patches/0027-Fix-editor-thread-storage-host-routing-3605.patch"
+        },
+        {
+          "code": "??",
+          "path": "patches/0028-feat-plugins-serve-versioned-lazy-frontend-artifacts.patch"
+        },
+        {
+          "code": "??",
+          "path": "scripts/verify-context-magnet-contribution-trace"
+        },
+        {
+          "code": "??",
+          "path": "scripts/verify-context-magnet-provider-admission"
+        }
+      ]
+    },
+    {
+      "path": "plugins",
+      "head": "054d555a3750125c0bacf48f93bb733a26adf34c",
+      "status": [
+        {
+          "code": " M",
+          "path": "bun.lock"
+        },
+        {
+          "code": " M",
+          "path": "packages/bb-identity/type-tests/browser/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agent-connect/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentd/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/background-jobs/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/bb-bug-reporter/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/btw/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/app.css"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/app.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/context-magnet.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/README.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/server.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/test/context-magnet.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/test/trace-projection.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/test/working-block-performance.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/test/working-block-renderer.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/witness.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/context-magnet-inspector/workbench-adapter.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/diffs/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/espresso-theme/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/future-threads/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/github-review/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/identity-boundaries/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/ntfy/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/plan-graph/components/ThreadPlanPanel.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/plan-graph/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/plan-portfolio/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/review-to-disposition/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/rosetta-slack/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/sidebar-defaults/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/sticky-notes/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/subscription-router/deployment.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/subscription-router/host/router.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/subscription-router/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/subscription-router/test/deployment.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/thread-links/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/thread-manager/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/thread-peek/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/thread-progress/package.json"
+        },
+        {
+          "code": " M",
+          "path": "tools/workspaces-sync/definition.ts"
+        },
+        {
+          "code": " M",
+          "path": "tsconfig.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/bb-event-adapter.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/AbsolutePathBuf.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/AgentPath.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ClientInfo.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ClientNotification.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/FunctionCallOutputBody.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/FunctionCallOutputContentItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ImageDetail.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ImageGenerationFailure.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ImageGenerationItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/InitializeCapabilities.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/InitializeParams.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/InitializeResponse.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/LegacyAppPathString.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/MessagePhase.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ReasoningEffort.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/serde_json/JsonValue.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/SleepItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/SubAgentSource.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/ThreadId.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/AgentMessageDelivery.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/AsyncUserInputQuestion.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ByteRange.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CodexErrorInfo.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CollabAgentState.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CollabAgentStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CollabAgentTool.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CollabAgentToolCallStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CommandAction.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CommandExecutionSource.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/CommandExecutionStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/DynamicToolCallOutputContentItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/DynamicToolCallStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/FileUpdateChange.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/GitInfo.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/HookPromptFragment.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/McpToolCallAppContext.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/McpToolCallError.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/McpToolCallResult.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/McpToolCallStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/MemoryCitation.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/MemoryCitationEntry.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/MisalignmentErrorDetails.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/MisalignmentSteer.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/NonSteerableTurnKind.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/PatchApplyStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/PatchChangeKind.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/SessionSource.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/SubAgentActivityKind.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/TextElement.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/Thread.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadActiveFlag.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadHistoryMode.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadReadParams.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadReadResponse.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadSection.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadSectionAppearance.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadSource.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/ThreadStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/Turn.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/TurnError.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/TurnItemsView.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/TurnStatus.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/UserInput.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/v2/WebSearchAction.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-app-server-schema/WebSearchItem.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/codex-session-adapter.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/codex-reader-version-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/codex-session-access-probe.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/live-consumption-projection-diagnosis.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/live-consumption-proof.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/provider-admission-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/provider-admission-topology.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/provider-transport-not-accepted-diagnosis.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/receipt-admission-probe.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/docs/session-etl-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/host-trace-adapter.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/router-reader-client.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/bb-event-adapter.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/codex-schema-receipt.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/codex-session-access-probe.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/codex-session-adapter.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/codex-schema-receipt.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/codex-session-access-probe.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/live-consumption-proof.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/provider-admission.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/fixtures/session-etl.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/host-free-boundary.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/host-trace-adapter.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/inspector-payload.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/live-consumption-proof.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/plugin-integration.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/plugin-trace-producer.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/provider-admission-fixture.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/router-reader-client.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/run-codex-session-access-probe.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/run-live-consumption-proof.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/session-etl-contract.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/session-etl-performance.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/session-etl-projection.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/session-etl-renderer.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/witness-step-link.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/test/workbench-adapter-v2.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/context-magnet-inspector/trace-producer.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/plan-graph/test/lazy-renderer-boundary.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/host/context-magnet-session-reader.d.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/host/context-magnet-session-reader.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/host/router.d.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/test/context-magnet-session-command.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/subscription-router/test/context-magnet-session-reader.test.ts"
+        }
+      ]
+    },
+    {
+      "path": "community-plugins",
+      "head": "4677a85e5b09bac9f7451498feaea47c57501378",
+      "status": [
+        {
+          "code": " D",
+          "path": "plugins/analytics/query-runtime/parameter-bridge.cjs"
+        },
+        {
+          "code": " D",
+          "path": "plugins/analytics/query-runtime/worker.cjs"
+        },
+        {
+          "code": " M",
+          "path": "package-lock.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/app.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/CHANGELOG.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/components/settings-section.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/README.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/server.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/skills/agentation-mentions/SKILL.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/agentation-mentions/test/reconciliation-contract.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/analytics-model.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/analytics-verifier.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/app.css"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/app.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/docs/execution-contract.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/execution-contract.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/extraction/event-projector.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/extraction/source-adapter.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/package.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/query-runtime/index.d.mts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/query-runtime/index.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/README.md"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/rpc-contract.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/server.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/store.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/analytics-verifier.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/captured-svg.browser.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/captured-svg.fixture.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/execution-backed-ui.fixture.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/stale-event.browser.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/browser/ui/stale-event.fixture.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/query-runtime/binding.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/query-runtime/builtin-summary-admission-control.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/query-runtime/parameter-bridge-controls.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/query-runtime/scheduler-controls.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/architecture/suites/ui.mjs"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/server.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/test/store.test.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/analytics/tsconfig.json"
+        },
+        {
+          "code": " M",
+          "path": "plugins/machine-monitor/app.css"
+        },
+        {
+          "code": " M",
+          "path": "plugins/machine-monitor/app.tsx"
+        },
+        {
+          "code": " M",
+          "path": "plugins/machine-monitor/fleet-contract.ts"
+        },
+        {
+          "code": " M",
+          "path": "plugins/machine-monitor/timeline-chart.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/agentation-mentions/components/annotation-prompt-action.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/isolation/collector/snapshot-supply.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/isolation/execution/enforced-execution-envelope.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/isolation/frontend/emitted-artifact-v2-proof.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/isolation/frontend/lazy-artifact-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/skill-analytics-contract.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/docs/skills-analytics.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/execution-service.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/execution-store.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/extraction/capture-budget.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/extraction/fork-free-skill-projector.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/extraction/retained-projector.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/extraction/skill-observation-projector.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/frontend/analytics-panel.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/query-runtime/isolation-policy.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/retained-query-cache.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-fact-projection.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-fact-schema.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-observation-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-query-schema.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skill-query-service.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skills-dashboard/skills-dashboard.css"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/skills-dashboard/skills-dashboard.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/snapshot-provider.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/architecture/browser/bindings/ui.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/architecture/suites/data/bindings/extraction.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/capture-budget.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/capture-publication.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/collector/snapshot-provider.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/execution-contract-envelope.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/execution-service.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/isolation-policy.test.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/legacy-runtime-denial.test.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/execution/production-import-boundary.test.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/frontend/lazy-artifact-boundary.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/legacy-capture.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/analytics-verifier-probe.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/legacy-parameter-bridge.cjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/legacy-query-runtime-worker.cjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/legacy-query-runtime.d.mts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/probes/legacy-query-runtime.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skill-fact-projection.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills-host-containment.test.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/acceptance.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/fixtures/skills-dashboard-fixture.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/fork-free/dashboard-semantics.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/qualification/skills-dashboard-performance.test.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/qualification/vitest.config.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/ui/skills-dashboard.test.tsx"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/browser/ui/vitest.config.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/composition/fork-free/capture-coordinator.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/composition/skill-refresh-failure.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/analytics/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/analytics/schema-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/fork-free/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/fork-free/schema-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/fork-free/thr-tn5pxvdf7j-fixture.d.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/runtime-events/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/contracts/runtime-events/schema-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/bootstrap/malformed-observation.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/bootstrap/rejected-import.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/bootstrap/timeout.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/bootstrap/wrong-value.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/fork-free/thr-tn5pxvdf7j.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/projection/pre-skill-store.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/projection/retained-source-integration/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/projection/store-migration-coverage/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/providers/catalog-identity/provider-catalog-identity.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/providers/skill-observation-v1-contract.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/providers/skill-observation-v1.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/qualification/performance-calibration.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/qualification/performance-workload.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/qualification/roundtrip/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/qualification/workload.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/fixtures/query-ui/skill-query-fixture.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/probes/fixtures/controlled-skill-root.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/probes/fixtures/provider-events.json"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/probes/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/projection/fork-free/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/projection/retained-projection.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/provider-claude/README.md"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/provider-claude/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/queries/dashboard-queries/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/queries/fork-free/run.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/retention-surface/retention-surface.ts"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/retention-surface/run.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/runner/bootstrap-suite.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/runner/suite-child.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/runner/suite-process.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/runner/supervised-node.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/analytics-contract.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/catalog-delivery.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/compatibility.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/composition.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/dashboard-queries.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/dashboard-ui.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-composition.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-contract.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-projection.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-queries.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-free-ui.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/fork-materialization.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/observability-probe.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/performance.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/provider-catalog-identity.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/provider-claude.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/provider-codex.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/retained-projection.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/retained-source-integration.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/retention-surface.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/runtime-contract.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/store-migration-coverage.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/analytics/test/skills/suites/vertical-slice.mjs"
+        },
+        {
+          "code": "??",
+          "path": "plugins/machine-monitor/test/lazy-renderer-boundary.test.ts"
+        }
+      ]
+    },
+    {
+      "path": "fork/upstream",
+      "head": "267938526dfcbc0edb228ce827b5bec202c1af97",
+      "status": []
+    }
+  ],
+  "normalRuntimeDeltas": [],
+  "workspaceDeltasOutsideGrant": [],
+  "planAndLedgerWritten": false,
+  "commitCreated": false,
+  "ok": true
+}

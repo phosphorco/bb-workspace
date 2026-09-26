@@ -1,0 +1,128 @@
+/** Bounded, read-only provider-session feasibility probe; never prints raw turns. */
+import { createHash } from "node:crypto";
+import { spawn } from "node:child_process";
+import { readFileSync, readdirSync, readlinkSync, realpathSync } from "node:fs";
+import { resolve } from "node:path";
+
+const TARGET = "thr_c9xdr46tjs", DB = "/home/ubuntu/.codex-subscription-router/state.db";
+const MAX_HTTP_BYTES = 262_144, MAX_STDOUT_BYTES = 8_388_608, MAX_STDERR_BYTES = 65_536, MAX_LINE_BYTES = 4_194_304;
+const MAX_TURNS = 128, MAX_ITEMS = 4_096, MAX_FRAGMENTS = 4_096, MAX_ROLLOUT_BYTES = 8_388_608, MAX_WALL_MS = 15_000, MAX_EVENT_PAGES = 2, MAX_CONCURRENCY = 1;
+type Row = Record<string, unknown>;
+type Route = { owner: string; home: string; executable: string; revision: number; selection: string; slot: string; rollout: string; routeDigest: string };
+type Snapshot = { updatedAt: number; status: string; highWatermark: number; providerThreadId: string; checkpointId: string | null; route: Route; processes: string; workspace: string };
+type Receipt = { threadId: string; sessionId: string; turns: Array<{ id: string; items: Array<{ id: string; fragments: Array<{ ordinal: number; hookRunId: string; bytes: number; sha256: string }> }> }> };
+const hash = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
+const object = (value: unknown): Row | null => value !== null && typeof value === "object" && !Array.isArray(value) ? value as Row : null;
+const keys = (value: Row, allowed: readonly string[]) => Object.keys(value).every((key) => allowed.includes(key));
+const boundedText = (value: unknown, name: string, maximum = 512): string => { if (typeof value !== "string" || value.length === 0 || value.length > maximum) throw new Error(`invalid ${name}`); return value; };
+
+/** Bound raw bytes before newline buffering/JSON parsing, and always reap the group. */
+async function command(executable: string, args: string[], env = process.env, input?: string): Promise<{ stdout: Buffer; stderr: Buffer }> {
+  return await new Promise((resolveResult, reject) => {
+    const child = spawn(executable, args, { cwd: resolve(import.meta.dirname, ".."), env, detached: true, stdio: ["pipe", "pipe", "pipe"] });
+    let stdout = Buffer.alloc(0), stderr = Buffer.alloc(0), settled = false, failure: Error | undefined;
+    const stop = (error: Error) => { if (settled || failure) return; failure = error; try { process.kill(-child.pid!, "SIGTERM"); } catch {} };
+    const collect = (stream: "stdout" | "stderr", chunk: Buffer) => {
+      const cap = stream === "stdout" ? MAX_STDOUT_BYTES : MAX_STDERR_BYTES;
+      const next = Buffer.concat([stream === "stdout" ? stdout : stderr, chunk]);
+      if (next.length > cap) return stop(new Error(`${stream} exceeds bound`));
+      if (stream === "stdout") stdout = next; else stderr = next;
+      for (const line of next.toString("utf8").split("\n")) if (Buffer.byteLength(line) > MAX_LINE_BYTES) return stop(new Error("line exceeds bound"));
+    };
+    const timer = setTimeout(() => stop(new Error("probe timeout")), MAX_WALL_MS);
+    const reaper = setTimeout(() => { if (failure) try { process.kill(-child.pid!, "SIGKILL"); } catch {} }, MAX_WALL_MS + 500);
+    child.stdout!.on("data", (chunk: Buffer) => collect("stdout", chunk)); child.stderr!.on("data", (chunk: Buffer) => collect("stderr", chunk)); child.on("error", stop);
+    child.on("close", (code) => { if (settled) return; settled = true; clearTimeout(timer); clearTimeout(reaper); if (failure) reject(failure); else if (code === 0) resolveResult({ stdout, stderr }); else reject(new Error(`child failed status ${code} stderr-sha256 ${hash(stderr)}`)); });
+    child.stdin!.end(input);
+  });
+}
+
+async function json(url: string): Promise<unknown> {
+  const controller = new AbortController(), timer = setTimeout(() => controller.abort(), MAX_WALL_MS);
+  try {
+    const response = await fetch(url, { signal: controller.signal, headers: { accept: "application/json" } }); if (!response.ok) throw new Error(`BB REST ${response.status}`);
+    const reader = response.body?.getReader(); if (!reader) throw new Error("missing REST body"); const parts: Uint8Array[] = []; let bytes = 0;
+    for (;;) { const next = await reader.read(); if (next.done) break; bytes += next.value.byteLength; if (bytes > MAX_HTTP_BYTES) { await reader.cancel(); throw new Error("REST body exceeds bound"); } parts.push(next.value); }
+    return JSON.parse(Buffer.concat(parts).toString("utf8"));
+  } finally { clearTimeout(timer); }
+}
+
+function thread(value: unknown): { updatedAt: number; status: string } {
+  const row = object(value); const allowed = ["id", "projectId", "environmentId", "providerId", "title", "titleFallback", "sectionId", "status", "parentThreadId", "sourceThreadId", "originKind", "originPluginId", "visibility", "archivedAt", "pinnedAt", "deletedAt", "lastReadAt", "latestAttentionAt", "createdAt", "updatedAt", "runtime", "activeBackgroundAgentCount", "canSpawnChild", "queuedMessageCount"];
+  if (!row || !keys(row, allowed) || row.id !== TARGET || row.providerId !== "codex" || typeof row.updatedAt !== "number" || typeof row.status !== "string" || row.archivedAt !== null) throw new Error("unexpected bodyless thread metadata"); return { updatedAt: row.updatedAt, status: row.status };
+}
+function events(value: unknown): { highWatermark: number; providerThreadId: string; checkpointId: string | null } {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 100) throw new Error("invalid allowlisted event page"); let highWatermark = -1, providerThreadId: string | null = null, checkpointId: string | null = null;
+  for (const entry of value) {
+    const row = object(entry), data = object(row?.data), scope = object(row?.scope);
+    if (!row || !data || !scope || !keys(row, ["id", "scope", "threadId", "seq", "createdAt", "type", "data"]) || row.threadId !== TARGET || !Number.isSafeInteger(row.seq) || !keys(scope, ["kind", "turnId"])) throw new Error("unexpected event envelope");
+    if (row.type === "thread/identity") { if (!keys(data, ["providerThreadId"]) || scope.kind !== "thread") throw new Error("unexpected identity event body"); const id = boundedText(data.providerThreadId, "providerThreadId"); if (providerThreadId !== null && providerThreadId !== id) throw new Error("divergent provider thread identity"); providerThreadId = id; }
+    else if (row.type === "turn/completed") { if (!keys(data, ["providerThreadId", "status", "providerCheckpointId"]) || scope.kind !== "turn" || !["completed", "failed", "interrupted"].includes(data.status as string)) throw new Error("unexpected terminal event body"); const id = boundedText(data.providerThreadId, "providerThreadId"); if (providerThreadId !== null && providerThreadId !== id) throw new Error("divergent provider thread identity"); providerThreadId = id; if (data.status === "completed" && data.providerCheckpointId !== undefined) checkpointId = boundedText(data.providerCheckpointId, "providerCheckpointId"); }
+    else throw new Error("unallowlisted event type"); highWatermark = Math.max(highWatermark, row.seq as number);
+  }
+  if (!providerThreadId) throw new Error("missing provider identity"); return { highWatermark, providerThreadId, checkpointId };
+}
+async function publicIdentity(): Promise<{ updatedAt: number; status: string; highWatermark: number; providerThreadId: string; checkpointId: string | null }> {
+  const base = process.env.BB_SERVER_URL; if (!base) throw new Error("BB_SERVER_URL absent"); const meta = thread(await json(`${base}/api/v1/threads/${TARGET}`));
+  // The only event route used: types constrains the response server-side before stdout.
+  const page = events(await json(`${base}/api/v1/threads/${TARGET}/events?types=thread%2Fidentity%2Cturn%2Fcompleted&order=asc&limit=100`)); return { ...meta, ...page };
+}
+
+async function route(providerThreadId: string): Promise<Route> {
+  const script = `import { Database } from "bun:sqlite"; import { createHash } from "node:crypto"; import { lstatSync, readFileSync, realpathSync } from "node:fs"; import { isAbsolute, relative } from "node:path"; const db=new Database(${JSON.stringify(DB)},{readonly:true,create:false}); try { const q=db.query(\`select r.account_id owner,a.codex_home home,r.rollout_path rollout,r.revision revision,m.value_json selection from routes r join accounts a on a.id=r.account_id join metadata m on m.key='realCodex' where r.thread_id=? and a.enabled=1 and a.draining=0\`); const rows=q.all(process.argv[1]); const claims=db.query('select count(*) count from migration_claims where thread_id=?').get(process.argv[1]); if(rows.length!==1 || Number(claims.count)!==0) throw new Error('ambiguous owner'); const x=rows[0], home=realpathSync(x.home), before=lstatSync(x.rollout); if(!before.isFile() || before.size<0 || before.size>${MAX_ROLLOUT_BYTES}) throw new Error('unsafe rollout'); const rollout=realpathSync(x.rollout), rel=relative(home,rollout); if(rel==='' || rel.startsWith('..') || isAbsolute(rel)) throw new Error('rollout outside owner'); const digest=createHash('sha256').update(readFileSync(rollout)).digest('hex'), after=lstatSync(rollout); if(before.dev!==after.dev || before.ino!==after.ino || before.size!==after.size || before.mtimeMs!==after.mtimeMs) throw new Error('rollout raced'); const h=(v)=>createHash('sha256').update(String(v)).digest('hex'), rolloutReceipt=h([before.dev,before.ino,before.size,before.mtimeMs,digest].join(':')); console.log(JSON.stringify({owner:x.owner,home:x.home,executable:JSON.parse(x.selection),revision:x.revision,selection:h(x.selection),slot:h(x.owner),rollout:rolloutReceipt,routeDigest:h(JSON.stringify({owner:x.owner,revision:x.revision,selection:x.selection,rollout:rolloutReceipt}))})); } finally { db.close(); }`;
+  const { stdout } = await command("bun", ["--eval", script, providerThreadId]); const row = object(JSON.parse(stdout.toString("utf8")));
+  if (!row || !keys(row, ["owner", "home", "executable", "revision", "selection", "slot", "rollout", "routeDigest"]) || !Number.isSafeInteger(row.revision)) throw new Error("invalid readonly owner projection"); return { owner: boundedText(row.owner, "owner"), home: boundedText(row.home, "home", 4096), executable: boundedText(row.executable, "realCodex", 4096), revision: row.revision as number, selection: boundedText(row.selection, "selection"), slot: boundedText(row.slot, "slot"), rollout: boundedText(row.rollout, "rollout receipt"), routeDigest: boundedText(row.routeDigest, "route digest") };
+}
+function schemaLauncher(executable: string): string {
+  const receipt = JSON.parse(readFileSync(resolve(import.meta.dirname, "fixtures/codex-schema-receipt.json"), "utf8"));
+  for (const hop of Object.values(receipt.launcherChain) as Array<{ path: string; realpath: string; sha256: string }>) if (realpathSync(hop.path) !== hop.realpath || hash(readFileSync(hop.path)) !== hop.sha256) throw new Error("launcher-chain receipt mismatch");
+  const launcher = receipt.launcherChain.routerLauncher, native = receipt.launcherChain.nativePayload;
+  if (realpathSync(executable) !== launcher.realpath || realpathSync(native.path) !== native.realpath || hash(readFileSync(native.path)) !== native.sha256) throw new Error("router-selected launcher or native payload mismatch");
+  return native.realpath;
+}
+function nativeProcesses(nativePayload: string): string {
+  const pids: string[] = [];
+  for (const entry of readdirSync("/proc", { withFileTypes: true })) if (/^\d+$/.test(entry.name)) try { if (readlinkSync(`/proc/${entry.name}/exe`) === nativePayload) pids.push(entry.name); } catch {}
+  return hash(pids.sort().join("\n"));
+}
+function attestedNativePayload(): string { const receipt = JSON.parse(readFileSync(resolve(import.meta.dirname, "fixtures/codex-schema-receipt.json"), "utf8")); return receipt.launcherChain.nativePayload.realpath; }
+async function reapNativeInventory(expected: string): Promise<void> { const native = attestedNativePayload(), until = Date.now() + 2_000; while (Date.now() < until) { if (nativeProcesses(native) === expected) return; await new Promise((resolveSleep) => setTimeout(resolveSleep, 50)); } throw new Error("owned app-server process group was not reaped"); }
+async function fingerprints(identity: Awaited<ReturnType<typeof publicIdentity>>): Promise<Snapshot> {
+  let owned: Route; try { owned = await route(identity.providerThreadId); } catch { throw new Error("readonly route projection failed"); } const native = schemaLauncher(owned.executable);
+  let version: { stdout: Buffer; stderr: Buffer }, workspace: { stdout: Buffer; stderr: Buffer };
+  try { [version, workspace] = await Promise.all([command(owned.executable, ["--version"]), command("git", ["-C", resolve(import.meta.dirname, "../../../.."), "status", "--porcelain=v1", "-uno"])]); } catch { throw new Error("launcher or workspace fingerprint failed"); }
+  const receipt = JSON.parse(readFileSync(resolve(import.meta.dirname, "fixtures/codex-schema-receipt.json"), "utf8")); if (version.stdout.toString("utf8").trim() !== receipt.codexVersion) throw new Error("Codex version mismatch"); return { ...identity, route: owned, processes: nativeProcesses(native), workspace: hash(workspace.stdout) };
+}
+function project(payload: unknown): Receipt {
+  const message = object(payload), result = object(message?.result), value = object(result?.thread ?? message?.thread); if (!value || typeof value.id !== "string" || typeof value.sessionId !== "string" || !Array.isArray(value.turns) || value.turns.length > MAX_TURNS) throw new Error("only vendored 0.153.2 thread/read shape is accepted"); let items = 0, fragments = 0;
+  return { threadId: value.id, sessionId: value.sessionId, turns: value.turns.map((turn) => { const t = object(turn); if (!t || typeof t.id !== "string" || !Array.isArray(t.items)) throw new Error("invalid turn"); return { id: t.id, items: t.items.flatMap((item) => { if (++items > MAX_ITEMS) throw new Error("item count exceeds bound"); const i = object(item); if (!i || typeof i.id !== "string" || i.type !== "hookPrompt") return []; if (!Array.isArray(i.fragments)) throw new Error("invalid hookPrompt"); return [{ id: i.id, fragments: i.fragments.map((fragment, ordinal) => { if (++fragments > MAX_FRAGMENTS) throw new Error("fragment count exceeds bound"); const f = object(fragment); if (!f || !keys(f, ["text", "hookRunId"]) || typeof f.text !== "string" || typeof f.hookRunId !== "string") throw new Error("invalid HookPromptFragment"); return { ordinal, hookRunId: f.hookRunId, bytes: Buffer.byteLength(f.text), sha256: hash(f.text) }; }) }]; }) }; }) };
+}
+/** The protocol is intentionally sequential: initialize response, initialized, then read. */
+async function directRead(before: Snapshot): Promise<Receipt> {
+  return await new Promise((resolveResult, reject) => {
+    const child = spawn(before.route.executable, ["app-server", "--stdio"], { cwd: resolve(import.meta.dirname, ".."), detached: true, stdio: ["pipe", "pipe", "pipe"], env: { ...process.env, CODEX_HOME: before.route.home, CODEX_SQLITE_HOME: before.route.home, CODEX_SUBSCRIPTION_ROUTER_ACTIVE_ACCOUNT: before.route.owner } });
+    let stdout = Buffer.alloc(0), stdoutBytes = 0, stderr = Buffer.alloc(0), phase = 0, settled = false, result: unknown, failure: Error | undefined;
+    const stop = (error: Error) => { if (settled || failure) return; failure = error; try { process.kill(-child.pid!, "SIGTERM"); } catch {} };
+    const write = (message: unknown) => child.stdin!.write(JSON.stringify({ jsonrpc: "2.0", ...message as object }) + "\n");
+    const finish = () => { child.stdin!.end(); setTimeout(() => { try { process.kill(-child.pid!, "SIGTERM"); } catch {} }, 250); };
+    const timer = setTimeout(() => stop(new Error("probe timeout")), MAX_WALL_MS), reaper = setTimeout(() => { if (!settled) try { process.kill(-child.pid!, "SIGKILL"); } catch {} }, MAX_WALL_MS + 500);
+    const line = (raw: Buffer) => { if (raw.length > MAX_LINE_BYTES) return stop(new Error("line exceeds bound")); let message: unknown; try { message = JSON.parse(raw.toString("utf8")); } catch { return stop(new Error("invalid app-server JSON")); } const row = object(message); if (row && typeof row.method === "string" && row.id !== undefined) return stop(new Error("unknown app-server request")); if (row?.id === 1 && phase === 0) { const init = object(row.result); if (row.error !== undefined || !init || !keys(init, ["userAgent", "codexHome", "platformFamily", "platformOs"]) || typeof init.userAgent !== "string" || typeof init.codexHome !== "string" || typeof init.platformFamily !== "string" || typeof init.platformOs !== "string") return stop(new Error("invalid initialize response")); phase = 1; write({ method: "initialized" }); write({ id: 2, method: "thread/read", params: { threadId: before.providerThreadId, includeTurns: true } }); } else if (row?.id === 2 && phase === 1) { if (row.error !== undefined) return stop(new Error("thread/read rejected")); phase = 2; result = message; finish(); } };
+    child.stdout!.on("data", (chunk: Buffer) => { stdoutBytes += chunk.length; if (stdoutBytes > MAX_STDOUT_BYTES) return stop(new Error("stdout exceeds bound")); stdout = Buffer.concat([stdout, chunk]); for (;;) { const at = stdout.indexOf(10); if (at < 0) { if (stdout.length > MAX_LINE_BYTES) stop(new Error("line exceeds bound")); break; } const next = stdout.subarray(0, at); stdout = stdout.subarray(at + 1); line(next); } });
+    child.stderr!.on("data", (chunk: Buffer) => { stderr = Buffer.concat([stderr, chunk]); if (stderr.length > MAX_STDERR_BYTES) stop(new Error("stderr exceeds bound")); }); child.on("error", stop);
+    child.on("close", (code) => { if (settled) return; settled = true; clearTimeout(timer); clearTimeout(reaper); if (failure) reject(failure); else if (phase === 2) { try { resolveResult(project(result)); } catch (error) { reject(error); } } else reject(new Error(`app-server closed before ${phase === 0 ? "initialize-response" : "thread-read-response"} status ${code} stderr-sha256 ${hash(stderr)}`)); });
+    write({ id: 1, method: "initialize", params: { clientInfo: { name: "context-magnet-session-access-probe", title: null, version: "1" }, capabilities: null } });
+  });
+}
+function unchanged(before: Snapshot, after: Snapshot): boolean { return before.updatedAt === after.updatedAt && before.status === after.status && before.highWatermark === after.highWatermark && before.providerThreadId === after.providerThreadId && before.checkpointId === after.checkpointId && before.route.routeDigest === after.route.routeDigest && before.route.revision === after.route.revision && before.route.selection === after.route.selection && before.route.rollout === after.route.rollout && before.processes === after.processes && before.workspace === after.workspace; }
+function changedFence(before: Snapshot, after: Snapshot): string[] { return [["threadUpdatedAt", before.updatedAt, after.updatedAt], ["threadStatus", before.status, after.status], ["eventHighWatermark", before.highWatermark, after.highWatermark], ["providerThreadId", before.providerThreadId, after.providerThreadId], ["providerCheckpoint", before.checkpointId, after.checkpointId], ["route", before.route.routeDigest, after.route.routeDigest], ["routeRevision", before.route.revision, after.route.revision], ["routeSelection", before.route.selection, after.route.selection], ["rolloutReceipt", before.route.rollout, after.route.rollout], ["nativeProcessInventory", before.processes, after.processes], ["workspaceDirtyState", before.workspace, after.workspace]].filter(([, left, right]) => left !== right).map(([name]) => name as string); }
+async function main(): Promise<void> {
+  if (MAX_CONCURRENCY !== 1 || process.env.BB_THREAD_ID === TARGET || MAX_EVENT_PAGES !== 2) throw new Error("invalid probe target/concurrency");
+  const before = await fingerprints(await publicIdentity()); let receipt: Receipt;
+  let hookPromptReceiptGap: string | null = null;
+  try { receipt = await directRead(before); if (receipt.threadId !== before.providerThreadId) throw new Error("returned Thread.id does not match providerThreadId"); if (!before.checkpointId || !receipt.turns.some((turn) => turn.id === before.checkpointId)) throw new Error("latest completed providerCheckpointId is not a returned Turn.id"); if (!receipt.turns.some((turn) => turn.items.some((item) => item.fragments.length > 0))) hookPromptReceiptGap = "complete-authoritative-thread-read-returned-zero-hookPrompt-items"; } catch (error) {
+    await reapNativeInventory(before.processes); const after = await fingerprints(await publicIdentity()); if (!unchanged(before, after)) throw new Error("protected state changed after direct-read failure");
+    process.stdout.write(JSON.stringify({ format: "context-magnet-codex-session-access-probe/v1", status: "unavailable", target: TARGET, stage: "direct-read", failure: error instanceof Error ? error.message : "unknown", highWatermark: before.highWatermark, accountSlot: `sha256:${before.route.slot}`, routeRevision: before.route.revision, protectedStateChanged: false, rawTurnsRetained: false }) + "\n"); return;
+  }
+  await reapNativeInventory(before.processes); const after = await fingerprints(await publicIdentity()); if (!unchanged(before, after)) throw new Error(`protected state changed: ${changedFence(before, after).join(",")}`); process.stdout.write(JSON.stringify({ format: "context-magnet-codex-session-access-probe/v1", status: "passed", target: TARGET, highWatermark: before.highWatermark, terminalCheckpointPresent: before.checkpointId !== null, accountSlot: `sha256:${before.route.slot}`, routeRevision: before.route.revision, thread: { id: receipt.threadId, sessionId: receipt.sessionId }, hookPromptReceiptGap, receipt, protectedStateChanged: false, rawTurnsRetained: false }) + "\n");
+}
+main().catch((error) => { process.stderr.write(`session-access-probe failed: ${error instanceof Error ? error.message : "unknown"}\n`); process.exitCode = 1; });
