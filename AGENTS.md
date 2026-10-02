@@ -17,6 +17,24 @@ the `ubuntu` user). The default BB service and CLI run from
 `~/bb/fork/build/bb`; direct-loaded plugins resolve only from
 `~/bb/plugins/plugins/` or `~/bb/community-plugins/plugins/`.
 
+## Fork changes are a last resort
+
+Deliver features through native BB and plugins, not the fork. Use
+`plugins/` or `community-plugins/` with the public Plugin SDK, existing
+surfaces (composer banners, panel and header actions, Sticky-Notes-style
+anchored overlays, thread storage, host watchers, plugin storage), and shared
+packages such as `bb-identity`. Prefer a slightly worse design, such as an
+overlay instead of a reflowed layout or a documented DOM dependency, to a
+fork patch.
+
+Do not plan, propose, or write a change to `fork/` (or its materialized
+`build/bb`) unless the plan proves that **no usable experience at all** is
+possible without it. The justification must name the missing capability, show
+why each native/plugin alternative cannot work at all (not just less well),
+give the smallest patch and its upstream-sync cost, and obtain Cole's explicit
+approval before implementation. "Cleaner", "more robust", "better UX", or
+"first-class slot" do not qualify. See [fork/README.md](fork/README.md#fork-changes-are-a-last-resort).
+
 ## Non-negotiable invariants
 
 - BB is edited, built, tested, and supported in place inside this workspace.
