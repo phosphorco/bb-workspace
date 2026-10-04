@@ -1,0 +1,271 @@
+amends "workbench:plan"
+
+// Ledger: --ledger /home/ubuntu/.bb/thread-storage/thr_i7xakgdxdd/package-publication.ledger.jsonl
+// Oracles run with --cwd /home/ubuntu/bb; scripts and DESIGN.md live in plans/package-publication/.
+// Every mechanical oracle judges freshly fetched origin/main in a verification-only worktree (shared trees and
+// peer dirt untouched) and fails today; those failures are recorded as known-failure witnesses.
+// Supersedes the open tail of plans/workspace-reconciliation.plan.pkl; its scripts are reused here with
+// fresh-check.sh binding them to the post-move child heads.
+// Authority: Cole, 2026-10-04 ("bring bb-identity and bb-provider-settings to publication"), plus the standing
+// reconciliation grant to commit and merge across children while coordinating with peer threads by bb thread tell.
+// Never: discard or publish peer dirt, change a production package API (additive /testing entries approved by Cole 2026-10-04), edit the fork, npm publish without Cole, restart
+// bb.service, write provider settings, or change host plugin selection.
+
+meta {
+  title = "Move bb-identity and bb-provider-settings to bb-community-plugins and publish them"
+  goal = "@phosphorco/bb-identity and @phosphorco/bb-provider-settings live in public phosphorco/bb-community-plugins with unchanged production API (plus the Cole-approved additive /testing conformance entries), consumer testing inverted (each plugin owns kit-based tests), are published to npm from it with provenance and trusted publishing configured, are consumed by exact npm version in plugins and community-plugins (Perspectives delivered), CI is green, and the combined workspace is fully checked, reloaded, promoted and clean."
+}
+
+local steward = "thr_i7xakgdxdd"
+local campaign = "thr_qjduvhha3z"
+local s = "plans/package-publication"
+local r = "plans/workspace-reconciliation"
+
+local planReview = new Guard {
+  id = "plan-review"
+  owner = steward
+  outcome = "An independent reviewer accepts this graph, its scripts and DESIGN.md as a faithful, safe route to the goal."
+  observes { "plans/package-publication.plan.pkl"; "\(s)/"; "AGENTS.md" }
+  oracle = module.adjudicated("Every goal condition maps to an oracle with a recorded known-failure witness; edges reflect real inputs; oracles judge pushed SHAs; nothing discards or publishes peer work, changes a production package API (beyond approved additive /testing entries), publishes private evidence, edits the fork, or publishes to npm without Cole.", "plan-reviewer")
+}
+
+local ownerCoordination = new Guard {
+  id = "owner-coordination"
+  owner = steward
+  outcome = "The provider-settings campaign and any active package owners accept the move and a package-edit freeze in plugins/packages until plugins consumes npm, and name in-flight edits."
+  observes { "plugins/packages"; "community-plugins/plugins/perspectives"; "bb thread messages" }
+  oracle = module.adjudicated("Ledger evidence records the owner's bb thread tell reply accepting move and freeze (or Cole's ruling).", steward)
+}
+
+local design = new Action {
+  id = "design"
+  owner = steward
+  outcome = "DESIGN.md decides transfer method, community layout/toolchain, suite destinations, publish workflow, pin policy, references and a cut-over order that keeps every pushed commit green."
+  grant { "\(s)/DESIGN.md" }
+  needs { module.verified(ownerCoordination) }
+  oracle = module.adjudicated("DESIGN.md answers each question from inspected files, and its order never pushes package changes while the private workflow can publish nor leaves plugins depending on an unpublished version.", "plan-reviewer")
+}
+
+local triageAccepted = new Guard {
+  id = "triage-accepted"
+  owner = campaign
+  outcome = "The provider-settings campaign accepts the per-file triage (keep, kit, plugin, archive, prune), the /testing kit API and the per-plugin behaviour obligations [1]-[7] in thread storage package-publication/test-triage.md (Cole approved the redesign and ruthless pruning, 2026-10-04)."
+  observes { "/home/ubuntu/.bb/thread-storage/thr_i7xakgdxdd/package-publication/test-triage.md" }
+  needs { module.verified(design) }
+  oracle = module.adjudicated("A bb thread tell from \(campaign) accepts the triage or lists changes that are folded in and re-accepted.", steward)
+}
+
+local archiveEvidence = new Action {
+  id = "archive-evidence"
+  owner = steward
+  outcome = "Before anything moves, all campaign evidence in both packages (tracked and gitignored disk-only files: artifacts/, receipts, logs, STATUS/REVIEW, local-proof, retirement tooling) is copied byte-identically by archive.sh into the PRIVATE plugins repo at evidence/package-publication/ (bb-workspace is public) after an independent pre-copy inventory of original hashes, with MANIFEST.json (oldPath, archivedPath, sha256, tracked, source), relocation-run failure logs and per-item verbatim acceptance limits; nothing is rewritten or re-minted; committed and pushed to plugins main before any package file is removed."
+  grant { "plugins/evidence/package-publication/"; "thread storage package-publication/archive-inventory.json" }
+  needs { module.verified(triageAccepted) }
+  oracle = module.mechanical("\(s)/archive-check.sh")
+}
+
+local packageKits = new Action {
+  id = "package-kits"
+  owner = steward
+  outcome = "Pushed plugins main: bb-provider-settings gains ./testing (fixtures, fake catalog, owner probe/network, owner and invocation scenarios) and ./testing/react (mountEditor that settles the initial Read; UI scenarios) driving the real owner implementation through the SDK fake host, with a kit self-test and a negative self-test in its ordinary test; bb-identity ./testing gains createIdentityWireFake and defineStateStorageConformance. Kits name no consumer, import nothing outside the package, carry no evidence, and are documented as source conformance, not native proof."
+  grant { "plugins/packages/bb-provider-settings/src/testing*.ts*"; "plugins/packages/bb-provider-settings/test/testing/"; "plugins/packages/bb-provider-settings/tools/ordinary-test.mjs and build.mjs (kit tests, types and entries)"; "plugins/packages/bb-provider-settings/tsconfig*.json (kit declarations)"; "plugins/packages/bb-identity/testing* and its runtime source for createIdentityWireFake / defineStateStorageConformance"; "plugins/packages/bb-identity/type-tests (kit tests)"; "plugins/tools/workspaces-sync/definition.ts (exports, build entries and externals, optional testing peers, dev dependencies)"; "generated manifests"; "plugins/bun.lock"; "package README/CONTRACT (testing section)"; "never the production owner/runtime implementation" }
+  needs { module.verified(triageAccepted); module.verified(planReview) }
+  oracle = module.mechanical("\(s)/kit-check.sh")
+}
+
+local pluginConformance = new Action {
+  id = "plugin-conformance"
+  owner = steward
+  outcome = "Pushed plugins main: each private consumer (rosetta-slack, github-review, thread-progress, sticky-notes, btw, future-threads, review-to-disposition, plugin-provider-settings) owns kit-based tests for its obligations in test-triage.md section 3, with the stale and racing cases rewritten to the correct behaviour; thread-progress inbox tests use createIdentityWireFake; the central registry, consumer suites, native-boundaries and central page suites, source-loader and pinned runners leave the packages in the same commit as their replacements; every removed file is archived or recorded in DISPOSITION.md with where its behaviour is retained."
+  grant { "plugins/plugins/{rosetta-slack,github-review,thread-progress,sticky-notes,btw,future-threads,review-to-disposition,plugin-provider-settings}/test/"; "plugins/packages/*/test, type-tests, tools, examples (removals per triage)"; "plugins/tools/workspaces-sync/definition.ts (scripts, workspaces)"; "plugins/tools/sdk-types/run.mts (fixture path)"; "plugins/package.json scripts"; "plugins/bun.lock"; "plugins/evidence/package-publication/DISPOSITION.md" }
+  needs { module.verified(packageKits); module.verified(archiveEvidence) }
+  oracle = module.mechanical("\(s)/conformance-check.sh")
+}
+
+local conformanceAccepted = new Guard {
+  id = "conformance-accepted"
+  owner = campaign
+  outcome = "The campaign confirms behaviours [1]-[7] are proven by the kit self-tests plus consumer-owned tests at the pushed plugins SHA, and that no historical proof was rewritten."
+  observes { "plugins/plugins/*/test"; "plugins/packages/bb-provider-settings/test/testing"; "plugins/evidence/package-publication/" }
+  needs { module.verified(pluginConformance) }
+  oracle = module.adjudicated("A bb thread tell from \(campaign) maps each behaviour [1]-[7] to passing, non-skipped tests at the named SHA under binding Amendments R1-R4 (inherit vs subject baseline, Perspectives planner/expert, settled Read with the two formerly racing cases passing, per-item limits) including the two-owner cross-owner replacement, or lists gaps that are fixed and re-confirmed.", steward)
+}
+
+local perspectivesBridge = new Action {
+  id = "perspectives-bridge"
+  owner = steward
+  outcome = "After bb.service auto-restarted (2026-10-04 21:09) and Perspectives failed to build from the held adoption, Perspectives runs again via an ignored, recorded runtime bridge (community-plugins/node_modules/@phosphorco/bb-provider-settings -> plugins/packages/bb-provider-settings), with exactly one reload, held bytes equal to HANDOFF.json, and settings unchanged. Receipt: thread storage package-publication/perspectives-bridge-20261004/RECEIPT.md."
+  grant { "community-plugins/node_modules/@phosphorco/bb-provider-settings (ignored link only)"; "runtime: one bb plugin reload perspectives (campaign emergency authority)" }
+  oracle = module.adjudicated("The campaign independently verifies held bytes, link target bindings, reload result, running status and settings-baseline equality.", campaign)
+}
+
+local bridgeRetired = new Guard {
+  id = "bridge-retired"
+  owner = steward
+  outcome = "Once the community move installs the real workspace dependency, only the exact owned bridge link is gone, @phosphorco/bb-provider-settings resolves from Perspectives to community-plugins/packages/bb-provider-settings, and Perspectives is running. Until then, plugins/packages/bb-provider-settings must stay in place."
+  observes { "community-plugins/node_modules/@phosphorco/bb-provider-settings"; "bb plugin list" }
+  needs { module.verified(perspectivesBridge); module.verified(moveToCommunity) }
+  oracle = module.mechanical("\(s)/bridge-check.sh")
+}
+
+local historyRevision = new Guard {
+  id = "history-revision"
+  owner = steward
+  outcome = "After Cole's history ruling, meta.goal, DESIGN.md section 1, move-to-community and community-moved.sh are revised to that ruling (history ancestry checks for preserve; source-pointer commit and private-history exclusion checks for fresh import) and re-reviewed."
+  observes { "plans/package-publication.plan.pkl"; "\(s)/DESIGN.md"; "\(s)/community-moved.sh" }
+  needs { module.ruled(historyPolicy) }
+  oracle = module.adjudicated("plan-reviewer accepts the revised goal, design, node and oracle as faithful to the recorded ruling.", "plan-reviewer")
+}
+
+local historyPolicy = new Selector {
+  id = "history-policy"
+  owner = "cole"
+  question = "Older package history contains private-plugin imports, campaign evidence and host paths (/home/ubuntu/.bb/thread-storage). Carry it into the public repo, or import the cleaned tree fresh with a pointer to the private source commit (history stays in private plugins)?"
+  options { "preserve-split-history"; "fresh-import-with-source-pointer" }
+}
+
+local moveToCommunity = new Action {
+  id = "move-to-community"
+  owner = steward
+  outcome = "Pushed community main: both packages subtree-added from the plugins split tips (recorded in split-tips) into packages/ as the first npm workspace, with npm-valid manifests (exact catalog values, bun 1.3.14 devDependency, public SDK 0.5.29, community repository), unchanged exports/peers/dependency set, standalone code, packs covering every export; agentation-mentions pins bb-identity 0.1.0; Perspectives hand-off landed byte-identical with exact bb-provider-settings 0.1.0 and execution-settings.ts in files (adaptations in separate commits); lock links both; only the seven Perspectives rows are removed from held-paths.txt once committed (other rows stay with their owners), and the perspectives reload hold is lifted only after these checks pass."
+  grant { "community-plugins/packages/"; "community-plugins/package.json"; "community-plugins/package-lock.json"; "community-plugins/plugins/agentation-mentions/package.json"; "community-plugins/plugins/perspectives (the seven hand-off files, package.json; no settings writes)"; "community-plugins/AGENTS.md"; "community-plugins/README.md (packages section)"; "\(s)/split-tips"; "\(r)/held-paths.txt"; "\(r)/reload-hold.txt" }
+  needs { module.verified(pluginConformance); module.verified(conformanceAccepted); module.ruled(historyPolicy); module.verified(historyRevision) }
+  oracle = module.mechanical("\(s)/community-moved.sh")
+}
+
+local publishWorkflow = new Action {
+  id = "publish-workflow"
+  owner = steward
+  outcome = "Pushed community main: publish.yml releases both packages from packages/<name> on <name>/v<version> tags or dispatch (OIDC first, NPM_TOKEN fallback for the first release, --provenance, dry_run input that stops before publish), plugin releases unchanged; validate-pull-request.yml also runs on push to main and packs both packages; a dry_run dispatch succeeded for each package."
+  grant { "community-plugins/.github/workflows/publish.yml"; "community-plugins/.github/workflows/validate-pull-request.yml"; "community-plugins/README.md (release section)"; "GitHub: workflow_dispatch of publish.yml with dry_run=true only" }
+  needs { module.produced(moveToCommunity); module.verified(moveToCommunity) }
+  oracle = module.mechanical("\(s)/workflow-check.sh")
+}
+
+local firstPublish = new Guard {
+  id = "first-publish"
+  owner = "cole"
+  outcome = "Cole bootstraps 0.1.0 of both packages through publish.yml (temporary NPM_TOKEN secret on bb-community-plugins; tags pushed by Cole or by the steward on Cole's explicit go), so the registry shows community repository, community gitHead and provenance."
+  observes { "registry.npmjs.org/@phosphorco/bb-identity"; "registry.npmjs.org/@phosphorco/bb-provider-settings" }
+  needs { module.verified(publishWorkflow) }
+  oracle = module.mechanical("\(s)/published.sh")
+}
+
+local trustedPublisher = new Guard {
+  id = "trusted-publisher"
+  owner = "cole"
+  outcome = "Each package's npm settings trust phosphorco/bb-community-plugins publish.yml and the bootstrap NPM_TOKEN secret is deleted."
+  observes { "npmjs.com package settings"; "bb-community-plugins repository secrets" }
+  needs { module.verified(firstPublish) }
+  oracle = module.adjudicated("Cole confirms both trusted publishers and token deletion, and accepts that a token-free OIDC publish is first exercised at the next version (disclosed in final-report).", "cole")
+}
+
+local pluginsConsumeNpm = new Action {
+  id = "plugins-consume-npm"
+  owner = steward
+  outcome = "Pushed plugins main drops packages/bb-identity, packages/bb-provider-settings and publish-provider-settings.yml; the generator emits exact 0.1.0 for every consumer; manifests, bun.lock (registry integrity), tsconfig references, root scripts and CI are regenerated/simplified; relocated suites resolve the npm packages; full checks pass. Ends the package-edit freeze."
+  grant { "plugins/packages/"; "plugins/tools/workspaces-sync/"; "plugins/tools/package-consumers/"; "plugins/tools/sdk-types/run.mts (fixture and resolution checks for npm-resolved packages)"; "plugins/package.json"; "plugins/bun.lock"; "plugins/tsconfig.json"; "plugins/plugins/*/package.json and generated tsconfig"; "plugins/.github/workflows/"; "plugins/AGENTS.md"; "plugins/README.md" }
+  needs { module.verified(firstPublish); module.verified(moveToCommunity); module.verified(bridgeRetired) }
+  oracle = module.mechanical("\(s)/plugins-consume.sh")
+}
+
+local references = new Action {
+  id = "references"
+  owner = steward
+  outcome = "Active guidance/tooling (workspace .agents/skills/bb-identity, AGENTS.md, README.md, sdk-artifacts/README.md; child AGENTS/README) points at community-plugins/packages and npm with resolving links; superseded bb-identity tarballs retired when unreferenced; historical plans and evidence keep their paths; fork unchanged."
+  grant { ".agents/skills/bb-identity/"; "AGENTS.md"; "README.md"; "sdk-artifacts/README.md"; "plugins/AGENTS.md, plugins/README.md, community-plugins/AGENTS.md, community-plugins/README.md (guidance fixes after earlier nodes)"; "sdk-artifacts/phosphorco-bb-identity-*"; "sdk-artifacts/checks.json" }
+  needs { module.verified(pluginsConsumeNpm) }
+  oracle = module.mechanical("\(s)/references.sh")
+}
+
+local ciGreen = new Guard {
+  id = "ci-green"
+  owner = steward
+  outcome = "The latest push runs of plugins CI and community Validate succeed at each child's current origin/main."
+  observes { "github.com/phosphorco/bb-plugins/actions"; "github.com/phosphorco/bb-community-plugins/actions" }
+  needs { module.verified(pluginsConsumeNpm); module.verified(publishWorkflow) }
+  oracle = module.mechanical("\(s)/ci-green.sh")
+}
+
+local peerFreeze = new Guard {
+  id = "peer-freeze"
+  owner = steward
+  outcome = "Every thread with dirty or unpushed work in fork, plugins or community-plugins is identified; each has published it (or parked it outside the shared trees itself) so the canonical trees equal pushed commits, and has acknowledged a publish freeze from full-check to final-clean. The steward never stashes, moves or discards peer dirt."
+  observes { "fork"; "plugins"; "community-plugins"; "\(r)/held-paths.txt" }
+  needs { module.verified(pluginsConsumeNpm); module.verified(references); module.verified(ciGreen) }
+  oracle = module.adjudicated("Ledger note lists each former dirty path group, owner thread and reply (published SHA, owner-parked, freeze acknowledgement); none remains in the shared child trees.", steward)
+}
+
+local childrenDrained = new Guard {
+  id = "children-drained"
+  owner = steward
+  outcome = "Children are strictly clean (no held paths), on main, equal to fresh origin/main, so canonical build and reload consume exactly the pushed commits."
+  observes { "fork"; "plugins"; "community-plugins" }
+  needs { module.verified(peerFreeze) }
+  oracle = module.mechanical("STRICT=1 \(r)/drained.sh")
+}
+
+local fullCheck = new Guard {
+  id = "full-check"
+  owner = steward
+  outcome = "The strictly drained child heads (STRICT=1 inherited by full-check's own pre and post drained.sh runs, so all checks build in place from pushed commits) pass every repository check; tested-shas and baseline-gitlinks are rewritten for them."
+  observes { "plugins"; "community-plugins"; "fork"; "\(r)/tested-shas" }
+  needs { module.verified(childrenDrained) }
+  oracle = module.mechanical("STRICT=1 \(r)/full-check.sh")
+}
+
+local reloadChanged = new Action {
+  id = "reload-changed"
+  owner = steward
+  outcome = "Every enabled plugin whose leaf changed since the baseline gitlinks (all, since packages/lock changed) is reloaded once after full-check, including the single Perspectives reload, and running."
+  grant { "runtime: bb plugin reload of changed leaves only, after owner acknowledgement (Perspectives: \(campaign) hand-off); never a service restart or settings write"; "\(r)/reloads.log" }
+  needs { module.verified(fullCheck) }
+  oracle = module.mechanical("\(r)/reload-check.sh")
+}
+
+local perspectivesReceipt = new Guard {
+  id = "perspectives-receipt"
+  owner = steward
+  outcome = "Perspectives runs from the tested community SHA after one reload: source, generation and running status recorded, provider settings read-only baseline equal before and after; receipt sent to the campaign."
+  observes { "bb plugin status perspectives"; "provider settings (read-only)" }
+  needs { module.verified(reloadChanged) }
+  oracle = module.adjudicated("Ledger evidence shows the reload receipt fields and settings-baseline equality, and the bb thread tell to \(campaign).", steward)
+}
+
+local selectionGate = new Guard {
+  id = "selection-gate"
+  owner = steward
+  outcome = "Host plugin selection is unchanged."
+  observes { "/home/ubuntu/phosphor/rosetta-machine/hosts/bb-machine/home/.config/rosetta-machine/bb-plugins.tsv" }
+  needs { module.verified(childrenDrained) }
+  oracle = module.adjudicated("No bb-plugins.tsv row was added or changed by this work; any new selectable leaf is listed as a gap.", steward)
+}
+
+local promote = new Action {
+  id = "promote"
+  owner = steward
+  outcome = "Workspace gitlinks equal the fresh tested-shas published on each child origin/main; plan files committed; workspace main clean and pushed."
+  grant { "/home/ubuntu/bb gitlinks"; "plans/package-publication*"; "\(r)/ (tested-shas, baseline-gitlinks, reloads.log, held-paths.txt, reload-hold.txt)" }
+  needs { module.verified(planReview); module.verified(fullCheck); module.verified(reloadChanged); module.verified(perspectivesReceipt); module.verified(selectionGate); module.verified(references) }
+  oracle = module.mechanical("\(r)/promote-check.sh && \(s)/fresh-check.sh")
+}
+
+local finalClean = new Guard {
+  id = "final-clean"
+  owner = steward
+  outcome = "All four repositories clean, on main, equal origin; bin/check passes; locks match; HEAD = origin = tested = gitlink; packages published with provenance; CI green."
+  observes { "/home/ubuntu/bb"; "fork"; "plugins"; "community-plugins" }
+  needs { module.verified(promote); module.verified(ciGreen); module.verified(trustedPublisher) }
+  oracle = module.mechanical("\(r)/final-check.sh && \(s)/fresh-check.sh && \(s)/published.sh && \(s)/ci-green.sh")
+}
+
+local finalReport = new Guard {
+  id = "final-report"
+  owner = steward
+  outcome = "Cole and the campaign receive final SHAs, published integrities, check logs, the Perspectives receipt, and every remaining gap (OIDC first exercised next version, selection, newer peer commits)."
+  observes { "BRIEF.md"; "bb thread messages" }
+  needs { module.verified(finalClean) }
+  oracle = module.adjudicated("Report lists four SHAs, integrities, receipts and gaps, and claims completion only with final-clean verified.", steward)
+}
+
+nodes { planReview; ownerCoordination; design; triageAccepted; archiveEvidence; packageKits; pluginConformance; conformanceAccepted; perspectivesBridge; bridgeRetired; historyPolicy; historyRevision; moveToCommunity; publishWorkflow; firstPublish; trustedPublisher; pluginsConsumeNpm; references; ciGreen; peerFreeze; childrenDrained; fullCheck; reloadChanged; perspectivesReceipt; selectionGate; promote; finalClean; finalReport }

@@ -17,6 +17,7 @@ done
 # worktree instead (never the held source); otherwise check in place.
 if [ -n "$(git -C community-plugins status --porcelain)" ]; then
   cw=$(mktemp -d "$HOME/.cache/community-check.XXXXXX"); git -C community-plugins worktree add -q --detach "$cw/wt" HEAD
+  ln -s /home/ubuntu/bb/sdk-artifacts "$cw/sdk-artifacts"  # ../../../sdk-artifacts from wt/plugins/<leaf>
   cleanup_cw() { git -C /home/ubuntu/bb/community-plugins worktree remove --force "$cw/wt" 2>/dev/null; git -C /home/ubuntu/bb/community-plugins worktree prune; rm -rf "$cw"; }
   trap 'cleanup_cw; rm -rf "${tmp:-}"' EXIT
   cdir="$cw/wt"; echo "community-plugins: checking HEAD $(git -C community-plugins rev-parse --short HEAD) in isolated worktree (held paths excluded)"

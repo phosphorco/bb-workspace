@@ -1,0 +1,29 @@
+# Tracked evidence to archive (git pathspecs relative to plugins/, expanded at SPLIT_BASE), from the accepted
+# test-triage.md ARCHIVE rows. Every gitignored file under either package (excluding node_modules, dist) and the
+# relocation-era failure logs are archived in addition.
+packages/bb-provider-settings/CONSUMERS.md
+packages/bb-provider-settings/tools/artifact-check.mjs
+packages/bb-provider-settings/tools/reproducibility-check.mjs
+packages/bb-provider-settings/tools/configured-check.mjs
+packages/bb-provider-settings/tools/repository-check.mjs
+packages/bb-provider-settings/tools/probe-retirement-check.mjs
+packages/bb-provider-settings/test/unit/retirement.test.mjs
+packages/bb-provider-settings/test/host/
+packages/bb-provider-settings/test/integration/consumer-wiring.test.mjs
+packages/bb-provider-settings/test/integration/local-pilot-check.mjs
+packages/bb-provider-settings/test/integration/README.md
+packages/bb-provider-settings/test/integration/receipts/
+:(glob)packages/bb-provider-settings/test/integration/consumers/*/README.md
+:(glob)packages/bb-provider-settings/test/integration/consumers/*/receipts/**
+packages/bb-provider-settings/test/integration/consumers/github-review/run-verification.mjs
+packages/bb-provider-settings/test/integration/consumers/thread-progress/verify.mjs
+packages/bb-provider-settings/test/integration/consumers/thread-progress/capture-frontier.mjs
+packages/bb-provider-settings/test/integration/consumers/perspectives/packed-fixture.mjs
+packages/bb-provider-settings/test/integration/consumers/perspectives/run-packed.mjs
+packages/bb-provider-settings/test/integration/consumers/perspectives/typecheck-delegate.mjs
+packages/bb-identity/examples/local-proof/
+packages/bb-identity/type-tests/bb-proof-sdk-contract.test.ts
+packages/bb-identity/tsconfig.proof-sdk.json
+packages/bb-identity/STATUS.md
+packages/bb-identity/REVIEW.md
+packages/bb-identity/type-tests/browser/view-picker-layout-browser-run.mts
