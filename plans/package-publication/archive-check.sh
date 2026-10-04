@@ -39,8 +39,18 @@ for (const i of disk) { const f = byOld.get(i.oldPath); if (!f) fail(`inventorie
 for (const f of m.files) { const b = git(head, f.archivedPath); if (sha(b) !== f.sha256) fail(`archived blob mismatch: ${f.archivedPath}`);
   const want = limits(b); const got = m.acceptanceLimits[f.oldPath] ?? [];
   if (JSON.stringify(want) !== JSON.stringify(got)) fail(`acceptance limits not verbatim for ${f.oldPath}`); }
+// Supplemental entries (archived after removal from surviving git blobs): bytes equal the named source revision,
+// and exactLimits equal the progressEvidenceLimits constant parsed from those bytes.
+for (const sup of m.supplemental ?? []) {
+  const rev = sup.source.replace(/^git:/, ''); const orig = git(rev, sup.oldPath);
+  if (sha(orig) !== sup.sha256) fail(`supplemental ${sup.oldPath} differs from ${sup.source}`);
+  const line = orig.toString('utf8').split('\n').find((l) => l.startsWith('const progressEvidenceLimits='));
+  const parsed = line ? JSON.parse(line.slice('const progressEvidenceLimits='.length).replace(/;\s*$/, '')) : null;
+  if (JSON.stringify(parsed) !== JSON.stringify(sup.exactLimits)) fail(`supplemental exactLimits not verbatim for ${sup.oldPath}`);
+  if (!m.files.some((f) => f.oldPath === sup.oldPath && f.supplemental)) fail(`supplemental ${sup.oldPath} missing from files`);
+}
 const logs = inv.items.filter((i) => i.oldPath.startsWith('pkgpub-work/logs/')).length;
 if (!logs || m.failureRecords.length !== logs) fail('failure records missing');
 for (const r of m.failureRecords) if (!m.files.some((f) => f.archivedPath === r)) fail(`failure record not in files: ${r}`);
-console.log(`archive-check: ${m.files.length} files verified against originals (${disk.length} disk-only), ${Object.keys(m.acceptanceLimits).length} items with verbatim limits, ${m.failureRecords.length} failure records, at ${head.slice(0, 12)}`);
+console.log(`archive-check: ${(m.supplemental ?? []).length} supplemental; ${m.files.length} files verified against originals (${disk.length} disk-only), ${Object.keys(m.acceptanceLimits).length} items with verbatim limits, ${m.failureRecords.length} failure records, at ${head.slice(0, 12)}`);
 JS
