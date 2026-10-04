@@ -10,7 +10,7 @@
 #    {"dryRun":true,"workspace":"@phosphorco/<pkg>","path":"packages/<pkg>"} for that head, and whose
 #    "Publish public package" step concluded "skipped".
 # Known failure: today (no package entries).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 BASE_PUBLISH=c0eda5095d7d474816e2edb7ed7049ad53ce697e
 C=community-plugins; R=phosphorco/bb-community-plugins
 sha=$(origin_head $C)

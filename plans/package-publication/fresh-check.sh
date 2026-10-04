@@ -2,7 +2,7 @@
 # The reconciliation evidence is fresh for this work: for each child, HEAD = origin/main = tested-shas =
 # recorded gitlink; tested-shas is newer than this plan's cut-over (both children contain the package move);
 # reloads.log has an entry newer than tested-shas. Known failure: today (tested-shas predates the move).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 R=plans/workspace-reconciliation
 for d in fork plugins community-plugins; do
   h=$(git -C $d rev-parse HEAD); o=$(origin_head $d); t=$(awk -v d=$d '$1==d{print $2}' $R/tested-shas)

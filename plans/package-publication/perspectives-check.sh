@@ -3,7 +3,7 @@
 # carries all seven files byte-identical to HANDOFF.json (later adaptations are separate commits, printed for
 # inspection); at WT the manifest pins exact bb-provider-settings VERSION and ships execution-settings.ts,
 # and the lock links it to the workspace package. Known failure: today (files are uncommitted).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 WT=${1:?WT}; c=community-plugins; sha=$(git -C "$WT" rev-parse HEAD)
 landed=""
 for k in $(git -C $c rev-list "$sha" -- plugins/perspectives); do

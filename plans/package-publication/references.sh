@@ -8,7 +8,7 @@
 #  - relative Markdown links resolve in workspace skill/AGENTS/README and in child AGENTS.md/README.md at the
 #    fetched SHA. Fork is excluded (unchanged).
 # Known failure: today (.agents/skills/bb-identity references plugins/packages).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 pl=$(origin_head plugins); cm=$(origin_head community-plugins)
 pat='(^|[^-a-z])plugins/packages/bb-(identity|provider-settings)|phosphorco-bb-identity-0\.'
 ppat='(^|[^-a-z/])(plugins/)?packages/bb-(identity|provider-settings)|phosphorco-bb-identity-0\.'

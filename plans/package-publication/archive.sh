@@ -5,7 +5,7 @@
 # Records an independent inventory of ORIGINAL hashes in thread storage before copying, then MANIFEST.json with
 # per-item verbatim acceptance limits. Originals come from the canonical tree and git; the archive is written under
 # DEST (a scratch plugins checkout), so the shared tree gains no untracked files. Commits nothing.
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 P=/home/ubuntu/bb/plugins; DEST=${DEST:?DEST=<plugins checkout to write the archive into>}; E=evidence/package-publication; LOGS=/home/ubuntu/.cache/pkgpub-work/logs
 INV=/home/ubuntu/.bb/thread-storage/thr_i7xakgdxdd/package-publication/archive-inventory.json
 [ ! -e "$DEST/$E" ] || die "$DEST/$E already exists; inspect before re-running"

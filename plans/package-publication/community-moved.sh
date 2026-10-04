@@ -4,7 +4,7 @@
 # everything is judged at one SHA in a verification worktree (shared dirt untouched).
 # Split tips: $S/split-tips (<pkg> <split-tip> <plugins-source-sha>) written when the subtree is split.
 # Known failure: today (no community packages, no split-tips).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 test -s $S/split-tips || die "no $S/split-tips"
 sha=$(origin_head community-plugins)
 verify_tree community-plugins "$sha"

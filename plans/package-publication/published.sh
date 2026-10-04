@@ -5,7 +5,7 @@
 # and carries VERSION in packages/<pkg>/package.json; repository metadata points at community; integrity is a
 # nonempty sha512. Records "<name>@<ver> <integrity> gitHead=<sha>" in published.txt.
 # Known failure: today (404 for both).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 C=community-plugins
 sha=$(origin_head $C); git -C $C fetch -q --tags origin
 out=/home/ubuntu/.bb/thread-storage/thr_i7xakgdxdd/package-publication; mkdir -p $out; : > $out/published.txt.new

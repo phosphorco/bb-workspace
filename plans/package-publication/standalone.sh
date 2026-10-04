@@ -3,7 +3,7 @@
 # no relative path climbing into plugins/, tools/, packages/, sdk-artifacts/ or fork/ (static, dynamic,
 # require or filesystem string), no absolute host paths. Docs (*.md) and recorded artifacts/ are excluded.
 # Known failure: plugins/packages at SPLIT_BASE (provider-settings consumer suites, identity browser fixture).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 root=${1:?DIR}; stage=${2:-public}
 # private stage (still inside plugins): manifests may keep the fork SDK tarball devDependency; it is replaced by
 # public @get-bb/plugin-sdk during the community adaptation, where the public stage checks manifests too.

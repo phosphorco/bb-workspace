@@ -7,7 +7,7 @@
 #  - failure records are the archived relocation-run logs, equal to their originals while present;
 #  - acceptanceLimits equal the verbatim extraction (limits.mjs) recomputed from each archived blob.
 # Known failure: today (no archive on plugins origin/main).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 P=plugins; E=evidence/package-publication; LOGS=/home/ubuntu/.cache/pkgpub-work/logs
 INV=/home/ubuntu/.bb/thread-storage/thr_i7xakgdxdd/package-publication/archive-inventory.json
 sha=$(origin_head $P)

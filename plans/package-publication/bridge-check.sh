@@ -4,7 +4,7 @@
 # is gone; @phosphorco/bb-provider-settings resolves from community-plugins to the community workspace package
 # (community-plugins/packages/bb-provider-settings); and Perspectives is running.
 # Known failure: today (bridge link in place, no community package).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 L=community-plugins/node_modules/@phosphorco/bb-provider-settings
 BRIDGE=/home/ubuntu/bb/plugins/packages/bb-provider-settings
 [ "$(readlink -f "$L" 2>/dev/null)" != "$BRIDGE" ] || die "bridge link still points at $BRIDGE"

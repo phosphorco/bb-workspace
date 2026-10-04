@@ -6,7 +6,7 @@
 #  - kit self-test AND a negative self-test (a deliberately broken port must fail a scenario) are part of the
 #    package's ordinary test; at that SHA each package builds, typechecks, tests and packs its testing entries.
 # Known failure: today (no provider-settings ./testing).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 sha=$(origin_head plugins)
 verify_tree plugins "$sha"
 ps=$WT/packages/bb-provider-settings; id=$WT/packages/bb-identity

@@ -4,7 +4,7 @@
 # as at SPLIT_BASE; bun.lock resolves both from the registry with the published integrity; at that SHA the
 # frozen install and full plugins checks plus relocated consumer suites pass.
 # Known failure: SPLIT_BASE (workspace:* consumers, packages present).
-. plans/package-publication/lib.sh
+cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
 sha=$(origin_head plugins)
 verify_tree plugins "$sha"
 for p in $PACKAGES; do test ! -e "$WT/packages/$p" || die "packages/$p still present"; done
