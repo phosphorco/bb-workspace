@@ -1,9 +1,2 @@
 # Paths explicitly held by their owner and allowed to stay dirty through full-check (not final-clean).
 # Format: <repo> <path>. Source: provider-settings campaign thr_qjduvhha3z (Perspectives awaits npm delivery).
-community-plugins plugins/perspectives/Perspectives.ts
-community-plugins plugins/perspectives/README.md
-community-plugins plugins/perspectives/server.ts
-community-plugins plugins/perspectives/test/scoped-tools.test.ts
-community-plugins plugins/perspectives/test/server.test.ts
-community-plugins plugins/perspectives/execution-settings.ts
-community-plugins plugins/perspectives/test/execution-settings.test.ts
