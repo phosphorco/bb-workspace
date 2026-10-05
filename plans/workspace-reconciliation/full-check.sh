@@ -24,10 +24,10 @@ if [ -n "$(git -C community-plugins status --porcelain)" ]; then
 else
   cdir=/home/ubuntu/bb/community-plugins
 fi
-# community-plugins pins no toolchain; use the mise default (Node 22). mise exec -C changes the working directory,
+# community-plugins pins no toolchain; use the plugins pin (Node 26.3.0, Bun 1.3.14) for native modules.
 # so cd into the community checkout inside the command.
-run community-ci mise exec -C /home/ubuntu/bb -- bash -c "cd '$cdir' && npm ci"
-for s in test typecheck build; do run "community-$s" mise exec -C /home/ubuntu/bb -- bash -c "cd '$cdir' && npm run $s"; done
+run community-ci mise exec -C /home/ubuntu/bb/plugins -- bash -c "cd '$cdir' && npm ci"
+for s in test typecheck build; do run "community-$s" mise exec -C /home/ubuntu/bb/plugins -- bash -c "cd '$cdir' && npm run $s"; done
 tmp=$(mktemp -d "$HOME/.cache/fork-verify.XXXXXX"); trap 'rm -rf "$tmp"; declare -F cleanup_cw >/dev/null && cleanup_cw' EXIT
 run fork-verify bash -c "cd fork && TMPDIR='$tmp' ./scripts/verify"
 "$here/drained.sh" >/dev/null || { echo "children moved during the check; rerun"; exit 1; }
