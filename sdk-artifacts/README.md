@@ -17,17 +17,19 @@ package resolution. Do not copy `bundled-types` into individual plugins.
 
 The selected package is:
 
-- File: `get-bb-plugin-sdk-0.5.29+phosphor.f35653218f9b.sdk.a0aca52c9e73.tgz`
-- SHA-256: `527f582a3a8fdf9c4ded610dd0696d5496b617d86f2affb3f389b3829244b77d`
+- File: `get-bb-plugin-sdk-0.5.29+phosphor.006c86feb52c.sdk.88e52af44c0b.tgz`
+- SHA-256: `229a461709fe5e98d1784d83b6c17135ce7c0fb24485b82a14b382b06c8ad530`
 - Name: `@get-bb/plugin-sdk`
-- Version: `0.5.29+phosphor.f35653218f9b.sdk.a0aca52c9e73`
-- Selected source receipt: `f35653218f9b209fdadd344c4b17718eb34640ea`
+- Version: `0.5.29+phosphor.006c86feb52c.sdk.88e52af44c0b`
+- Selected source receipt: `006c86feb52ca604f23b4d422562d635500306ad`
 
-The SDK artifact was built from the upstream 0.44.0 refresh, locking result
-tree `f35653218f9b209fdadd344c4b17718eb34640ea`. The adjacent provenance
-receipt binds the archive bytes, declarations, and runtime entries to that
-exact source tree. The subsequent migration and test tree
-`a5be4c5a2233f9f02631fce86debf82b8a4920a6` retains identical SDK sources.
+The SDK artifact includes the experimental Phosphor prompt-rendering contract,
+`BbPluginApi.experimental_p6rPrompts`, built from exact source and final queue tree
+`006c86feb52ca604f23b4d422562d635500306ad`.
+The adjacent provenance receipt binds the archive bytes, declarations and runtime
+entries to that source. Organization plugins select this artifact through
+the generator; older archives remain for existing pins and historical receipts.
+This development dependency update does not activate the corresponding server.
 
 The version suffix identifies the fork and packaged input. Semver compatibility
 alone is not provenance: the archive hash and adjacent `.provenance.json` receipt
@@ -67,7 +69,7 @@ Then, from the workspace root, pack into a fresh output directory:
 ```sh
 node sdk-artifacts/prepare-plugin-sdk.mjs \
   --source /path/to/disposable/materialization \
-  --source-receipt f35653218f9b209fdadd344c4b17718eb34640ea \
+  --source-receipt 006c86feb52ca604f23b4d422562d635500306ad \
   --output /tmp/bb-sdk-reproduction
 ```
 

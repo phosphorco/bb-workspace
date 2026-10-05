@@ -1,0 +1,24 @@
+{
+  "artifact": {
+    "file": "get-bb-plugin-sdk-0.5.29+phosphor.006c86feb52c.sdk.88e52af44c0b.tgz",
+    "sha256": "229a461709fe5e98d1784d83b6c17135ce7c0fb24485b82a14b382b06c8ad530",
+    "bytes": 655460
+  },
+  "sourceReceipt": "006c86feb52ca604f23b4d422562d635500306ad",
+  "finalReplayTree": "006c86feb52ca604f23b4d422562d635500306ad",
+  "checks": {
+    "queueReplay": "pass including namespace and diff checks",
+    "sdkTests": "369 passed including runtime/declaration export coverage",
+    "guideTests": "82 passed after copy/grouping correction",
+    "pluginFeatureTests": "18 passed including full 20-per-ID capture, SQLite restart, SDK middleware/RPC/CLI and UI",
+    "consumerResolution": "all generated fork-target organization plugins resolve exact selected archive",
+    "frozenInstall": "passed",
+    "coreTypecheck": "99 tasks passed; final documentation/export-test corrections checked separately",
+    "coreBuild": "52 tasks passed; final source build log in delivery evidence",
+    "organizationTypecheck": "passed",
+    "organizationBuild": "passed",
+    "wholeSuite": "not clean: see delivery evidence for environment-sensitive core failures and previous-SDK reproduction of existing Thread Progress failure",
+    "runtimeActivation": "not performed"
+  },
+  "evidence": "/home/ubuntu/.bb/thread-storage/thr_dfirty56w6/DELIVERY.md"
+}
