@@ -2,8 +2,8 @@
 # align-canonical.sh [--apply]: move the canonical plugins checkout to origin/main without discarding authored work.
 # HEAD and index move by mixed reset (working files untouched). A dirty path is updated only when its bytes equal the
 # blob at the old HEAD or at an origin/main ancestor (published content); an untracked leftover is removed only when
-# its bytes equal its blob at the old HEAD, or an archived MANIFEST hash. Everything else is authored work, kept
-# byte-identical and verified. Without --apply it only prints the plan. Evidence goes to thread storage.
+# its bytes equal its blob at the old HEAD. A tracked path deleted in the working tree is an authored deletion and
+# stays deleted. Everything else is authored work, kept byte-identical and verified. Without --apply it only prints the plan. Evidence goes to thread storage.
 set -euo pipefail
 cd /home/ubuntu/bb/plugins
 E=/home/ubuntu/.bb/thread-storage/thr_i7xakgdxdd/package-publication/canonical-align-$(date +%Y%m%dT%H%M%S); mkdir -p "$E"
@@ -26,7 +26,9 @@ git status --porcelain --untracked-files=all > "$E/status-mid.txt"
 while read -r st fp; do
   h=$(git hash-object "$fp" 2>/dev/null || echo none); o=$(git rev-parse "$OLD:$fp" 2>/dev/null || echo none)
   case "$st" in
-    D) echo "restore $fp" >> "$E/plan.txt" ;;
+    # Missing from disk: restore only paths that are NEW on origin (absent at the old HEAD). A path tracked at the old
+    # HEAD and deleted in the working tree is an authored deletion (tombstone) and stays deleted.
+    D) if git cat-file -e "$OLD:$fp" 2>/dev/null; then echo "KEEP-deleted $fp" >> "$E/plan.txt"; else echo "restore $fp" >> "$E/plan.txt"; fi ;;
     M) if [ "$h" = "$o" ] || [ -n "$(published "$fp")" ]; then echo "update $fp" >> "$E/plan.txt"; else echo "KEEP $fp" >> "$E/plan.txt"; fi ;;
     '??') if [ "$h" = "$o" ]; then echo "remove $fp" >> "$E/plan.txt"; else echo "KEEP $fp" >> "$E/plan.txt"; fi ;;
   esac
@@ -37,5 +39,6 @@ up=$(awk '$1=="restore"||$1=="update"{print $2}' "$E/plan.txt"); [ -z "$up" ] ||
 awk '$1=="remove"{print $2}' "$E/plan.txt" | while read -r fp; do rm -f -- "$fp"; done
 git status --porcelain --untracked-files=all > "$E/status-after.txt"
 bad=0; while read -r fp; do b=$(grep " $fp\$" "$E/hashes-before.txt" | cut -d' ' -f1); [ -z "$b" ] || [ "$(git hash-object "$fp")" = "$b" ] || { echo "CHANGED $fp"; bad=1; }; done < <(awk '$1=="KEEP"{print $2}' "$E/plan.txt")
+while read -r fp; do [ ! -e "$fp" ] || { echo "TOMBSTONE RESURRECTED $fp"; bad=1; }; done < <(awk '$1=="KEEP-deleted"{print $2}' "$E/plan.txt")
 echo "aligned to ${NEW:0:12}; kept $(grep -c '^KEEP' "$E/plan.txt") authored paths byte-identical (bad=$bad); evidence $E"
 exit $bad
