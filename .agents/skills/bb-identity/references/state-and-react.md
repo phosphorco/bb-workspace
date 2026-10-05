@@ -1,8 +1,8 @@
 # State, views, and recovery
 
-Read [CONSUMERS state/view recipes](../../../../plugins/packages/bb-identity/CONSUMERS.md#one-preferences-feature),
-[react.d.ts](../../../../plugins/packages/bb-identity/react.d.ts), and
-[state.d.ts](../../../../plugins/packages/bb-identity/state.d.ts) for the task's exact types.
+Read [CONSUMERS state/view recipes](../../../../community-plugins/packages/bb-identity/CONSUMERS.md#one-preferences-feature),
+[react.d.ts](../../../../community-plugins/packages/bb-identity/react.d.ts), and
+[state.d.ts](../../../../community-plugins/packages/bb-identity/state.d.ts) for the task's exact types.
 
 The feature supplies a stable `StateResource<T>` and transactional
 `AtomicStateStorage<T>`. Persistent `DraftStorage<T>` is an explicit opt-in,

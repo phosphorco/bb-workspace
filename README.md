@@ -69,7 +69,7 @@ agents from this root so the cross-repository constraints are in scope.
 The [bb-identity skill](.agents/skills/bb-identity/SKILL.md) is the entry point for
 portable request identity, personal state, view-as, providers and external
 contributions. Its short task map loads only the relevant reference; package
-[STATUS](plugins/packages/bb-identity/STATUS.md) separates implemented interfaces
+[STATUS](plugins/evidence/package-publication/packages/bb-identity/STATUS.md) (archived; the package now ships from bb-community-plugins as `@phosphorco/bb-identity` on npm) separates implemented interfaces
 from remaining feature and host proof. Other shared guidance lives under
 `.agents/skills/`.
 The [identity experience plan](plans/identity-experience/README.md) records the

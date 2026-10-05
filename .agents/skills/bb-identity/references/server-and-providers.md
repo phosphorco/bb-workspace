@@ -1,7 +1,7 @@
 # Server and providers
 
-Read the relevant sections of [CONSUMERS.md](../../../../plugins/packages/bb-identity/CONSUMERS.md)
-and exact declarations in [bb.d.ts](../../../../plugins/packages/bb-identity/bb.d.ts).
+Read the relevant sections of [CONSUMERS.md](../../../../community-plugins/packages/bb-identity/CONSUMERS.md)
+and exact declarations in [bb.d.ts](../../../../community-plugins/packages/bb-identity/bb.d.ts).
 
 Create one `bindBbIdentity(bb)` per plugin factory. Handle the factory Result;
 register identity-dependent RPCs and resources through that binding. Keep the binding tied

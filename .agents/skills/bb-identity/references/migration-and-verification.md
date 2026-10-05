@@ -1,6 +1,6 @@
 # Migration and verification
 
-Use [PACKAGING.md](../../../../plugins/packages/bb-identity/PACKAGING.md), the
+Use [PACKAGING.md](../../../../community-plugins/packages/bb-identity/PACKAGING.md), the
 [master plan](../../../../fork/plans/bb-fork-master-plan.md), and the applicable
 feature migration policy. Read only the current feature and host proof sections.
 

@@ -1,8 +1,0 @@
-{
-  "sourceRepository": "plugins",
-  "sourceCommit": "4ecd8b0bddc248cfd19ab94362cbba8937ba375b",
-  "packagePath": "packages/bb-identity",
-  "sha256": "7964b11db94d0d19e5631659c03368a98d57eb62284890f7fe62479d4520522e",
-  "archive": "phosphorco-bb-identity-0.1.0.7964b11db94d.tgz",
-  "scope": "bb-service local preview dependency; not npm publication"
-}

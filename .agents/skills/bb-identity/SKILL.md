@@ -22,8 +22,8 @@ patches, and verify the actual selected composition rather than a mixed worktree
 
 ## Start with the task
 
-Read the [package entry map](../../../plugins/packages/bb-identity/README.md#entry-points)
-and [current implementation status](../../../plugins/packages/bb-identity/STATUS.md).
+Read the [package entry map](../../../community-plugins/packages/bb-identity/README.md#entry-points)
+and [the archived implementation status](../../../plugins/evidence/package-publication/packages/bb-identity/STATUS.md) (the package now ships from bb-community-plugins as `@phosphorco/bb-identity` on npm).
 Then load only the relevant reference:
 
 | Task | Reference |

@@ -1,12 +1,9 @@
 # Shared fork plugin SDK
 
-The workspace also supplies
-`phosphorco-bb-identity-0.1.0.e9433450fa93.tgz` for community consumers of the
-shared identity package. Its SHA-256 is
-`e9433450fa93639641e2a3596f9b3fcebc2b980b5dc6f0bf644636f960edd8f4`;
-the adjacent provenance receipt identifies the exact organization package tree
-and packing baseline. All nine public entry points were checked through the installed
-consumer package. This archive is a workspace dependency, not a registry release.
+`@phosphorco/bb-identity` and `@phosphorco/bb-provider-settings` are published
+on npm from bb-community-plugins (0.1.0, with provenance). Consumers pin exact
+versions, and the former bb-identity workspace tarballs
+are retired.
 The transcript binding adds explicit host/producer rendering ownership; see
 [the delivery plan](../plans/message-transcripts.plan.pkl) for verification.
 Earlier artifacts and [port receipts](../preview/unpublished-port/README.md) remain

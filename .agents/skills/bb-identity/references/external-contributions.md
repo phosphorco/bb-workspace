@@ -1,6 +1,6 @@
 # External contributions and provenance
 
-Read [CONSUMERS external recipe](../../../../plugins/packages/bb-identity/CONSUMERS.md#external-contributions-and-history)
+Read [CONSUMERS external recipe](../../../../community-plugins/packages/bb-identity/CONSUMERS.md#external-contributions-and-history)
 and the current `/bb` and `/server` declarations before implementing a producer.
 
 The integration verifies its credential and maps an external subject. Core
