@@ -196,3 +196,23 @@ This supersedes §3 and the relocation in §7 step 2. The contract is the accept
     `<plugin test>`, with a rationale.
 - **History:** the public repo's history is decided by Cole (`history-policy`
   selector), then this design and the move oracle are revised and re-reviewed.
+
+## 9. History ruling (Cole, 2026-10-05): fresh import
+
+This supersedes §1. The public repo starts each package without private history.
+
+**Recording the source:** each package is recorded in `import-sources` as
+`<pkg> <plugins-source-sha>`.
+
+**The import commit:** one commit in community-plugins adds both package trees,
+copied from `plugins` at that source. Its message names
+`phosphorco/bb-plugins@<sha>`.
+- No plugins commit enters community history.
+- The full history stays readable in private bb-plugins.
+
+**Before pushing:**
+- the copied trees are scanned for host paths (`/home/ubuntu`, `.bb/`,
+  `thread-storage`) and thread ids;
+- `community-moved.sh` checks the source pointer, that no community commit
+  touching `packages/` is a plugins commit, tree equality outside the
+  manifest/config/docs allowlist, and the leak scan.

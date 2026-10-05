@@ -2,33 +2,36 @@
 # Both packages live in pushed community-plugins main, with history, unchanged API, npm-valid manifests,
 # packed contents covering every export, standalone code, linked community consumers, and passing checks;
 # everything is judged at one SHA in a verification worktree (shared dirt untouched).
-# Split tips: $S/split-tips (<pkg> <split-tip> <plugins-source-sha>) written when the subtree is split.
-# Known failure: today (no community packages, no split-tips).
+# Import sources: $S/import-sources (<pkg> <plugins-source-sha>), fresh import (Cole 2026-10-05).
+# Known failure: today (no import-sources, no community packages).
 cd /home/ubuntu/bb && . plans/package-publication/lib.sh || { echo "FAIL: cannot load lib.sh" >&2; exit 1; }
-test -s $S/split-tips || die "no $S/split-tips"
 sha=$(origin_head community-plugins)
 verify_tree community-plugins "$sha"
 node -e 'const w=require(process.argv[1]).workspaces; if(w[0]!=="packages/*") throw new Error("packages/* must be the first workspace: "+w)' "$WT/package.json"
 plans/package-publication/standalone.sh "$WT/packages"
-# split-tips rows: <pkg> <split-tip> <plugins-source-sha>. Exactly one per package; the source is on plugins
-# main after SPLIT_BASE and the tip's tree equals source:packages/<pkg> (what git subtree split produces).
+# import-sources rows: <pkg> <plugins-source-sha> (Cole 2026-10-05: fresh import, no private history). Exactly one
+# per package; the source is on plugins main after SPLIT_BASE. One community import commit adds packages/<pkg> and
+# names phosphorco/bb-plugins@<sha> in its message; no community commit touching packages/ exists in the plugins repo
+# (no private history imported); the imported tree equals source:packages/<pkg> except community-owned
+# manifest/config/docs; it carries no host paths or thread-storage references.
+test -s $S/import-sources || die "no $S/import-sources"
 pl=$(origin_head plugins)
-for p in $PACKAGES; do [ "$(awk -v p=$p '$1==p' $S/split-tips | wc -l)" = 1 ] || die "split-tips needs exactly one row for $p"; done
-[ "$(grep -cvE '^\s*(#|$)' $S/split-tips)" = 2 ] || die "split-tips has unexpected rows"
-# Files allowed to differ from the plugins split tip (community-owned manifest/config/docs).
-allow='^(package\.json|tsconfig[^/]*\.json|README\.md|PACKAGING\.md|CONSUMERS\.md|STATUS\.md|REVIEW\.md)$'
-while read -r p tip src; do
+for p in $PACKAGES; do [ "$(awk -v p=$p '$1==p' $S/import-sources | wc -l)" = 1 ] || die "import-sources needs exactly one row for $p"; done
+[ "$(grep -cvE '^\s*(#|$)' $S/import-sources)" = 2 ] || die "import-sources has unexpected rows"
+allow='^(package\.json|tsconfig[^/]*\.json|README\.md|PACKAGING\.md|CONSUMERS\.md)$'
+while read -r p src; do
   case "$p" in ''|'#'*) continue;; esac
-  git -C plugins merge-base --is-ancestor "$SPLIT_BASE" "$src" && git -C plugins merge-base --is-ancestor "$src" "$pl" || die "$p split source $src not on plugins main after SPLIT_BASE"
-  [ "$(git -C community-plugins rev-parse "$tip^{tree}")" = "$(git -C plugins rev-parse "$src:packages/$p")" ] || die "$p split tip tree != $src:packages/$p"
-  git -C community-plugins merge-base --is-ancestor "$tip" "$sha" || die "$p split tip $tip not in community history"
-  n_src=$(git -C plugins rev-list --count "$src" -- "packages/$p"); n_tip=$(git -C community-plugins rev-list --count "$tip")
-  [ "$n_tip" -ge "$n_src" ] || die "$p history not preserved ($n_tip of $n_src commits)"
-  diffs=$(git -C community-plugins diff --name-only "$tip^{tree}" "$sha:packages/$p") || die "git diff failed for $p"
-  diffs=$(printf '%s\n' "$diffs" | grep -vE "$allow" | grep -vE '^(examples/local-proof/|tsconfig\.proof-sdk\.json)' || true)
-  [ -z "$diffs" ] || { echo "$diffs"; die "$p differs from split tip outside the allowlist"; }
-  # Contract source = the split source manifest (already carrying the approved additive /testing entries);
-  # production = SPLIT_BASE, whose every export must survive unchanged.
+  git -C plugins merge-base --is-ancestor "$SPLIT_BASE" "$src" && git -C plugins merge-base --is-ancestor "$src" "$pl" || die "$p source $src not on plugins main after SPLIT_BASE"
+  first=$(git -C community-plugins log --reverse --format=%H "$sha" -- "packages/$p" | head -1); [ -n "$first" ] || die "no community commit adds packages/$p"
+  git -C community-plugins log -1 --format=%B "$first" | grep -qE "phosphorco/bb-plugins@${src:0:7}" || die "$p import commit $first does not name phosphorco/bb-plugins@${src:0:7}"
+  for c in $(git -C community-plugins log --format=%H "$sha" -- "packages/$p"); do
+    if git -C plugins cat-file -e "$c^{commit}" 2>/dev/null; then die "$p: community commit $c is a plugins commit (private history imported)"; fi; done
+  git -C plugins ls-tree -r "$src:packages/$p" | awk '{print $3"\t"$4}' | sort -k2 > "$VT/$p.src"
+  git -C community-plugins ls-tree -r "$sha:packages/$p" | awk '{print $3"\t"$4}' | sort -k2 > "$VT/$p.dst"
+  delta=$(diff <(cat "$VT/$p.src") <(cat "$VT/$p.dst") | grep -E '^[<>]' | cut -f2 | sort -u | grep -vE "$allow" || true)
+  [ -z "$delta" ] || { echo "$delta" | head || true; die "$p differs from plugins source outside the allowlist"; }
+  set +e; leak=$(git -C community-plugins grep -nE "/home/ubuntu|thread-storage|\.bb/|thr_[a-z0-9]{10}" "$sha" -- "packages/$p"); set -e
+  [ -z "$leak" ] || { echo "$leak" | head -5 || true; die "$p carries host or private references"; }
   base=$(git -C plugins show "$src:packages/$p/package.json") || die "no source manifest for $p"
   prod=$(git -C plugins show "$SPLIT_BASE:packages/$p/package.json") || die "no production manifest for $p"
   root=$(git -C plugins show "$src:package.json") || die "no plugins root manifest"
@@ -49,7 +52,7 @@ while read -r p tip src; do
     if(/"(workspace|catalog|file|link):/.test(JSON.stringify(c))) fail("non-registry specifier");
     for (const s of ["build","test","typecheck"]) if(!c.scripts?.[s]) fail("missing script "+s);
   ' "$base" "$WT/packages/$p/package.json" "$VERSION" "$root" "$prod"
-done < $S/split-tips
+done < $S/import-sources
 node -e '
   const lock=require(process.argv[1]); const fail=m=>{console.error(m);process.exit(1)};
   for (const p of ["bb-identity","bb-provider-settings"]) { const e=lock.packages["node_modules/@phosphorco/"+p];
