@@ -9,29 +9,29 @@ sha=$(origin_head community-plugins)
 verify_tree community-plugins "$sha"
 node -e 'const w=require(process.argv[1]).workspaces; if(w[0]!=="packages/*") throw new Error("packages/* must be the first workspace: "+w)' "$WT/package.json"
 plans/package-publication/standalone.sh "$WT/packages"
-# import-sources rows: <pkg> <plugins-source-sha> (Cole 2026-10-05: fresh import, no private history). Exactly one
-# per package; the source is on plugins main after SPLIT_BASE. One community import commit adds packages/<pkg> and
-# names phosphorco/bb-plugins@<sha> in its message; no community commit touching packages/ exists in the plugins repo
-# (no private history imported); the imported tree equals source:packages/<pkg> except community-owned
-# manifest/config/docs; it carries no host paths or thread-storage references.
+# import-sources (Cole 2026-10-05: fresh import): 'base <community sha>' = trusted pre-import community baseline,
+# then '<pkg> <full plugins sha>' per package. Each source descends from the accepted conformance commit ce7d05e and
+# is on plugins main. fresh-import-check.sh proves the history property over the whole of base..HEAD
+# (no roots or plugins commits, one common import commit with full pointers, tree equality at the import commit,
+# and no leaks or archived campaign material in any newly reachable tree); see fresh-import-witness.sh.
+ACCEPTED=ce7d05ec70dbd8f5dc6f17665cbe2fec8ee61f60
 test -s $S/import-sources || die "no $S/import-sources"
 pl=$(origin_head plugins)
+cbase=$(awk '$1=="base"{print $2}' $S/import-sources); [ -n "$cbase" ] || die "import-sources lacks 'base <sha>'"
 for p in $PACKAGES; do [ "$(awk -v p=$p '$1==p' $S/import-sources | wc -l)" = 1 ] || die "import-sources needs exactly one row for $p"; done
-[ "$(grep -cvE '^\s*(#|$)' $S/import-sources)" = 2 ] || die "import-sources has unexpected rows"
+[ "$(grep -cvE '^\s*(#|$)' $S/import-sources)" = 3 ] || die "import-sources has unexpected rows"
+specs=""
+while read -r p src; do
+  case "$p" in ''|'#'*|base) continue;; esac
+  [ ${#src} = 40 ] || die "$p source must be a full SHA"
+  git -C plugins merge-base --is-ancestor "$ACCEPTED" "$src" && git -C plugins merge-base --is-ancestor "$src" "$pl" || die "$p source $src does not descend from accepted $ACCEPTED on plugins main"
+  specs+=" $p=$src"
+done < $S/import-sources
+mkdir -p "$VT/m"; git -C plugins show "$pl:evidence/package-publication/MANIFEST.json" > "$VT/m/manifest.json"
+plans/package-publication/fresh-import-check.sh /home/ubuntu/bb/community-plugins "$cbase" "$sha" /home/ubuntu/bb/plugins "$VT/m/manifest.json" $specs
 allow='^(package\.json|tsconfig[^/]*\.json|README\.md|PACKAGING\.md|CONSUMERS\.md)$'
 while read -r p src; do
-  case "$p" in ''|'#'*) continue;; esac
-  git -C plugins merge-base --is-ancestor "$SPLIT_BASE" "$src" && git -C plugins merge-base --is-ancestor "$src" "$pl" || die "$p source $src not on plugins main after SPLIT_BASE"
-  first=$(git -C community-plugins log --reverse --format=%H "$sha" -- "packages/$p" | head -1); [ -n "$first" ] || die "no community commit adds packages/$p"
-  git -C community-plugins log -1 --format=%B "$first" | grep -qE "phosphorco/bb-plugins@${src:0:7}" || die "$p import commit $first does not name phosphorco/bb-plugins@${src:0:7}"
-  for c in $(git -C community-plugins log --format=%H "$sha" -- "packages/$p"); do
-    if git -C plugins cat-file -e "$c^{commit}" 2>/dev/null; then die "$p: community commit $c is a plugins commit (private history imported)"; fi; done
-  git -C plugins ls-tree -r "$src:packages/$p" | awk '{print $3"\t"$4}' | sort -k2 > "$VT/$p.src"
-  git -C community-plugins ls-tree -r "$sha:packages/$p" | awk '{print $3"\t"$4}' | sort -k2 > "$VT/$p.dst"
-  delta=$(diff <(cat "$VT/$p.src") <(cat "$VT/$p.dst") | grep -E '^[<>]' | cut -f2 | sort -u | grep -vE "$allow" || true)
-  [ -z "$delta" ] || { echo "$delta" | head || true; die "$p differs from plugins source outside the allowlist"; }
-  set +e; leak=$(git -C community-plugins grep -nE "/home/ubuntu|thread-storage|\.bb/|thr_[a-z0-9]{10}" "$sha" -- "packages/$p"); set -e
-  [ -z "$leak" ] || { echo "$leak" | head -5 || true; die "$p carries host or private references"; }
+  case "$p" in ''|'#'*|base) continue;; esac
   base=$(git -C plugins show "$src:packages/$p/package.json") || die "no source manifest for $p"
   prod=$(git -C plugins show "$SPLIT_BASE:packages/$p/package.json") || die "no production manifest for $p"
   root=$(git -C plugins show "$src:package.json") || die "no plugins root manifest"
