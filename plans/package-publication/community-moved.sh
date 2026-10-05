@@ -9,20 +9,21 @@ sha=$(origin_head community-plugins)
 verify_tree community-plugins "$sha"
 node -e 'const w=require(process.argv[1]).workspaces; if(w[0]!=="packages/*") throw new Error("packages/* must be the first workspace: "+w)' "$WT/package.json"
 plans/package-publication/standalone.sh "$WT/packages"
-# import-sources (Cole 2026-10-05: fresh import): 'base <community sha>' = trusted pre-import community baseline,
-# then '<pkg> <full plugins sha>' per package. Each source descends from the accepted conformance commit ce7d05e and
+# import-sources (Cole 2026-10-05: fresh import): '<pkg> <full plugins sha>' per package. Each source descends from the accepted conformance commit ce7d05e and
 # is on plugins main. fresh-import-check.sh proves the history property over the whole of base..HEAD
 # (no roots or plugins commits, one common import commit with full pointers, tree equality at the import commit,
 # and no leaks or archived campaign material in any newly reachable tree); see fresh-import-witness.sh.
 ACCEPTED=ce7d05ec70dbd8f5dc6f17665cbe2fec8ee61f60
 test -s $S/import-sources || die "no $S/import-sources"
 pl=$(origin_head plugins)
-cbase=$(awk '$1=="base"{print $2}' $S/import-sources); [ -n "$cbase" ] || die "import-sources lacks 'base <sha>'"
+# Trusted baseline: community main when this plan was authored (reviewed public history, before any package import).
+# Everything after it, including peers' commits and side branches, is inspected.
+cbase=c0eda5095d7d474816e2edb7ed7049ad53ce697e
 for p in $PACKAGES; do [ "$(awk -v p=$p '$1==p' $S/import-sources | wc -l)" = 1 ] || die "import-sources needs exactly one row for $p"; done
-[ "$(grep -cvE '^\s*(#|$)' $S/import-sources)" = 3 ] || die "import-sources has unexpected rows"
+[ "$(grep -cvE '^\s*(#|$)' $S/import-sources)" = 2 ] || die "import-sources has unexpected rows"
 specs=""
 while read -r p src; do
-  case "$p" in ''|'#'*|base) continue;; esac
+  case "$p" in ''|'#'*) continue;; esac
   [ ${#src} = 40 ] || die "$p source must be a full SHA"
   git -C plugins merge-base --is-ancestor "$ACCEPTED" "$src" && git -C plugins merge-base --is-ancestor "$src" "$pl" || die "$p source $src does not descend from accepted $ACCEPTED on plugins main"
   specs+=" $p=$src"
@@ -31,7 +32,7 @@ mkdir -p "$VT/m"; git -C plugins show "$pl:evidence/package-publication/MANIFEST
 plans/package-publication/fresh-import-check.sh /home/ubuntu/bb/community-plugins "$cbase" "$sha" /home/ubuntu/bb/plugins "$VT/m/manifest.json" $specs
 allow='^(package\.json|tsconfig[^/]*\.json|README\.md|PACKAGING\.md|CONSUMERS\.md)$'
 while read -r p src; do
-  case "$p" in ''|'#'*|base) continue;; esac
+  case "$p" in ''|'#'*) continue;; esac
   base=$(git -C plugins show "$src:packages/$p/package.json") || die "no source manifest for $p"
   prod=$(git -C plugins show "$SPLIT_BASE:packages/$p/package.json") || die "no production manifest for $p"
   root=$(git -C plugins show "$src:package.json") || die "no plugins root manifest"

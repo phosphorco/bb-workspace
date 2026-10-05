@@ -2,7 +2,8 @@
 # fresh-import-check.sh COMMUNITY_REPO BASE HEAD SOURCE_REPO MANIFEST_JSON PKG=SRC [PKG=SRC...]
 # Proves the fresh import (Cole 2026-10-05) over the WHOLE newly reachable history BASE..HEAD of COMMUNITY_REPO:
 #  1. no commit in BASE..HEAD is a root (foreign history brings its own root) or exists in SOURCE_REPO;
-#  2. one commit I adds every package (its parent has none of packages/<pkg>); its message names the full
+#  2. exactly one commit I (single parent) introduces every package, found without path simplification; the
+#     packages are absent at BASE; its message names the full
 #     phosphorco/bb-plugins@<SRC> for each package; every SRC is a SOURCE_REPO commit;
 #  3. at I, packages/<pkg> equals SRC:packages/<pkg> blob-for-blob outside the manifest/config/docs allowlist;
 #  4. no newly reachable tree under packages/ (every commit in BASE..HEAD touching packages/) contains host paths,
@@ -21,14 +22,25 @@ for c in $new; do
   [ "$(g rev-list --parents -n1 "$c" | wc -w)" -ge 2 ] || die "root commit $c in newly reachable history (foreign history)"
   if git -C "$SRCREPO" cat-file -e "$c^{commit}" 2>/dev/null; then die "commit $c also exists in the source repo"; fi
 done
-# 2. one import commit for all packages, full pointers
+# 2. one import commit for all packages: found over the FULL set (no path simplification) as the commits whose tree
+#    has packages/<pkg> while some parent lacks it; exactly one such commit, common to all packages, with ONE parent;
+#    the package is absent at BASE; full pointers in its message.
 I=""
 for spec in "$@"; do p=${spec%%=*}; src=${spec#*=}
   git -C "$SRCREPO" cat-file -e "$src^{commit}" 2>/dev/null || die "$src is not a source-repo commit"
-  first=$(g rev-list --reverse "$BASE..$HEAD" -- "packages/$p" | head -1); [ -n "$first" ] || die "nothing adds packages/$p"
+  if git -C "$C" cat-file -e "$BASE:packages/$p" 2>/dev/null; then die "packages/$p already exists at the trusted baseline"; fi
+  adds=""
+  for c in $new; do
+    git -C "$C" cat-file -e "$c:packages/$p" 2>/dev/null || continue
+    for par in $(g rev-list --parents -n1 "$c" | cut -d' ' -f2-); do
+      if ! git -C "$C" cat-file -e "$par:packages/$p" 2>/dev/null; then adds+=" $c"; break; fi
+    done
+  done
+  [ "$(echo $adds | wc -w)" = 1 ] || die "packages/$p is introduced by $(echo $adds | wc -w) commits ($adds); need exactly one import"
+  first=$(echo $adds)
   [ -z "$I" ] || [ "$I" = "$first" ] || die "packages are not added by one common import commit ($I vs $first)"
   I=$first
-  if git -C "$C" cat-file -e "$I^:packages/$p" 2>/dev/null; then die "packages/$p already exists in the import commit's parent"; fi
+  [ "$(g rev-list --parents -n1 "$I" | wc -w)" = 2 ] || die "import commit $I must have exactly one parent"
   g log -1 --format=%B "$I" | grep -qF "phosphorco/bb-plugins@$src" || die "import commit $I lacks full pointer phosphorco/bb-plugins@$src"
   # 3. tree equality at the import commit
   a=$(git -C "$SRCREPO" ls-tree -r "$src:packages/$p") || die "ls-tree $src:packages/$p"
@@ -36,9 +48,10 @@ for spec in "$@"; do p=${spec%%=*}; src=${spec#*=}
   delta=$(diff <(printf '%s\n' "$a" | awk '{print $3"\t"$4}' | sort -k2) <(printf '%s\n' "$b" | awk '{print $3"\t"$4}' | sort -k2) | grep -E '^[<>]' | cut -f2 | sort -u | grep -vE "$allow" || true)
   [ -z "$delta" ] || { printf '%s\n' "$delta" | head -5; die "$p at import commit differs from $src outside the allowlist"; }
 done
-# 4. scan every newly reachable packages/ tree for leaks and archived campaign material
+# 4. scan the packages/ tree of EVERY commit in base..HEAD (side branches included) for leaks and archived material
 arch=$(node -e 'const m=JSON.parse(require("fs").readFileSync(process.argv[1]));const s=new Set();for(const f of m.files){const x=f.oldPath.match(/^packages\/[^/]+\/(.*)$/);if(x)s.add(x[1])}console.log([...s].join("\n"))' "$MAN") || die "cannot read MANIFEST"
-for c in $(g rev-list "$BASE..$HEAD" -- packages); do
+for c in $new; do
+  git -C "$C" cat-file -e "$c:packages" 2>/dev/null || continue   # no packages/ tree in this commit
   set +e; hits=$(git -C "$C" grep -nIE "$leakpat" "$c" -- packages 2>&1); rc=$?; set -e
   [ $rc -le 1 ] || die "git grep failed at $c: $hits"
   [ -z "$hits" ] || { printf '%s\n' "$hits" | head -3; die "leak in newly reachable tree $c"; }
