@@ -1,2 +1,1 @@
 # Plugin ids that must NOT be reloaded (owner hold). One per line.
-perspectives
