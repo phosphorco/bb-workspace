@@ -1,2 +1,0 @@
-# Paths explicitly held by their owner and allowed to stay dirty through full-check (not final-clean).
-# Format: <repo> <path>. Source: provider-settings campaign thr_qjduvhha3z (Perspectives awaits npm delivery).
