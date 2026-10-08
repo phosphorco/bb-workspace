@@ -1,5 +1,24 @@
 # External activation execution — 2026-10-08
 
+## Reconciliation acceptance update — 2026-10-08
+
+Cole accepted G6 in thread `thr_ubmxu5kq62` while actively using BB:
+“I don't know. I am using the BB right now though. Think that I can confirm G6.”
+This is operator acceptance based on current use; this reconciliation did not
+independently repeat the personal-device identity or scratch-message test.
+G7 was confirmed by the activation owner and steward in their subsequent
+thread records. The pending entries below describe the original activation
+snapshot and are retained as history.
+
+The reconciliation selects fork `c1e938f6d59c279d20eacf42b5339f4ce854dbd8`,
+organization plugins `1284fe54002321b357f53fb3f5d9ef74f3c34115`, and community
+plugins `9b55ac63a2865c029b0540916a4d087e038aed1c`. The runtime source remains
+`515fddf7238579ac31a0321e1fd6d44d66d9f2f3`, tree
+`81da17d778dcf19648c77a726b7f5cd41ec2d3f0`. The workspace gitlink receipt
+records these already-published child revisions after repository checks.
+No service restart is part of this reconciliation.
+
+
 Activation and recovery ownership transferred from BB threads to the external
 managing agent at Cole's request. The executing session was session-62.scope,
 outside bb.service. Both owner and steward froze before activation; neither
