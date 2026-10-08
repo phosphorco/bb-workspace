@@ -1,0 +1,4 @@
+interface:
+  display_name: "BB Plugin Contracts"
+  short_description: "Connect independent plugins through a published contract package"
+  default_prompt: "Use $bb-plugin-contracts to design or adopt a shared cross-plugin contract: ownership table, versioned RPC protocol, data-only presentation, listed discovery with per-supplier isolation, npm publication, and conformance proof."

@@ -105,6 +105,13 @@ package contracts, task-specific recipes and current verification limits. Use
 the shared package for identity/synchronization; keep product schemas and storage
 with the feature.
 
+When one plugin's surface should accept contributions from other independently
+installed plugins (settings roles, reference suppliers, similar extension
+points), start with the [bb-plugin-contracts skill](.agents/skills/bb-plugin-contracts/SKILL.md):
+a published, versioned contract package with data-only presentation, listed
+discovery and per-adopter conformance proof, instead of imports, singletons or
+fork slots.
+
 ## Build caches and temporary verification
 
 Keep Go's shared build and module caches warm for ordinary builds. A different
