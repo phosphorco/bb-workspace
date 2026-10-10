@@ -149,10 +149,12 @@ opacity.
 - **attention (viewer)** = blocking ∨ summary disposition requires-input / optional-next-steps
   waiting on this viewer.
 - **failed** = indicator `unread-error` ∨ progress state `error`.
-- **sole provider background command** = indicator `background-command`, `backgroundCommands > 0`,
-  all other activity counters 0, and `newestBackgroundCommandStartedAt` known
-  (`background-command-presentation.ts:17`). **Covered** = such a command whose newest start
-  is **strictly more than 30 minutes** ago.
+- **covered background command** = indicator `background-command`, `runtimeStatus` exactly
+  `idle`, `backgroundCommands > 0`, and all other activity counters 0
+  (`background-command-presentation.ts`). It applies immediately: an idle agent holding an open
+  shell command is not generating. (The earlier 30-minute grace keyed on
+  `newestBackgroundCommandStartedAt`, which the current host no longer supplies, so it never
+  fired.) Covered rows skip the arrival curtain unless they are also blocking or failed.
 - **working** = ¬blocking ∧ ¬failed ∧ ¬covered ∧ (progress state `active` ∨ indicator ∈
   {working-draft, workflow, background-agent, background-command, plan-mode, goal, runtime}).
 - **waiting on viewer (strict)** = viewer is in `p6rParticipants` ∧ (pending interaction ∨
@@ -172,15 +174,17 @@ opacity.
 
 ### Timer (`StatusTimer`, `formatCompactTimer`)
 
-- Reference time precedence: a sole provider background command uses
-  `newestBackgroundCommandStartedAt` (`:4724`); otherwise, if the plugin progress state
+- Reference time precedence: a covered background command uses the plugin progress
+  `lastEndedAtMs` when progress is idle after an observed run (basis `stop-transition`), else
+  `thread.updatedAt` (basis `updated`); otherwise, if the plugin progress state
   agrees with the host-derived working flag, `progress.stateSinceMs`; otherwise
   `thread.updatedAt`.
 - Kind: `working`, `idle`, or `covered`.
 - Compact text: 5-second steps under a minute (`0s…55s`), then `m`, `h`, `d`.
 - Full sentence (tooltip and aria-label): "Needs you · stopped for 3 minutes 10 seconds";
   "Optional next step · stopped for …"; "<dependency label> · stopped for …";
-  "Background command · running for …"; "<host indicatorLabel> · working|stopped for …"
+  "6 background commands open · agent stopped for …" (observed stop) or "… open · agent idle ·
+  updated … ago" (no observed stop); failure text takes precedence; "<host indicatorLabel> · working|stopped for …"
   (this is how queued-message states surface: the host labels `queued-waiting` /
   `queued-failed`); "Failed · stopped for …"; "Working for … · worked 1h 12m total";
   "Stopped | Waiting for follow-up for … · worked … total".
@@ -479,10 +483,11 @@ unless it changes them.
 | `lifecycleOwnerThreadId`, `sourceThreadId`, `originKind`, `originPluginId` | ✗ | |
 | `sectionId` (host named sections) | ✗ | a different concept from plugin Thread Sections |
 | `providerId` | ✗ | |
-| `status`, `runtimeStatus` | ✗ | working state comes from `indicator` + plugin progress; provisioning / waiting-for-host are not distinguished |
+| `status` | ✗ | |
+| `runtimeStatus` | ✓ | only `idle` lets a background-command-only thread be covered; other states are not otherwise distinguished |
 | `queuedWork` | ✗ (field) | but queued states reach the user through `indicator` / `indicatorLabel` in the timer sentence |
 | `hasPendingInteraction` | ✓ | |
-| `activity {workflows, backgroundAgents, backgroundCommands, planMode, goals, newestBackgroundCommandStartedAt?}` | ✓ | |
+| `activity {workflows, backgroundAgents, backgroundCommands, planMode, goals}` | ✓ | |
 | `indicator` (14 values), `indicatorLabel` | ✓ | |
 | `p6rParticipants[]` | ✓ | |
 | `isUnread`, `isPinned` | ✓ | |
